@@ -1,0 +1,110 @@
+import { Libraries } from '@/components/Libraries'
+
+export const metadata = {
+  title: 'icpay SDKs',
+  description:
+    'icpay offers fine-tuned JavaScript, Ruby, PHP, Python, and Go libraries to make your life easier and give you the best experience when consuming the API.',
+}
+
+export const sections = [
+  { title: 'Official libraries', id: 'official-libraries' },
+]
+
+# icpay SDKs
+
+The recommended way to interact with the icpay API is by using one of our official SDKs. Today, icpay offers fine-tuned JavaScript, Ruby, PHP, Python, and Go libraries to make your life easier and give you the best experience when consuming the API. {{ className: 'lead' }}
+
+<Libraries />
+
+## JavaScript SDK
+
+Our JavaScript SDK is built with modern JavaScript features and provides a clean, promise-based API. It's perfect for Node.js applications and modern web browsers.
+
+```bash
+npm install @example/icpay-api --save
+```
+
+```javascript
+import ApiClient from '@example/icpay-api'
+
+const client = new ApiClient('your_api_key')
+const conversations = await client.conversations.list()
+```
+
+## Python SDK
+
+Our Python SDK is designed to be Pythonic and follows PEP 8 conventions. It's great for data processing, automation scripts, and web applications.
+
+```bash
+pip install icpay_api
+```
+
+```python
+from icpay_api import ApiClient
+
+client = ApiClient('your_api_key')
+conversations = client.conversations.list()
+```
+
+## PHP SDK
+
+Our PHP SDK is built with modern PHP practices and provides a clean, object-oriented interface. It's perfect for Laravel, Symfony, and other PHP frameworks.
+
+```bash
+composer require icpay/sdk
+```
+
+```php
+<?php
+
+require_once 'vendor/autoload.php';
+
+$client = new \Icpay\ApiClient('your_api_key');
+$conversations = $client->conversations->list();
+```
+
+## Ruby SDK
+
+Our Ruby SDK follows Ruby conventions and provides a clean, readable interface. It's great for Rails applications and Ruby scripts.
+
+```bash
+gem install icpay_api
+```
+
+```ruby
+require 'icpay_api'
+
+client = IcpayApi::Client.new('your_api_key')
+conversations = client.conversations.list
+```
+
+## Go SDK
+
+Our Go SDK is designed for performance and follows Go best practices. It's perfect for microservices, CLI tools, and high-performance applications.
+
+```bash
+go get github.com/example/icpay-go
+```
+
+```go
+package main
+
+import (
+    "github.com/example/icpay-go"
+)
+
+func main() {
+    client := icpay.NewClient("your_api_key")
+    conversations, _ := client.Conversations.List()
+}
+```
+
+## Getting started
+
+To get started with any of our SDKs, you'll need your API key from the [icpay dashboard](#). Once you have that, you can install the SDK and start making API calls.
+
+<div className="not-prose">
+  <Button href="/quickstart" variant="text" arrow="right">
+    <>Get started with the icpay API</>
+  </Button>
+</div>

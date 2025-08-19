@@ -1,0 +1,99 @@
+export const metadata = {
+  title: 'Errors',
+  description:
+    'Learn about the different types of errors you might encounter when using the icpay API and how to handle them.',
+}
+
+# Errors
+
+When working with the icpay API, you'll encounter various types of errors. Understanding these errors and how to handle them is crucial for building robust integrations. {{ className: 'lead' }}
+
+## HTTP status codes
+
+The icpay API uses standard HTTP status codes to indicate the success or failure of a request. These status codes provide a quick way to understand what happened with your request. {{ className: 'lead' }}
+
+Here is a list of the different categories of status codes returned by the icpay API. Use these to understand if a request was successful.
+
+### 2xx Success
+
+- **200 OK**: The request was successful and the response contains the requested data.
+- **201 Created**: The resource was successfully created.
+- **204 No Content**: The request was successful but there is no content to return.
+
+### 4xx Client Errors
+
+- **400 Bad Request**: The request was malformed or invalid.
+- **401 Unauthorized**: Authentication is required and has failed or has not been provided.
+- **403 Forbidden**: The server understood the request but refuses to authorize it.
+- **404 Not Found**: The requested resource could not be found.
+- **422 Unprocessable Entity**: The request was well-formed but was unable to be followed due to semantic errors.
+
+### 5xx Server Errors
+
+- **500 Internal Server Error**: An unexpected error occurred on the server.
+- **502 Bad Gateway**: The server received an invalid response from an upstream server.
+- **503 Service Unavailable**: The server is temporarily unable to handle the request.
+
+## Error responses
+
+Whenever a request is unsuccessful, the icpay API will return an error response with an error type and message. You can use this information to understand better what has gone wrong and how to fix it. Most of the error messages are pretty self-explanatory, but if you're still having trouble, you can always reach out to our support team. {{ className: 'lead' }}
+
+Here is a list of the two error types supported by the icpay API — use these to understand what you have done wrong.
+
+### API Error
+
+An API error occurs when there's an issue with the request itself. This could be due to invalid parameters, missing required fields, or other request-related issues.
+
+```json
+{
+  "error": {
+    "type": "api_error",
+    "message": "Invalid parameter: 'email' must be a valid email address",
+    "param": "email",
+    "code": "invalid_parameter"
+  }
+}
+```
+
+### Validation Error
+
+A validation error occurs when the data you're trying to create or update doesn't meet the required validation rules.
+
+```json
+{
+  "error": {
+    "type": "validation_error",
+    "message": "The provided data was invalid",
+    "errors": [
+      {
+        "field": "email",
+        "message": "must be a valid email address"
+      }
+    ]
+  }
+}
+```
+
+## Getting help
+
+If you're still having trouble after reading through the error messages and checking your code before contacting icpay support.
+
+## Documentation URL
+
+All error responses include a `documentation_url` field that points to the relevant documentation:
+
+```json
+{
+  "error": {
+    "type": "api_error",
+    "message": "Invalid parameter",
+    "documentation_url": "https://icpay.chat/docs/errors/api_error"
+  }
+}
+```
+
+<div className="not-prose">
+  <Button href="/quickstart" variant="text" arrow="right">
+    <>Get started with the icpay API</>
+  </Button>
+</div>

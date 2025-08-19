@@ -1,0 +1,326 @@
+export const metadata = {
+  title: 'Conversations',
+  description:
+    'Learn how to work with conversations in the icpay API. Conversations are the core of communication in icpay.',
+}
+
+# Conversations
+
+Conversations are the core of communication in icpay. They represent the ongoing dialogue between you and your contacts, whether one-on-one or in groups. On this page, we'll explore the conversation endpoints and learn how to manage conversations programmatically. {{ className: 'lead' }}
+
+## List conversations
+
+The first endpoint we'll look at is the one that allows you to get a list of all your conversations. This endpoint supports pagination, so you can get all your conversations in manageable chunks.
+
+<CodeGroup tag="GET" label="/v1/conversations">
+
+```bash {{ title: 'cURL' }}
+curl -G https://api.icpay.chat/v1/conversations \
+  -H "Authorization: Bearer {token}" \
+  -d limit=10
+```
+
+```js
+import ApiClient from '@example/icpay-api'
+
+const client = new ApiClient(token)
+const conversations = await client.conversations.list({ limit: 10 })
+```
+
+```python
+from icpay_api import ApiClient
+
+client = ApiClient(token)
+conversations = client.conversations.list(limit=10)
+```
+
+```php
+$client = new \Icpay\ApiClient($token);
+$conversations = $client->conversations->list(['limit' => 10]);
+```
+
+</CodeGroup>
+
+The response will include an array of conversation objects, each containing information about the conversation, such as its participants, last message, and status.
+
+```json
+{
+  "conversations": [
+    {
+      "id": "xgQQXg3hrtjh7AvZ",
+      "type": "direct",
+      "participants": [
+        {
+          "id": "user_123",
+          "username": "john_doe",
+          "avatar_url": "https://example.com/avatar.jpg"
+        }
+      ],
+      "last_message": {
+        "id": "msg_456",
+        "content": "Hello, how are you?",
+        "created_at": "2023-01-01T12:00:00Z"
+      },
+      "unread_count": 2,
+      "created_at": "2023-01-01T10:00:00Z"
+    }
+  ],
+  "pagination": {
+    "next_cursor": "next_page_token",
+    "has_more": true
+  }
+}
+```
+
+## Create a conversation
+
+This endpoint allows you to create a new conversation with one or more contacts.
+
+<CodeGroup tag="POST" label="/v1/conversations">
+
+```bash {{ title: 'cURL' }}
+curl https://api.icpay.chat/v1/conversations \
+  -H "Authorization: Bearer {token}" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "contact_ids": ["contact_123", "contact_456"],
+    "type": "direct"
+  }'
+```
+
+```js
+import ApiClient from '@example/icpay-api'
+
+const client = new ApiClient(token)
+const conversation = await client.conversations.create({
+  contact_ids: ['contact_123', 'contact_456'],
+  type: 'direct'
+})
+```
+
+```python
+from icpay_api import ApiClient
+
+client = ApiClient(token)
+conversation = client.conversations.create(
+    contact_ids=['contact_123', 'contact_456'],
+    type='direct'
+)
+```
+
+```php
+$client = new \Icpay\ApiClient($token);
+$conversation = $client->conversations->create([
+    'contact_ids' => ['contact_123', 'contact_456'],
+    'type' => 'direct'
+]);
+```
+
+</CodeGroup>
+
+The response will include the newly created conversation object with all its details.
+
+```json
+{
+  "id": "xgQQXg3hrtjh7AvZ",
+  "type": "direct",
+  "participants": [
+    {
+      "id": "contact_123",
+      "username": "john_doe"
+    },
+    {
+      "id": "contact_456",
+      "username": "jane_smith"
+    }
+  ],
+  "created_at": "2023-01-01T12:00:00Z"
+}
+```
+
+## Get a specific conversation
+
+To get information about a specific conversation, you can use the GET endpoint with the conversation ID.
+
+<CodeGroup tag="GET" label="/v1/conversations/{id}">
+
+```bash {{ title: 'cURL' }}
+curl https://api.icpay.chat/v1/conversations/xgQQXg3hrtjh7AvZ \
+  -H "Authorization: Bearer {token}"
+```
+
+```js
+import ApiClient from '@example/icpay-api'
+
+const client = new ApiClient(token)
+const conversation = await client.conversations.get('xgQQXg3hrtjh7AvZ')
+```
+
+```python
+from icpay_api import ApiClient
+
+client = ApiClient(token)
+conversation = client.conversations.get('xgQQXg3hrtjh7AvZ')
+```
+
+```php
+$client = new \Icpay\ApiClient($token);
+$conversation = $client->conversations->get('xgQQXg3hrtjh7AvZ');
+```
+
+</CodeGroup>
+
+The response will include the conversation object with all its details.
+
+```json
+{
+  "id": "xgQQXg3hrtjh7AvZ",
+  "type": "direct",
+  "participants": [
+    {
+      "id": "contact_123",
+      "username": "john_doe",
+      "avatar_url": "https://example.com/avatar.jpg"
+    }
+  ],
+  "last_message": {
+    "id": "msg_456",
+    "content": "Hello, how are you?",
+    "created_at": "2023-01-01T12:00:00Z"
+  },
+  "unread_count": 2,
+  "created_at": "2023-01-01T10:00:00Z"
+}
+```
+
+## Update a conversation
+
+You can update certain properties of a conversation, such as its status or participants.
+
+<CodeGroup tag="PUT" label="/v1/conversations/{id}">
+
+```bash {{ title: 'cURL' }}
+curl -X PUT https://api.icpay.chat/v1/conversations/xgQQXg3hrtjh7AvZ \
+  -H "Authorization: Bearer {token}" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "status": "archived"
+  }'
+```
+
+```js
+import ApiClient from '@example/icpay-api'
+
+const client = new ApiClient(token)
+const conversation = await client.conversations.update('xgQQXg3hrtjh7AvZ', {
+  status: 'archived'
+})
+```
+
+```python
+from icpay_api import ApiClient
+
+client = ApiClient(token)
+conversation = client.conversations.update('xgQQXg3hrtjh7AvZ', {
+    'status': 'archived'
+})
+```
+
+```php
+$client = new \Icpay\ApiClient($token);
+$conversation = $client->conversations->update('xgQQXg3hrtjh7AvZ', [
+    'status' => 'archived'
+]);
+```
+
+</CodeGroup>
+
+The response will include the updated conversation object.
+
+```json
+{
+  "id": "xgQQXg3hrtjh7AvZ",
+  "type": "direct",
+  "status": "archived",
+  "participants": [
+    {
+      "id": "contact_123",
+      "username": "john_doe",
+      "avatar_url": "https://example.com/avatar.jpg"
+    }
+  ],
+  "last_message": {
+    "id": "msg_456",
+    "content": "Hello, how are you?",
+    "created_at": "2023-01-01T12:00:00Z"
+  },
+  "unread_count": 0,
+  "created_at": "2023-01-01T10:00:00Z",
+  "updated_at": "2023-01-01T13:00:00Z"
+}
+```
+
+## Delete a conversation
+
+To remove a conversation, you can use the DELETE endpoint.
+
+<CodeGroup tag="DELETE" label="/v1/conversations/{id}">
+
+```bash {{ title: 'cURL' }}
+curl -X DELETE https://api.icpay.chat/v1/conversations/xgQQXg3hrtjh7AvZ \
+  -H "Authorization: Bearer {token}"
+```
+
+```js
+import ApiClient from '@example/icpay-api'
+
+const client = new ApiClient(token)
+await client.conversations.delete('xgQQXg3hrtjh7AvZ')
+```
+
+```python
+from icpay_api import ApiClient
+
+client = ApiClient(token)
+client.conversations.delete('xgQQXg3hrtjh7AvZ')
+```
+
+```php
+$client = new \Icpay\ApiClient($token);
+$client->conversations->delete('xgQQXg3hrtjh7AvZ');
+```
+
+</CodeGroup>
+
+The DELETE endpoint will return a 204 No Content response if the conversation was successfully deleted.
+
+## Conversation types
+
+icpay supports several different conversation types:
+
+- **Direct**: One-on-one conversations between two users
+- **Group**: Multi-user conversations with multiple participants
+- **Broadcast**: One-to-many conversations for announcements
+
+## Conversation status
+
+Conversations can have different statuses:
+
+- **Active**: Normal, ongoing conversations
+- **Archived**: Conversations that have been archived but not deleted
+- **Muted**: Conversations where notifications are disabled
+- **Blocked**: Conversations that have been blocked by one of the participants
+
+## Best practices
+
+- Use pagination when listing conversations to avoid overwhelming responses
+- Handle conversation status changes gracefully in your application
+- Implement proper error handling for conversation operations
+- Consider implementing conversation search functionality
+- Monitor conversation activity for analytics purposes
+
+<div className="not-prose">
+  <Button href="/quickstart" variant="text" arrow="right">
+    <>Get started with the icpay API</>
+  </Button>
+</div>

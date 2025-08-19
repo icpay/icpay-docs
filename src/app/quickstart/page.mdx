@@ -1,0 +1,93 @@
+export const metadata = {
+  title: 'Quickstart',
+  description:
+    'This guide will get you all set up and ready to use the icpay API. We will cover how to get started an API client and how to make your first API request.',
+}
+
+# Quickstart
+
+This guide will get you all set up and ready to use the icpay API. We will cover how to get started using one of our API clients and how to make your first API request. We will also look at where to go next to find all the information you need to take full advantage of the icpay API. {{ className: 'lead' }}
+
+## Get your API key
+
+Before you can make requests to the icpay API, you will need to grab your [API key from the icpay dashboard](#). This key is used to authenticate your requests and identify your application to the icpay API.
+
+## Choose your API client
+
+Before making your first API request, you need to pick which API client you will use. In addition to good old cURL HTTP requests, icpay offers clients for JavaScript, Python, and PHP. In the following example, you can see how to install each client.
+
+### JavaScript
+
+```bash
+# Install the icpay JavaScript SDK
+npm install @example/icpay-api --save
+```
+
+### Python
+
+```bash
+# Install the icpay Python SDK
+pip install icpay_api
+```
+
+### PHP
+
+```bash
+# Install the icpay PHP SDK
+composer require icpay/sdk
+```
+
+## Make your first API request
+
+After picking your preferred client, you are ready to make your first call to the icpay API. Below, you can see how to send a GET request to the Conversations endpoint to get a list of all your conversations. In the cURL example, results are limited to ten conversations, the default limit.
+
+### cURL
+
+```bash {{ title: 'Get conversations with cURL' }}
+curl -G https://api.icpay.chat/v1/conversations \
+  -H "Authorization: Bearer {your_api_key}" \
+  -d limit=10
+```
+
+### JavaScript
+
+```javascript {{ title: 'Get conversations with JavaScript' }}
+import ApiClient from '@example/icpay-api'
+
+const client = new ApiClient('{your_api_key}')
+const conversations = await client.conversations.list({ limit: 10 })
+```
+
+### Python
+
+```python {{ title: 'Get conversations with Python' }}
+from icpay_api import ApiClient
+
+client = ApiClient('{your_api_key}')
+conversations = client.conversations.list(limit=10)
+```
+
+### PHP
+
+```php {{ title: 'Get conversations with PHP' }}
+<?php
+
+require_once 'vendor/autoload.php';
+
+$client = new \Icpay\ApiClient($token);
+$conversations = $client->conversations->list(['limit' => 10]);
+```
+
+## What is next?
+
+Congratulations! You have successfully made your first API request to the icpay API. Here are some resources that will come in handy as you venture further into the icpay API:
+
+- [Grab your API key from the icpay dashboard](#)
+- [Learn about authentication](/authentication)
+- [Learn about the different error messages in icpay](/errors)
+
+<div className="not-prose">
+  <Button href="/sdks" variant="text" arrow="right">
+    <>Explore our SDKs</>
+  </Button>
+</div>
