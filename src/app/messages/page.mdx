@@ -1,0 +1,327 @@
+export const metadata = {
+  title: 'Messages',
+  description:
+    'Learn how to work with messages in the icpay API. Messages are the core content of conversations in icpay.',
+}
+
+# Messages
+
+Messages are the core content of conversations in icpay. They represent the actual communication between users, whether text, media, or other types of content. On this page, we'll explore the message endpoints and learn how to send, retrieve, and manage messages programmatically. {{ className: 'lead' }}
+
+## List messages
+
+The first endpoint we'll look at is the one that allows you to get a list of messages from a conversation. This endpoint supports pagination, so you can get all messages in manageable chunks.
+
+<CodeGroup tag="GET" label="/v1/messages">
+
+```bash {{ title: 'cURL' }}
+curl -G https://api.icpay.chat/v1/messages \
+  -H "Authorization: Bearer {token}" \
+  -d conversation_id="conv_123" \
+  -d limit=10
+```
+
+```js
+import ApiClient from '@example/icpay-api'
+
+const client = new ApiClient(token)
+const messages = await client.messages.list({ 
+  conversation_id: 'conv_123',
+  limit: 10 
+})
+```
+
+```python
+from icpay_api import ApiClient
+
+client = ApiClient(token)
+messages = client.messages.list(
+    conversation_id='conv_123',
+    limit=10
+)
+```
+
+```php
+$client = new \Icpay\ApiClient($token);
+$messages = $client->messages->list([
+    'conversation_id' => 'conv_123',
+    'limit' => 10
+]);
+```
+
+</CodeGroup>
+
+The response will include an array of message objects, each containing information about the message, such as its content, sender, and timestamp.
+
+```json
+{
+  "messages": [
+    {
+      "id": "SIuAFUNKdSYHZF2w",
+      "conversation_id": "conv_123",
+      "sender_id": "user_456",
+      "content": "Hello, how are you?",
+      "type": "text",
+      "status": "delivered",
+      "created_at": "2023-01-01T12:00:00Z"
+    }
+  ],
+  "pagination": {
+    "next_cursor": "next_page_token",
+    "has_more": true
+  }
+}
+```
+
+## Send a message
+
+This endpoint allows you to send a new message to a conversation.
+
+<CodeGroup tag="POST" label="/v1/messages">
+
+```bash {{ title: 'cURL' }}
+curl https://api.icpay.chat/v1/messages \
+  -H "Authorization: Bearer {token}" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "conversation_id": "conv_123",
+    "content": "Hello, this is a test message!",
+    "type": "text"
+  }'
+```
+
+```js
+import ApiClient from '@example/icpay-api'
+
+const client = new ApiClient(token)
+const message = await client.messages.create({
+  conversation_id: 'conv_123',
+  content: 'Hello, this is a test message!',
+  type: 'text'
+})
+```
+
+```python
+from icpay_api import ApiClient
+
+client = ApiClient(token)
+message = client.messages.create(
+    conversation_id='conv_123',
+    content='Hello, this is a test message!',
+    type='text'
+)
+```
+
+```php
+$client = new \Icpay\ApiClient($token);
+$message = $client->messages->create([
+    'conversation_id' => 'conv_123',
+    'content' => 'Hello, this is a test message!',
+    'type' => 'text'
+]);
+```
+
+</CodeGroup>
+
+The response will include the newly created message object with all its details.
+
+```json
+{
+  "id": "SIuAFUNKdSYHZF2w",
+  "conversation_id": "conv_123",
+  "sender_id": "user_789",
+  "content": "Hello, this is a test message!",
+  "type": "text",
+  "status": "sent",
+  "created_at": "2023-01-01T12:00:00Z"
+}
+```
+
+## Get a specific message
+
+To get information about a specific message, you can use the GET endpoint with the message ID.
+
+<CodeGroup tag="GET" label="/v1/messages/{id}">
+
+```bash {{ title: 'cURL' }}
+curl https://api.icpay.chat/v1/messages/SIuAFUNKdSYHZF2w \
+  -H "Authorization: Bearer {token}"
+```
+
+```js
+import ApiClient from '@example/icpay-api'
+
+const client = new ApiClient(token)
+const message = await client.messages.get('SIuAFUNKdSYHZF2w')
+```
+
+```python
+from icpay_api import ApiClient
+
+client = ApiClient(token)
+message = client.messages.get('SIuAFUNKdSYHZF2w')
+```
+
+```php
+$client = new \Icpay\ApiClient($token);
+$message = $client->messages->get('SIuAFUNKdSYHZF2w');
+```
+
+</CodeGroup>
+
+The response will include the message object with all its details.
+
+```json
+{
+  "id": "SIuAFUNKdSYHZF2w",
+  "conversation_id": "conv_123",
+  "sender_id": "user_456",
+  "content": "Hello, how are you?",
+  "type": "text",
+  "status": "delivered",
+  "created_at": "2023-01-01T12:00:00Z"
+}
+```
+
+## Update a message
+
+You can update certain properties of a message, such as its content or status.
+
+<CodeGroup tag="PUT" label="/v1/messages/{id}">
+
+```bash {{ title: 'cURL' }}
+curl -X PUT https://api.icpay.chat/v1/messages/SIuAFUNKdSYHZF2w \
+  -H "Authorization: Bearer {token}" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "content": "Updated message content"
+  }'
+```
+
+```js
+import ApiClient from '@example/icpay-api'
+
+const client = new ApiClient(token)
+const message = await client.messages.update('SIuAFUNKdSYHZF2w', {
+  content: 'Updated message content'
+})
+```
+
+```python
+from icpay_api import ApiClient
+
+client = ApiClient(token)
+message = client.messages.update('SIuAFUNKdSYHZF2w', {
+    'content': 'Updated message content'
+})
+```
+
+```php
+$client = new \Icpay\ApiClient($token);
+$message = $client->messages->update('SIuAFUNKdSYHZF2w', [
+    'content' => 'Updated message content'
+]);
+```
+
+</CodeGroup>
+
+The response will include the updated message object.
+
+```json
+{
+  "id": "SIuAFUNKdSYHZF2w",
+  "conversation_id": "conv_123",
+  "sender_id": "user_456",
+  "content": "Updated message content",
+  "type": "text",
+  "status": "delivered",
+  "created_at": "2023-01-01T12:00:00Z",
+  "updated_at": "2023-01-01T13:00:00Z"
+}
+```
+
+## Delete a message
+
+To remove a message, you can use the DELETE endpoint.
+
+<CodeGroup tag="DELETE" label="/v1/messages/{id}">
+
+```bash {{ title: 'cURL' }}
+curl -X DELETE https://api.icpay.chat/v1/messages/SIuAFUNKdSYHZF2w \
+  -H "Authorization: Bearer {token}"
+```
+
+```js
+import ApiClient from '@example/icpay-api'
+
+const client = new ApiClient(token)
+await client.messages.delete('SIuAFUNKdSYHZF2w')
+```
+
+```python
+from icpay_api import ApiClient
+
+client = ApiClient(token)
+client.messages.delete('SIuAFUNKdSYHZF2w')
+```
+
+```php
+$client = new \Icpay\ApiClient($token);
+$client->messages->delete('SIuAFUNKdSYHZF2w');
+```
+
+</CodeGroup>
+
+The DELETE endpoint will return a 204 No Content response if the message was successfully deleted.
+
+## Message types
+
+icpay supports several different message types:
+
+- **Text**: Plain text messages
+- **Media**: Images, videos, audio files
+- **Documents**: PDFs, documents, and other files
+- **Location**: Geographic coordinates and addresses
+- **Contact**: Contact information sharing
+- **Sticker**: Animated or static stickers
+
+## Message status
+
+Messages can have different statuses:
+
+- **Sending**: Message is being sent
+- **Sent**: Message has been sent to the server
+- **Delivered**: Message has been delivered to the recipient
+- **Read**: Message has been read by the recipient
+- **Failed**: Message failed to send
+
+## Message reactions
+
+Users can react to messages with emojis or other reactions:
+
+```json
+{
+  "reactions": [
+    {
+      "emoji": "👍",
+      "user_id": "user_123",
+      "created_at": "2023-01-01T12:00:00Z"
+    }
+  ]
+}
+```
+
+## Best practices
+
+- Use pagination when listing messages to avoid overwhelming responses
+- Handle message status changes gracefully in your application
+- Implement proper error handling for message operations
+- Consider implementing message search functionality
+- Monitor message delivery and read receipts for analytics
+- Respect rate limits when sending messages
+
+<div className="not-prose">
+  <Button href="/quickstart" variant="text" arrow="right">
+    <>Get started with the icpay API</>
+  </Button>
+</div>

@@ -1,0 +1,109 @@
+export const metadata = {
+  title: 'Webhooks',
+  description:
+    'In this guide, we will look at how to register and consume webhooks to integrate your app with icpay.',
+}
+
+# Webhooks
+
+In this guide, we will look at how to register and consume webhooks to integrate your app with icpay. With webhooks, your app can know when something happens in icpay, such as someone sending a message or adding a contact. {{ className: 'lead' }}
+
+## Registering a webhook
+
+To register a new webhook, you need to have a URL in your app that icpay can call. You can configure a new webhook from the icpay dashboard under [API settings](#). Give your webhook a name, pick the [events](#event-types) you want to listen for, and add your URL.
+
+Now, whenever something of interest happens in your app, a webhook is fired off by icpay. In the next section, we will look at how to consume webhooks.
+
+## Consuming webhooks
+
+When icpay sends a webhook to your app, it will send a POST request to your webhook URL with a JSON payload containing information about the event that occurred. Here is an example of what a webhook payload might look like:
+
+```json
+{
+  "event": "message.created",
+  "data": {
+    "id": "msg_123456789",
+    "conversation_id": "conv_987654321",
+    "sender_id": "user_456789123",
+    "content": "Hello, world!",
+    "created_at": "2023-01-01T12:00:00Z"
+  }
+}
+```
+
+## Event types
+
+icpay supports several different event types that you can listen for:
+
+- **message.created**: Fired when a new message is created
+- **conversation.created**: Fired when a new conversation is created
+- **contact.created**: Fired when a new contact is added
+- **group.created**: Fired when a new group is created
+
+## Webhook security
+
+To ensure that webhooks are coming from icpay, each webhook request includes a signature in the `X-icpay-Signature` header. You should verify this signature to ensure the webhook is legitimate.
+
+```javascript
+const crypto = require('crypto');
+
+function verifyWebhookSignature(payload, signature, secret) {
+  const expectedSignature = crypto
+    .createHmac('sha256', secret)
+    .update(payload)
+    .digest('hex');
+  
+  return crypto.timingSafeEqual(
+    Buffer.from(signature),
+    Buffer.from(expectedSignature)
+  );
+}
+```
+
+## Example webhook handler
+
+Here is an example of how you might handle webhooks in a Node.js Express app:
+
+```javascript
+app.post('/webhooks/icpay', (req, res) => {
+  const signature = req.headers['x-icpay-signature'];
+  const payload = JSON.stringify(req.body);
+  
+  if (!verifyWebhookSignature(payload, signature, process.env.ICPAY_WEBHOOK_SECRET)) {
+    return res.status(401).send('Invalid signature');
+  }
+  
+  const { event, data } = req.body;
+  
+  switch (event) {
+    case 'message.created':
+      handleNewMessage(data);
+      break;
+    case 'conversation.created':
+      handleNewConversation(data);
+      break;
+    default:
+      console.log(`Unhandled event: ${event}`);
+  }
+  
+  res.status(200).send('OK');
+});
+```
+
+## Testing webhooks
+
+You can test your webhook endpoints using tools like ngrok to expose your local development server to the internet. This allows you to receive webhooks from icpay during development.
+
+## Best practices
+
+- Always verify webhook signatures
+- Respond quickly to webhook requests (within 5 seconds)
+- Implement idempotency to handle duplicate webhooks
+- Log webhook events for debugging
+- Handle webhook failures gracefully
+
+<div className="not-prose">
+  <Button href="/quickstart" variant="text" arrow="right">
+    <>Get started with the icpay API</>
+  </Button>
+</div>

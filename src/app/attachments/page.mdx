@@ -1,0 +1,295 @@
+export const metadata = {
+  title: 'Attachments',
+  description:
+    'Learn how to work with attachments in the icpay API. Attachments allow you to share files with your contacts and groups.',
+}
+
+# Attachments
+
+Attachments are how you share things in icpay — they allow you to send all sorts of files to your contacts and groups. On this page, we'll dive into the different attachment endpoints you can use to manage attachments programmatically. We'll look at how to create, read, update, and delete attachments, as well as how to handle file uploads and downloads. {{ className: 'lead' }}
+
+## List attachments
+
+The first endpoint we'll look at is the one that allows you to get a list of all your attachments. This endpoint supports pagination, so you can get all your attachments in manageable chunks.
+
+<CodeGroup tag="GET" label="/v1/attachments">
+
+```bash {{ title: 'cURL' }}
+curl -G https://api.icpay.chat/v1/attachments \
+  -H "Authorization: Bearer {token}" \
+  -d limit=10
+```
+
+```js
+import ApiClient from '@example/icpay-api'
+
+const client = new ApiClient(token)
+const attachments = await client.attachments.list({ limit: 10 })
+```
+
+```python
+from icpay_api import ApiClient
+
+client = ApiClient(token)
+attachments = client.attachments.list(limit=10)
+```
+
+```php
+$client = new \Icpay\ApiClient($token);
+$attachments = $client->attachments->list(['limit' => 10]);
+```
+
+</CodeGroup>
+
+The response will include an array of attachment objects, each containing information about the file, such as its name, size, and URL.
+
+```json
+{
+  "attachments": [
+    {
+      "id": "Nc6yKKMpcxiiFxp6",
+      "name": "Invoice_room_service__Plaza_Hotel.pdf",
+      "size": 1024000,
+      "mime_type": "application/pdf",
+      "file_url": "https://assets.icpay.chat/attachments/Invoice_room_service__Plaza_Hotel.pdf",
+      "created_at": "2023-01-01T12:00:00Z"
+    }
+  ],
+  "pagination": {
+    "next_cursor": "next_page_token",
+    "has_more": true
+  }
+}
+```
+
+## Create an attachment
+
+This endpoint allows you to upload a new attachment to a conversation. See the code examples for how to send the file to the icpay API.
+
+<CodeGroup tag="POST" label="/v1/attachments">
+
+```bash {{ title: 'cURL' }}
+curl https://api.icpay.chat/v1/attachments \
+  -H "Authorization: Bearer {token}" \
+  -F "file=@/path/to/file.pdf" \
+  -F "conversation_id=conv_123" \
+  -F "name=Invoice.pdf"
+```
+
+```js
+import ApiClient from '@example/icpay-api'
+
+const client = new ApiClient(token)
+const attachment = await client.attachments.create({
+  file: fileData,
+  conversation_id: 'conv_123',
+  name: 'Invoice.pdf'
+})
+```
+
+```python
+from icpay_api import ApiClient
+
+client = ApiClient(token)
+with open('file.pdf', 'rb') as f:
+    attachment = client.attachments.create(
+        file=f,
+        conversation_id='conv_123',
+        name='Invoice.pdf'
+    )
+```
+
+```php
+$client = new \Icpay\ApiClient($token);
+$attachment = $client->attachments->create([
+    'file' => fopen('/path/to/file.pdf', 'r'),
+    'conversation_id' => 'conv_123',
+    'name' => 'Invoice.pdf'
+]);
+```
+
+</CodeGroup>
+
+The response will include the newly created attachment object with all its details.
+
+```json
+{
+  "id": "Nc6yKKMpcxiiFxp6",
+  "name": "Invoice.pdf",
+  "size": 1024000,
+  "mime_type": "application/pdf",
+  "file_url": "https://assets.icpay.chat/attachments/Invoice.pdf",
+  "conversation_id": "conv_123",
+  "created_at": "2023-01-01T12:00:00Z"
+}
+```
+
+## Get a specific attachment
+
+To get information about a specific attachment, you can use the GET endpoint with the attachment ID.
+
+<CodeGroup tag="GET" label="/v1/attachments/{id}">
+
+```bash {{ title: 'cURL' }}
+curl https://api.icpay.chat/v1/attachments/Nc6yKKMpcxiiFxp6 \
+  -H "Authorization: Bearer {token}"
+```
+
+```js
+import ApiClient from '@example/icpay-api'
+
+const client = new ApiClient(token)
+const attachment = await client.attachments.get('Nc6yKKMpcxiiFxp6')
+```
+
+```python
+from icpay_api import ApiClient
+
+client = ApiClient(token)
+attachment = client.attachments.get('Nc6yKKMpcxiiFxp6')
+```
+
+```php
+$client = new \Icpay\ApiClient($token);
+$attachment = $client->attachments->get('Nc6yKKMpcxiiFxp6');
+```
+
+</CodeGroup>
+
+The response will include the attachment object with all its details.
+
+```json
+{
+  "id": "Nc6yKKMpcxiiFxp6",
+  "name": "Invoice.pdf",
+  "size": 1024000,
+  "mime_type": "application/pdf",
+  "file_url": "https://assets.icpay.chat/attachments/Invoice.pdf",
+  "conversation_id": "conv_123",
+  "created_at": "2023-01-01T12:00:00Z"
+}
+```
+
+## Update an attachment
+
+You can update certain properties of an attachment, such as its name or the conversation it belongs to.
+
+<CodeGroup tag="PUT" label="/v1/attachments/{id}">
+
+```bash {{ title: 'cURL' }}
+curl -X PUT https://api.icpay.chat/v1/attachments/Nc6yKKMpcxiiFxp6 \
+  -H "Authorization: Bearer {token}" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Updated_Invoice.pdf",
+    "conversation_id": "conv_456"
+  }'
+```
+
+```js
+import ApiClient from '@example/icpay-api'
+
+const client = new ApiClient(token)
+const attachment = await client.attachments.update('Nc6yKKMpcxiiFxp6', {
+  name: 'Updated_Invoice.pdf',
+  conversation_id: 'conv_456'
+})
+```
+
+```python
+from icpay_api import ApiClient
+
+client = ApiClient(token)
+attachment = client.attachments.update('Nc6yKKMpcxiiFxp6', {
+    'name': 'Updated_Invoice.pdf',
+    'conversation_id': 'conv_456'
+})
+```
+
+```php
+$client = new \Icpay\ApiClient($token);
+$attachment = $client->attachments->update('Nc6yKKMpcxiiFxp6', [
+    'name' => 'Updated_Invoice.pdf',
+    'conversation_id' => 'conv_456'
+]);
+```
+
+</CodeGroup>
+
+The response will include the updated attachment object.
+
+```json
+{
+  "id": "Nc6yKKMpcxiiFxp6",
+  "name": "Updated_Invoice.pdf",
+  "size": 1024000,
+  "mime_type": "application/pdf",
+  "file_url": "https://assets.icpay.chat/attachments/Updated_Invoice.pdf",
+  "conversation_id": "conv_456",
+  "created_at": "2023-01-01T12:00:00Z",
+  "updated_at": "2023-01-01T13:00:00Z"
+}
+```
+
+## Delete an attachment
+
+To remove an attachment, you can use the DELETE endpoint.
+
+<CodeGroup tag="DELETE" label="/v1/attachments/{id}">
+
+```bash {{ title: 'cURL' }}
+curl -X DELETE https://api.icpay.chat/v1/attachments/Nc6yKKMpcxiiFxp6 \
+  -H "Authorization: Bearer {token}"
+```
+
+```js
+import ApiClient from '@example/icpay-api'
+
+const client = new ApiClient(token)
+await client.attachments.delete('Nc6yKKMpcxiiFxp6')
+```
+
+```python
+from icpay_api import ApiClient
+
+client = ApiClient(token)
+client.attachments.delete('Nc6yKKMpcxiiFxp6')
+```
+
+```php
+$client = new \Icpay\ApiClient($token);
+$client->attachments->delete('Nc6yKKMpcxiiFxp6');
+```
+
+</CodeGroup>
+
+The DELETE endpoint will return a 204 No Content response if the attachment was successfully deleted.
+
+## File types and limits
+
+icpay supports a wide variety of file types, including:
+
+- **Documents**: PDF, DOC, DOCX, TXT, RTF
+- **Images**: JPG, PNG, GIF, BMP, SVG
+- **Videos**: MP4, AVI, MOV, WMV
+- **Audio**: MP3, WAV, AAC, OGG
+
+There are some limits to be aware of:
+
+- **Maximum file size**: 100 MB
+- **Maximum files per message**: 10
+- **Supported formats**: Common file formats only
+
+## Best practices
+
+- Always check file size before uploading
+- Use appropriate file names that are descriptive
+- Consider compressing large files when possible
+- Handle upload errors gracefully
+- Clean up unused attachments regularly
+
+<div className="not-prose">
+  <Button href="/quickstart" variant="text" arrow="right">
+    <>Get started with the icpay API</>
+  </Button>
+</div>
