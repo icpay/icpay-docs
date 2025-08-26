@@ -1,0 +1,307 @@
+export const metadata = {
+  title: 'Groups',
+  description:
+    'Learn how to work with groups in the icpay API. Groups allow you to manage group conversations and send messages to multiple contacts at once.',
+}
+
+# Groups
+
+Groups are where communities live in icpay — they are a collection of contacts you're talking to all at once. On this page, we'll dive into the different group endpoints you can use to manage groups programmatically. We'll look at how to create, read, update, and delete groups, as well as how to manage group members and send group messages. {{ className: 'lead' }}
+
+## List groups
+
+The first endpoint we'll look at is the one that allows you to get a list of all your groups. This endpoint supports pagination, so you can get all your groups in manageable chunks.
+
+<CodeGroup tag="GET" label="/v1/groups">
+
+```bash {{ title: 'cURL' }}
+curl -G https://api.icpay.chat/v1/groups \
+  -H "Authorization: Bearer {token}" \
+  -d limit=10
+```
+
+```js
+import ApiClient from '@example/icpay-api'
+
+const client = new ApiClient(token)
+const groups = await client.groups.list({ limit: 10 })
+```
+
+```python
+from icpay_api import ApiClient
+
+client = ApiClient(token)
+groups = client.groups.list(limit=10)
+```
+
+```php
+$client = new \Icpay\ApiClient($token);
+$groups = $client->groups->list(['limit' => 10]);
+```
+
+</CodeGroup>
+
+The response will include an array of group objects, each containing information about the group, such as its name, description, and member count.
+
+```json
+{
+  "groups": [
+    {
+      "id": "L7cGNIBKZiNJ6wqF",
+      "name": "Plaza Hotel Staff",
+      "description": "Staff members of the Plaza Hotel",
+      "member_count": 15,
+      "avatar_url": "https://assets.icpay.chat/avatars/plazahotel.jpg",
+      "created_at": "2023-01-01T12:00:00Z"
+    }
+  ],
+  "pagination": {
+    "next_cursor": "next_page_token",
+    "has_more": true
+  }
+}
+```
+
+## Create a group
+
+This endpoint allows you to create a new group conversation between you and a group of your icpay contacts.
+
+<CodeGroup tag="POST" label="/v1/groups">
+
+```bash {{ title: 'cURL' }}
+curl https://api.icpay.chat/v1/groups \
+  -H "Authorization: Bearer {token}" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "New Group",
+    "description": "A new group for testing",
+    "contact_ids": ["contact_123", "contact_456"],
+    "avatar_url": "https://example.com/avatar.jpg"
+  }'
+```
+
+```js
+import ApiClient from '@example/icpay-api'
+
+const client = new ApiClient(token)
+const group = await client.groups.create({
+  name: 'New Group',
+  description: 'A new group for testing',
+  contact_ids: ['contact_123', 'contact_456'],
+  avatar_url: 'https://example.com/avatar.jpg'
+})
+```
+
+```python
+from icpay_api import ApiClient
+
+client = ApiClient(token)
+group = client.groups.create(
+    name='New Group',
+    description='A new group for testing',
+    contact_ids=['contact_123', 'contact_456'],
+    avatar_url='https://example.com/avatar.jpg'
+)
+```
+
+```php
+$client = new \Icpay\ApiClient($token);
+$group = $client->groups->create([
+    'name' => 'New Group',
+    'description' => 'A new group for testing',
+    'contact_ids' => ['contact_123', 'contact_456'],
+    'avatar_url' => 'https://example.com/avatar.jpg'
+]);
+```
+
+</CodeGroup>
+
+The response will include the newly created group object with all its details.
+
+```json
+{
+  "id": "L7cGNIBKZiNJ6wqF",
+  "name": "New Group",
+  "description": "A new group for testing",
+  "member_count": 2,
+  "avatar_url": "https://example.com/avatar.jpg",
+  "created_at": "2023-01-01T12:00:00Z"
+}
+```
+
+## Get a specific group
+
+To get information about a specific group, you can use the GET endpoint with the group ID.
+
+<CodeGroup tag="GET" label="/v1/groups/{id}">
+
+```bash {{ title: 'cURL' }}
+curl https://api.icpay.chat/v1/groups/L7cGNIBKZiNJ6wqF \
+  -H "Authorization: Bearer {token}"
+```
+
+```js
+import ApiClient from '@example/icpay-api'
+
+const client = new ApiClient(token)
+const group = await client.groups.get('L7cGNIBKZiNJ6wqF')
+```
+
+```python
+from icpay_api import ApiClient
+
+client = ApiClient(token)
+group = client.groups.get('L7cGNIBKZiNJ6wqF')
+```
+
+```php
+$client = new \Icpay\ApiClient($token);
+$group = $client->groups->get('L7cGNIBKZiNJ6wqF');
+```
+
+</CodeGroup>
+
+The response will include the group object with all its details.
+
+```json
+{
+  "id": "L7cGNIBKZiNJ6wqF",
+  "name": "Plaza Hotel Staff",
+  "description": "Staff members of the Plaza Hotel",
+  "member_count": 15,
+  "avatar_url": "https://assets.icpay.chat/avatars/plazahotel.jpg",
+  "created_at": "2023-01-01T12:00:00Z"
+}
+```
+
+## Update a group
+
+You can update certain properties of a group, such as its name, description, or avatar.
+
+<CodeGroup tag="PUT" label="/v1/groups/{id}">
+
+```bash {{ title: 'cURL' }}
+curl -X PUT https://api.icpay.chat/v1/groups/L7cGNIBKZiNJ6wqF \
+  -H "Authorization: Bearer {token}" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Updated Group Name",
+    "description": "Updated description"
+  }'
+```
+
+```js
+import ApiClient from '@example/icpay-api'
+
+const client = new ApiClient(token)
+const group = await client.groups.update('L7cGNIBKZiNJ6wqF', {
+  name: 'Updated Group Name',
+  description: 'Updated description'
+})
+```
+
+```python
+from icpay_api import ApiClient
+
+client = ApiClient(token)
+group = client.groups.update('L7cGNIBKZiNJ6wqF', {
+    'name': 'Updated Group Name',
+    'description': 'Updated description'
+})
+```
+
+```php
+$client = new \Icpay\ApiClient($token);
+$group = $client->groups->update('L7cGNIBKZiNJ6wqF', [
+    'name' => 'Updated Group Name',
+    'description' => 'Updated description'
+]);
+```
+
+</CodeGroup>
+
+The response will include the updated group object.
+
+```json
+{
+  "id": "L7cGNIBKZiNJ6wqF",
+  "name": "Updated Group Name",
+  "description": "Updated description",
+  "member_count": 15,
+  "avatar_url": "https://assets.icpay.chat/avatars/plazahotel.jpg",
+  "created_at": "2023-01-01T12:00:00Z",
+  "updated_at": "2023-01-01T13:00:00Z"
+}
+```
+
+## Delete a group
+
+To remove a group, you can use the DELETE endpoint.
+
+<CodeGroup tag="DELETE" label="/v1/groups/{id}">
+
+```bash {{ title: 'cURL' }}
+curl -X DELETE https://api.icpay.chat/v1/groups/L7cGNIBKZiNJ6wqF \
+  -H "Authorization: Bearer {token}"
+```
+
+```js
+import ApiClient from '@example/icpay-api'
+
+const client = new ApiClient(token)
+await client.groups.delete('L7cGNIBKZiNJ6wqF')
+```
+
+```python
+from icpay_api import ApiClient
+
+client = ApiClient(token)
+client.groups.delete('L7cGNIBKZiNJ6wqF')
+```
+
+```php
+$client = new \Icpay\ApiClient($token);
+$client->groups->delete('L7cGNIBKZiNJ6wqF');
+```
+
+</CodeGroup>
+
+The DELETE endpoint will return a 204 No Content response if the group was successfully deleted.
+
+## Group management
+
+### Add members to a group
+
+You can add new members to an existing group using the group update endpoint.
+
+```json
+{
+  "contact_ids": ["contact_789", "contact_101"]
+}
+```
+
+### Remove members from a group
+
+To remove members from a group, you can update the group with a new list of contact IDs that excludes the members you want to remove.
+
+### Group permissions
+
+Groups in icpay support different permission levels:
+
+- **Admin**: Can manage group settings, add/remove members, and delete the group
+- **Member**: Can send messages and view group information
+- **Read-only**: Can only view group information and messages
+
+## Best practices
+
+- Use descriptive group names and descriptions
+- Keep group sizes manageable for better performance
+- Regularly clean up inactive groups
+- Use appropriate avatar images for group identification
+- Handle group member changes gracefully in your application
+
+<div className="not-prose">
+  <Button href="/quickstart" variant="text" arrow="right">
+    <>Get started with the icpay API</>
+  </Button>
+</div>

@@ -1,0 +1,182 @@
+export const metadata = {
+  title: 'Pagination',
+  description:
+    'Learn how to work with pagination in the icpay API. Pagination allows you to efficiently retrieve large datasets.',
+}
+
+# Pagination
+
+When working with the icpay API, you'll often encounter endpoints that return large amounts of data. To handle this efficiently, the icpay API uses pagination to break down large responses into manageable chunks. {{ className: 'lead' }}
+
+## How pagination works
+
+Pagination in the icpay API is cursor-based, which means instead of using page numbers, you use a cursor to navigate through the results. This approach is more reliable and efficient than traditional page-based pagination.
+
+## Basic pagination
+
+Most list endpoints in the icpay API support pagination. Here's an example of how to use it:
+
+<CodeGroup tag="GET" label="/v1/conversations">
+
+```bash {{ title: 'cURL' }}
+curl -G https://api.icpay.chat/v1/conversations \
+  -H "Authorization: Bearer {token}" \
+  -d limit=10
+```
+
+```js
+import ApiClient from '@example/icpay-api'
+
+const client = new ApiClient(token)
+const conversations = await client.conversations.list({ limit: 10 })
+```
+
+```python
+from icpay_api import ApiClient
+
+client = ApiClient(token)
+conversations = client.conversations.list(limit=10)
+```
+
+```php
+$client = new \Icpay\ApiClient($token);
+$conversations = $client->conversations->list(['limit' => 10]);
+```
+
+</CodeGroup>
+
+## Pagination response
+
+When you make a paginated request, the response will include pagination information:
+
+```json
+{
+  "conversations": [
+    {
+      "id": "conv_123",
+      "name": "Sample Conversation",
+      "created_at": "2023-01-01T12:00:00Z"
+    }
+  ],
+  "pagination": {
+    "next_cursor": "eyJjcmVhdGVkX2F0IjoiMjAyMy0wMS0wMVQxMjowMDowMFoiLCJpZCI6ImNvbnZfMTIzIn0",
+    "has_more": true
+  }
+}
+```
+
+## Using cursors
+
+To get the next page of results, use the `next_cursor` from the previous response:
+
+```bash
+curl -G https://api.icpay.chat/v1/conversations \
+  -H "Authorization: Bearer {token}" \
+  -d limit=10 \
+  -d cursor="eyJjcmVhdGVkX2F0IjoiMjAyMy0wMS0wMVQxMjowMDowMFoiLCJpZCI6ImNvbnZfMTIzIn0"
+```
+
+## Pagination parameters
+
+Most paginated endpoints support these parameters:
+
+- **limit**: The maximum number of items to return (default: 10, max: 100)
+- **cursor**: The cursor for pagination (optional)
+
+## Handling pagination in your code
+
+Here's an example of how to handle pagination in JavaScript:
+
+```javascript
+async function getAllConversations() {
+  const client = new ApiClient(token)
+  let allConversations = []
+  let hasMore = true
+  let cursor = null
+  
+  while (hasMore) {
+    const response = await client.conversations.list({
+      limit: 50,
+      cursor: cursor
+    })
+    
+    allConversations = allConversations.concat(response.conversations)
+    hasMore = response.pagination.has_more
+    cursor = response.pagination.next_cursor
+  }
+  
+  return allConversations
+}
+```
+
+## Best practices
+
+- **Use appropriate limits**: Don't request too many items at once. Use 10-50 for most cases.
+- **Handle empty responses**: Some pages might be empty, especially near the end.
+- **Store cursors**: If you need to resume pagination later, store the cursor.
+- **Respect rate limits**: Don't make pagination requests too quickly.
+- **Use async/await**: Handle pagination asynchronously to avoid blocking.
+
+## Common paginated endpoints
+
+The following endpoints support pagination:
+
+- `/v1/conversations` - List conversations
+- `/v1/contacts` - List contacts
+- `/v1/messages` - List messages
+- `/v1/groups` - List groups
+- `/v1/attachments` - List attachments
+
+## Error handling
+
+When working with pagination, be prepared to handle these scenarios:
+
+- **Invalid cursor**: If a cursor is invalid or expired, the API will return an error
+- **Rate limiting**: If you make too many requests, you may be rate limited
+- **Empty results**: Some pages might return no results
+
+## Example: Building a contact list
+
+Here's a complete example of building a paginated contact list:
+
+```javascript
+class ContactManager {
+  constructor(client) {
+    this.client = client
+    this.contacts = []
+  }
+  
+  async loadAllContacts() {
+    let hasMore = true
+    let cursor = null
+    
+    while (hasMore) {
+      try {
+        const response = await this.client.contacts.list({
+          limit: 25,
+          cursor: cursor
+        })
+        
+        this.contacts = this.contacts.concat(response.contacts)
+        hasMore = response.pagination.has_more
+        cursor = response.pagination.next_cursor
+        
+        // Add a small delay to respect rate limits
+        await new Promise(resolve => setTimeout(resolve, 100))
+        
+      } catch (error) {
+        console.error('Error loading contacts:', error)
+        break
+      }
+    }
+    
+    return this.contacts
+  }
+}
+```
+
+<div className="not-prose">
+  <Button href="/quickstart" variant="text" arrow="right">
+    <>Get started with the icpay API</>
+  </Button>
+</div>
