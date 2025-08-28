@@ -262,6 +262,8 @@ export const navigation: Array<NavGroup> = [
       { title: 'Component: Coffee Shop', href: '/widget/components/coffee-shop' },
       { title: 'Component: Donation Thermometer', href: '/widget/components/donation-thermometer' },
       { title: 'Component: Progress Bar', href: '/widget/components/progress-bar' },
+      { title: 'Component: Pay Button', href: '/widget/components/pay-button' },
+      { title: 'Component: Amount Input', href: '/widget/components/amount-input' },
     ],
   },
   {
