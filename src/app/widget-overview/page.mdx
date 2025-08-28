@@ -1,0 +1,39 @@
+export const metadata = {
+  title: 'Widget Overview',
+  description: 'What the ICPay Widget is, when to use it, and how it relates to the SDK.',
+}
+
+export const sections = [
+  { title: 'What is the Widget?', id: 'what-is-the-widget' },
+  { title: 'When to use', id: 'when-to-use' },
+  { title: 'Relation to SDK', id: 'relation-to-sdk' },
+  { title: 'Examples', id: 'examples' },
+]
+
+# Widget Overview
+
+The ICPay Widget is a set of Web Components that let you accept payments quickly without building UI flows from scratch. {{ className: 'lead' }}
+
+## What is the Widget?
+
+- Framework-agnostic Web Components (`icpay-*`) powered by the ICPay SDK.
+- Built-in wallet handling via Plug N Play (optional) or bring-your-own wallet (`actorProvider`, `connectedWallet`).
+
+## When to use
+
+- You want to embed a payment UI (tips, premium content, donation thermometer, shop items) with minimal setup.
+- You prefer declarative configuration via element `config`.
+
+## Relation to SDK
+
+- The widget wraps the [Public SDK](/sdk) and passes supported options through.
+- Server-only operations still belong on your backend using the [Private SDK](/sdk-secret).
+
+<div className="not-prose">
+  <Button href="/widget-install" variant="text" arrow="right">
+    <>Install the Widget</>
+  </Button>
+</div>
+
+
+
