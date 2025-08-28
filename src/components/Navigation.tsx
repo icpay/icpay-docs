@@ -234,25 +234,52 @@ function NavigationGroup({
 
 export const navigation: Array<NavGroup> = [
   {
-    title: 'Guides',
+    title: 'Getting started',
     links: [
       { title: 'Introduction', href: '/' },
       { title: 'Quickstart', href: '/quickstart' },
-      { title: 'SDKs', href: '/sdks' },
-      { title: 'Authentication', href: '/authentication' },
-      { title: 'Pagination', href: '/pagination' },
+    ],
+  },
+  {
+    title: 'ICPay SDK',
+    links: [
+      { title: 'Overview', href: '/sdk-overview' },
+      { title: 'Install', href: '/sdk-install' },
+      { title: 'SDK (frontend)', href: '/sdk' },
+      { title: 'SDK (server)', href: '/sdk-secret' },
       { title: 'Errors', href: '/errors' },
+    ],
+  },
+  {
+    title: 'Widget',
+    links: [
+      { title: 'Overview', href: '/widget-overview' },
+      { title: 'Install', href: '/widget-install' },
+      { title: 'Widget components', href: '/widget' },
+      { title: 'Component: Tip Jar', href: '/widget/components/tip-jar' },
+      { title: 'Component: Premium Content', href: '/widget/components/premium-content' },
+      { title: 'Component: Article Paywall', href: '/widget/components/article-paywall' },
+      { title: 'Component: Coffee Shop', href: '/widget/components/coffee-shop' },
+      { title: 'Component: Donation Thermometer', href: '/widget/components/donation-thermometer' },
+      { title: 'Component: Progress Bar', href: '/widget/components/progress-bar' },
+    ],
+  },
+  {
+    title: 'Ledgers',
+    links: [
+      { title: 'Ledgers', href: '/ledgers' },
+    ],
+  },
+  {
+    title: 'Webhooks',
+    links: [
       { title: 'Webhooks', href: '/webhooks' },
     ],
   },
   {
-    title: 'Resources',
+    title: 'Operations',
     links: [
-      { title: 'Contacts', href: '/contacts' },
-      { title: 'Conversations', href: '/conversations' },
-      { title: 'Messages', href: '/messages' },
-      { title: 'Groups', href: '/groups' },
-      { title: 'Attachments', href: '/attachments' },
+      { title: 'icpay.org Dashboard', href: '/icpay-org' },
     ],
   },
 ]

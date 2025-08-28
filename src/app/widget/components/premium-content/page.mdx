@@ -1,0 +1,104 @@
+export const metadata = {
+  title: 'Premium Content',
+  description: 'Lock content behind a paywall and unlock on successful payment.',
+}
+
+export const sections = [
+  { title: 'Usage', id: 'usage' },
+  { title: 'Configuration', id: 'configuration' },
+]
+
+# Premium Content
+
+## Usage
+
+<CodeGroup title="Premium Content">
+
+```tsx {{ title: 'Next.js' }}
+'use client'
+import { useEffect, useRef } from 'react'
+import '@icpay/widget'
+
+export default function Page() {
+  const ref = useRef<any>(null)
+  useEffect(() => {
+    if (!ref.current) return
+    ref.current.config = {
+      publishableKey: process.env.NEXT_PUBLIC_ICPAY_PK,
+      priceUsd: 5,
+      imageUrl: '/cover.jpg',
+      onSuccess: (tx: any) => console.log('Unlocked', tx),
+      theme: { primaryColor: '#0ea5e9' },
+      progressBar: { enabled: true, mode: 'modal' },
+    }
+  }, [])
+  return <icpay-premium-content ref={ref as any} />
+}
+```
+
+```vue {{ title: 'Vue.js' }}
+<script setup lang="ts">
+import { onMounted, ref } from 'vue'
+import '@icpay/widget'
+const el = ref<any>(null)
+onMounted(() => {
+  if (!el.value) return
+  el.value.config = {
+    publishableKey: import.meta.env.VITE_ICPAY_PK,
+    priceUsd: 5,
+    imageUrl: '/cover.jpg',
+    onSuccess: (tx: any) => console.log('Unlocked', tx),
+    theme: { primaryColor: '#0ea5e9' },
+    progressBar: { enabled: true, mode: 'modal' },
+  }
+})
+</script>
+<template>
+  <icpay-premium-content ref="el" />
+</template>
+```
+
+```ts {{ title: 'Angular' }}
+import { Component, ElementRef, ViewChild, AfterViewInit } from '@angular/core'
+import '@icpay/widget'
+@Component({ selector: 'app-root', template: `<icpay-premium-content #el></icpay-premium-content>` })
+export class AppComponent implements AfterViewInit {
+  @ViewChild('el', { static: true }) el!: ElementRef<any>
+  ngAfterViewInit() {
+    this.el.nativeElement.config = {
+      publishableKey: (window as any).env?.ICPAY_PK || 'pk_test_xxx',
+      priceUsd: 5,
+      imageUrl: '/cover.jpg',
+      onSuccess: (tx: any) => console.log('Unlocked', tx),
+      theme: { primaryColor: '#0ea5e9' },
+      progressBar: { enabled: true, mode: 'modal' },
+    }
+  }
+}
+```
+
+```html {{ title: 'No framework' }}
+<script type="module">import '@icpay/widget'</script>
+<icpay-premium-content id="el"></icpay-premium-content>
+<script>
+  el.config = {
+    publishableKey: 'pk_test_xxx',
+    priceUsd: 5,
+    imageUrl: '/cover.jpg',
+    onSuccess: (tx) => console.log('Unlocked', tx),
+    theme: { primaryColor: '#0ea5e9' },
+    progressBar: { enabled: true, mode: 'modal' },
+  }
+</script>
+```
+
+</CodeGroup>
+
+## Configuration
+
+- `priceUsd: number`
+- `cryptoOptions?: { symbol: string; label: string; canisterId?: string }[]`
+- `imageUrl?: string`
+- `onSuccess?: (tx) => void`
+- `theme?` and `progressBar?` same as other widgets — progress bar styling can be controlled via widget `progressBar`. See [Progress Bar](/widget/components/progress-bar).
+

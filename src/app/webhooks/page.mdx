@@ -1,109 +1,162 @@
 export const metadata = {
   title: 'Webhooks',
   description:
-    'In this guide, we will look at how to register and consume webhooks to integrate your app with icpay.',
+    'Subscribe to ICPay events and receive secure webhook deliveries. Learn event types, payloads, signatures, and endpoint setup.',
 }
+
+export const sections = [
+  { title: 'Overview', id: 'overview' },
+  { title: 'Create endpoints', id: 'create-endpoints' },
+  { title: 'Event types', id: 'event-types' },
+  { title: 'Payload format', id: 'payload-format' },
+  { title: 'Verify signatures', id: 'verify-signatures' },
+  { title: 'Example handlers', id: 'example-handlers' },
+  { title: 'Best practices', id: 'best-practices' },
+]
 
 # Webhooks
 
-In this guide, we will look at how to register and consume webhooks to integrate your app with icpay. With webhooks, your app can know when something happens in icpay, such as someone sending a message or adding a contact. {{ className: 'lead' }}
+Webhooks let your backend react to ICPay events such as payments being created or completed. Endpoints receive signed JSON payloads with Stripe-like structure and `X-ICPay-Signature`. {{ className: 'lead' }}
 
-## Registering a webhook
+## Overview
 
-To register a new webhook, you need to have a URL in your app that icpay can call. You can configure a new webhook from the icpay dashboard under [API settings](#). Give your webhook a name, pick the [events](#event-types) you want to listen for, and add your URL.
+- Configure endpoints in `icpay.org` under Settings → Webhook Endpoints.
+- Subscribe per-endpoint to one or more event types.
+- ICPay retries failed deliveries up to your endpoint’s configured retry count.
 
-Now, whenever something of interest happens in your app, a webhook is fired off by icpay. In the next section, we will look at how to consume webhooks.
+## Create endpoints
 
-## Consuming webhooks
+In `icpay.org` → Settings → Webhook Endpoints, click “New Endpoint”, set:
 
-When icpay sends a webhook to your app, it will send a POST request to your webhook URL with a JSON payload containing information about the event that occurred. Here is an example of what a webhook payload might look like:
-
-```json
-{
-  "event": "message.created",
-  "data": {
-    "id": "msg_123456789",
-    "conversation_id": "conv_987654321",
-    "sender_id": "user_456789123",
-    "content": "Hello, world!",
-    "created_at": "2023-01-01T12:00:00Z"
-  }
-}
-```
+- URL: your HTTPS receiver.
+- Subscribed events.
+- Retry count and timeout.
+- Optional custom headers.
 
 ## Event types
 
-icpay supports several different event types that you can listen for:
+Supported event types map to `WebhookEventType` in the API:
 
-- **message.created**: Fired when a new message is created
-- **conversation.created**: Fired when a new conversation is created
-- **contact.created**: Fired when a new contact is added
-- **group.created**: Fired when a new group is created
+- payment.created
+- payment.updated
+- payment.completed
+- payment.failed
+- payment.cancelled
+- payment.refunded
+- payment_intent.created
+- account.updated
+- account.verified
+- wallet.created
+- wallet.updated
+- wallet.balance_changed
+- ledger.created
+- ledger.updated
 
-## Webhook security
+## Payload format
 
-To ensure that webhooks are coming from icpay, each webhook request includes a signature in the `X-icpay-Signature` header. You should verify this signature to ensure the webhook is legitimate.
+Deliveries use this canonical shape:
 
-```javascript
-const crypto = require('crypto');
-
-function verifyWebhookSignature(payload, signature, secret) {
-  const expectedSignature = crypto
-    .createHmac('sha256', secret)
-    .update(payload)
-    .digest('hex');
-  
-  return crypto.timingSafeEqual(
-    Buffer.from(signature),
-    Buffer.from(expectedSignature)
-  );
+```json
+{
+  "id": "evt_...",
+  "object": "event",
+  "api_version": "2025-08-11",
+  "created": 1733966400,
+  "data": {
+    "object": { /* domain object, e.g. payment */ },
+    "previous_attributes": { /* optional diff */ }
+  },
+  "livemode": true,
+  "pending_webhooks": 1,
+  "request": { "id": "req_...", "idempotency_key": null },
+  "type": "payment.completed"
 }
 ```
 
-## Example webhook handler
+Example `payment.completed`:
 
-Here is an example of how you might handle webhooks in a Node.js Express app:
-
-```javascript
-app.post('/webhooks/icpay', (req, res) => {
-  const signature = req.headers['x-icpay-signature'];
-  const payload = JSON.stringify(req.body);
-  
-  if (!verifyWebhookSignature(payload, signature, process.env.ICPAY_WEBHOOK_SECRET)) {
-    return res.status(401).send('Invalid signature');
+```json
+{
+  "type": "payment.completed",
+  "data": {
+    "object": {
+      "id": "pay_123",
+      "paymentIntentId": "pi_123",
+      "amount": "150000000",
+      "ledgerCanisterId": "ryjl3-tyaaa-aaaaa-aaaba-cai",
+      "status": "completed",
+      "metadata": {"orderId": "ORD-123"},
+      "createdAt": "2025-01-01T12:00:00Z"
+    }
   }
-  
-  const { event, data } = req.body;
-  
-  switch (event) {
-    case 'message.created':
-      handleNewMessage(data);
-      break;
-    case 'conversation.created':
-      handleNewConversation(data);
-      break;
-    default:
-      console.log(`Unhandled event: ${event}`);
-  }
-  
-  res.status(200).send('OK');
-});
+}
 ```
 
-## Testing webhooks
+## Verify signatures
 
-You can test your webhook endpoints using tools like ngrok to expose your local development server to the internet. This allows you to receive webhooks from icpay during development.
+Every request includes:
+
+- `X-ICPay-Signature`: `t=<unix>,v1=<hex>` HMAC-SHA256 over `"<t>." + payload` using your account secret key
+- `X-ICPay-Timestamp`: Unix seconds
+
+```ts {{ title: 'Node/Express verification' }}
+import crypto from 'crypto'
+
+function verifyIcpaySignature(payload: string, header: string, secret: string, toleranceSec = 300) {
+  const parts = header.split(',')
+  const t = Number(parts.find(p => p.startsWith('t='))?.split('=')[1])
+  const sig = parts.find(p => p.startsWith('v1='))?.split('=')[1]
+  if (!t || !sig) return false
+  if (Math.abs(Math.floor(Date.now()/1000) - t) > toleranceSec) return false
+  const signed = `${t}.${payload}`
+  const computed = crypto.createHmac('sha256', secret).update(signed, 'utf8').digest('hex')
+  return crypto.timingSafeEqual(Buffer.from(sig, 'hex'), Buffer.from(computed, 'hex'))
+}
+```
+
+## Example handlers
+
+```ts {{ title: 'Express' }}
+import express from 'express'
+const app = express()
+app.post('/webhooks/icpay', express.raw({ type: 'application/json' }), (req, res) => {
+  const signature = req.header('X-ICPay-Signature') || ''
+  const ok = verifyIcpaySignature(req.body.toString('utf8'), signature, process.env.ICPAY_SECRET!)
+  if (!ok) return res.status(401).send('Invalid signature')
+  const event = JSON.parse(req.body.toString('utf8'))
+  switch (event.type) {
+    case 'payment.completed': /* fulfill order */ break
+    case 'payment.failed': /* notify user */ break
+    default: /* log */
+  }
+  res.sendStatus(200)
+})
+```
+
+```ts {{ title: 'Next.js Route Handler' }}
+export const config = { api: { bodyParser: false } }
+export async function POST(req: Request) {
+  const payload = await req.text()
+  const sig = req.headers.get('x-icpay-signature') || ''
+  if (!verifyIcpaySignature(payload, sig, process.env.ICPAY_SECRET!)) {
+    return new Response('Invalid signature', { status: 401 })
+  }
+  const event = JSON.parse(payload)
+  // handle event.type
+  return new Response('ok')
+}
+```
 
 ## Best practices
 
-- Always verify webhook signatures
-- Respond quickly to webhook requests (within 5 seconds)
-- Implement idempotency to handle duplicate webhooks
-- Log webhook events for debugging
-- Handle webhook failures gracefully
+- Verify signatures and enforce timestamp tolerance.
+- Respond within 5s; perform heavy work async.
+- Implement idempotency using event id `evt_*`.
+- Log deliveries and store last processed `evt_*`.
+- Use retries prudently; keep endpoints highly available.
 
 <div className="not-prose">
-  <Button href="/quickstart" variant="text" arrow="right">
-    <>Get started with the icpay API</>
+  <Button href="/sdk" variant="text" arrow="right">
+    <>Use the SDK for server workflows</>
   </Button>
 </div>

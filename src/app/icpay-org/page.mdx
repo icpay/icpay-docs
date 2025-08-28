@@ -1,0 +1,105 @@
+export const metadata = {
+  title: 'icpay.org',
+  description:
+    'Guide to the ICPay dashboard: pages, sidebars, and fields across accounts, payments, webhooks, wallets, analytics, and settings.',
+}
+
+export const sections = [
+  { title: 'Overview', id: 'overview' },
+  { title: 'Dashboard', id: 'dashboard' },
+  { title: 'Accounts', id: 'accounts' },
+  { title: 'Payments', id: 'payments' },
+  { title: 'Wallets', id: 'wallets' },
+  { title: 'Payouts', id: 'payouts' },
+  { title: 'Users', id: 'users' },
+  { title: 'Webhooks', id: 'webhooks' },
+  { title: 'Analytics', id: 'analytics' },
+  { title: 'Settings', id: 'settings' },
+]
+
+# icpay.org
+
+`icpay.org` is the merchant dashboard for managing accounts, payments, wallets, webhooks, and settings. This guide explains each section and field you will encounter. {{ className: 'lead' }}
+
+## Overview
+
+The sidebar surfaces core areas:
+
+- Dashboard
+- Accounts
+- Payments
+- Payouts
+- Wallets
+- Users
+- Webhooks
+- Analytics
+- Settings
+
+## Dashboard
+
+High-level snapshot of recent activity, balances, and shortcuts into detailed pages.
+
+## Accounts
+
+- Create account: name, email, country, business name, business type.
+- Account detail: overview, wallets, and settings access.
+
+Fields (create/edit):
+
+- `name`: internal account name
+- `email`: business contact
+- `country`: ISO country
+- `businessName`: public-facing business name
+- `businessType`: corporation | llc | partnership | sole_proprietorship | nonprofit
+
+## Payments
+
+- List of payments with status: pending, completed, failed.
+- Detail page shows amount, ledger, transaction ids, and metadata.
+
+## Wallets
+
+- View platform/user wallets tied to the account.
+- Inspect balances per ledger.
+
+## Payouts
+
+- Create and track payouts from account balances to target addresses.
+
+## Users
+
+- Invite and manage users with roles; edit user profiles.
+
+## Webhooks
+
+- Webhook Endpoints: create URL, choose subscribed events, set retries and timeout, manage headers.
+- Webhook Events: searchable table of deliveries with status, attempts, and endpoint. Click into details per event.
+
+## Analytics
+
+- Overview of payment volume, conversion, and ledger breakdowns.
+
+## Settings
+
+Tabs within Settings include:
+
+- Basic: account name and email.
+- Business Profile: public name, website URL, industry (MCC), support email/phone/url.
+- Domain: primary domain for hosted pages.
+- Branding: logo URL, favicon URL, primary/secondary color, statement descriptor and suffix.
+- API Keys: view publishable key, generate/regenerate secret key.
+- Webhook Endpoints: CRUD for endpoints; subscribe to `WebhookEventType` values.
+- ICPay Fees: platform fee percentage and fixed fee (read-only for most users).
+
+Key actions:
+
+- Generate secret key: one-time display; copy immediately.
+- Regenerate secret key: invalidates existing key; update your servers.
+
+<div className="not-prose">
+  <Button href="/webhooks" variant="text" arrow="right">
+    <>Configure webhook endpoints</>
+  </Button>
+</div>
+
+
