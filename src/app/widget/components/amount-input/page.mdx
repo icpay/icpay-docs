@@ -1,0 +1,136 @@
+export const metadata = {
+  title: 'Amount Input',
+  description: 'Let users enter a USD amount to pay with optional ledger selection.',
+}
+
+export const sections = [
+  { title: 'Usage', id: 'usage' },
+  { title: 'Configuration', id: 'configuration' },
+]
+
+# Amount Input
+
+The Amount Input component lets users enter a custom USD amount and pay, optionally choosing a ledger from a dropdown. {{ className: 'lead' }}
+
+## Usage
+
+<CodeGroup title="Amount Input">
+
+```tsx {{ title: 'Next.js' }}
+'use client'
+import { useEffect, useRef } from 'react'
+import '@icpay/widget'
+
+export default function Page() {
+  const ref = useRef<any>(null)
+  useEffect(() => {
+    if (!ref.current) return
+    ref.current.config = {
+      publishableKey: process.env.NEXT_PUBLIC_ICPAY_PK,
+      defaultAmountUsd: 20,
+      minUsd: 1,
+      stepUsd: 1,
+      defaultSymbol: 'ICP',
+      // Show dropdown to let users pick ICP or USDC
+      showLedgerDropdown: true,
+      cryptoOptions: [
+        { symbol: 'ICP', label: 'ICP', canisterId: 'ryjl3-tyaaa-aaaaa-aaaba-cai' },
+        { symbol: 'ckUSDC', label: 'USDC', canisterId: 'xevnm-gaaaa-aaaar-qafnq-cai' },
+      ],
+      // Modal progress bar matches other components
+      progressBar: { enabled: true, mode: 'modal' },
+    }
+  }, [])
+  return <icpay-amount-input ref={ref as any} />
+}
+```
+
+```vue {{ title: 'Vue.js' }}
+<script setup lang="ts">
+import { onMounted, ref } from 'vue'
+import '@icpay/widget'
+const el = ref<any>(null)
+onMounted(() => {
+  if (!el.value) return
+  el.value.config = {
+    publishableKey: import.meta.env.VITE_ICPAY_PK,
+    defaultAmountUsd: 20,
+    minUsd: 1,
+    stepUsd: 1,
+    defaultSymbol: 'ICP',
+    showLedgerDropdown: true,
+    cryptoOptions: [
+      { symbol: 'ICP', label: 'ICP', canisterId: 'ryjl3-tyaaa-aaaaa-aaaba-cai' },
+      { symbol: 'ckUSDC', label: 'USDC', canisterId: 'xevnm-gaaaa-aaaar-qafnq-cai' },
+    ],
+    progressBar: { enabled: true, mode: 'modal' },
+  }
+})
+</script>
+<template>
+  <icpay-amount-input ref="el" />
+</template>
+```
+
+```ts {{ title: 'Angular' }}
+import { Component, ElementRef, ViewChild, AfterViewInit } from '@angular/core'
+import '@icpay/widget'
+@Component({ selector: 'app-root', template: `<icpay-amount-input #el></icpay-amount-input>` })
+export class AppComponent implements AfterViewInit {
+  @ViewChild('el', { static: true }) el!: ElementRef<any>
+  ngAfterViewInit() {
+    this.el.nativeElement.config = {
+      publishableKey: (window as any).env?.ICPAY_PK || 'pk_test_xxx',
+      defaultAmountUsd: 20,
+      minUsd: 1,
+      stepUsd: 1,
+      defaultSymbol: 'ICP',
+      showLedgerDropdown: true,
+      cryptoOptions: [
+        { symbol: 'ICP', label: 'ICP', canisterId: 'ryjl3-tyaaa-aaaaa-aaaba-cai' },
+        { symbol: 'ckUSDC', label: 'USDC', canisterId: 'xevnm-gaaaa-aaaar-qafnq-cai' },
+      ],
+      progressBar: { enabled: true, mode: 'modal' },
+    }
+  }
+}
+```
+
+```html {{ title: 'No framework' }}
+<script type="module">import '@icpay/widget'</script>
+<icpay-amount-input id="el"></icpay-amount-input>
+<script>
+  el.config = {
+    publishableKey: 'pk_test_xxx',
+    defaultAmountUsd: 20,
+    minUsd: 1,
+    stepUsd: 1,
+    defaultSymbol: 'ICP',
+    showLedgerDropdown: true,
+    cryptoOptions: [
+      { symbol: 'ICP', label: 'ICP', canisterId: 'ryjl3-tyaaa-aaaaa-aaaba-cai' },
+      { symbol: 'ckUSDC', label: 'USDC', canisterId: 'xevnm-gaaaa-aaaar-qafnq-cai' },
+    ],
+    progressBar: { enabled: true, mode: 'modal' },
+  }
+</script>
+```
+
+</CodeGroup>
+
+## Configuration
+
+- `defaultAmountUsd?: number`
+- `placeholder?: string`
+- `minUsd?: number`, `maxUsd?: number`, `stepUsd?: number`
+- `cryptoOptions?: { symbol: string; label: string; canisterId?: string }[]`
+- `showLedgerDropdown?: boolean` (default: false)
+- `defaultSymbol?: string` (e.g., `'ICP'`)
+- `payButtonLabel?: string`
+- `progressBar?: { enabled?: boolean; mode?: 'modal' | 'horizontal' | 'vertical' | 'inline' }`
+
+Notes:
+- When `showLedgerDropdown` is false, the component uses `defaultSymbol`.
+- For non-modal progress modes, the bar appears only during processing.
+
+
