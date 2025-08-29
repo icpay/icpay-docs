@@ -81,16 +81,32 @@ Example `payment.completed`:
   "data": {
     "object": {
       "id": "pay_123",
+      "accountId": "acc_abc",
       "paymentIntentId": "pi_123",
+      "transactionId": "tx_789",
+      "transactionSplitId": "spl_456",
+      "basePaymentAccountId": "acc_base",
+      "canisterTxId": 123456,
       "amount": "150000000",
       "ledgerCanisterId": "ryjl3-tyaaa-aaaaa-aaaba-cai",
+      "ledgerTxId": "ltx_001",
+      "accountCanisterId": 42,
       "status": "completed",
+      "invoiceId": "inv_001",
       "metadata": {"orderId": "ORD-123"},
-      "createdAt": "2025-01-01T12:00:00Z"
+      "createdAt": "2025-01-01T12:00:00Z",
+      "updatedAt": "2025-01-01T12:00:10Z"
     }
   }
 }
 ```
+
+### Payment object fields
+
+- **transactionSplitId**: Identifier of the `TransactionSplit` that this payment represents.
+- **basePaymentAccountId**: The base account for the intent/transaction (always present with ≥ 0.01% in split rules).
+- **ledgerTxId**: Linked `LedgerTransaction` id once sweep/linking completes.
+- **accountCanisterId**: Canister id of the target account for this payment.
 
 ## Verify signatures
 
