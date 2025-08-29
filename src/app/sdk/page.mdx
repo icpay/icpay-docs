@@ -143,6 +143,33 @@ const unsubscribe = icpay.on('icpay-sdk-transaction-completed', (detail) => {
 unsubscribe()
 ```
 
+## Types reference (payments)
+
+Payment objects now include split-aware fields when applicable:
+
+```ts
+type SdkPayment = {
+  id: string
+  accountId: string
+  paymentIntentId: string
+  transactionId: string | null
+  transactionSplitId?: string | null
+  canisterTxId: number | null
+  amount: string
+  ledgerCanisterId: string
+  ledgerTxId?: string | null
+  accountCanisterId?: number | null
+  basePaymentAccountId?: string | null
+  status: 'pending' | 'completed' | 'failed' | 'canceled' | 'refunded'
+  invoiceId: string | null
+  metadata: Record<string, unknown>
+  createdAt: string
+  updatedAt: string
+}
+```
+
+Public responses (publishable key) expose the same fields via `PaymentPublic` where returned.
+
 Alternatively, DOM-style listeners:
 
 ```ts
