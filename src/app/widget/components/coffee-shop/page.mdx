@@ -17,7 +17,7 @@ export const sections = [
 ```tsx {{ title: 'Next.js' }}
 'use client'
 import { useEffect, useRef } from 'react'
-import '@icpay/widget'
+import '@ic-pay/widget'
 
 export default function Page() {
   const ref = useRef<any>(null)
@@ -34,12 +34,11 @@ export default function Page() {
   }, [])
   return <icpay-coffee-shop ref={ref as any} />
 }
-```
 
 ```vue {{ title: 'Vue.js' }}
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
-import '@icpay/widget'
+import '@ic-pay/widget'
 const el = ref<any>(null)
 onMounted(() => {
   if (!el.value) return
@@ -56,11 +55,10 @@ onMounted(() => {
 <template>
   <icpay-coffee-shop ref="el" />
 </template>
-```
 
 ```ts {{ title: 'Angular' }}
 import { Component, ElementRef, ViewChild, AfterViewInit } from '@angular/core'
-import '@icpay/widget'
+import '@ic-pay/widget'
 @Component({ selector: 'app-root', template: `<icpay-coffee-shop #el></icpay-coffee-shop>` })
 export class AppComponent implements AfterViewInit {
   @ViewChild('el', { static: true }) el!: ElementRef<any>
@@ -75,10 +73,9 @@ export class AppComponent implements AfterViewInit {
     }
   }
 }
-```
 
 ```html {{ title: 'No framework' }}
-<script type="module">import '@icpay/widget'</script>
+<script type="module">import '@ic-pay/widget'</script>
 <icpay-coffee-shop id="el"></icpay-coffee-shop>
 <script>
   el.config = {
@@ -90,6 +87,7 @@ export class AppComponent implements AfterViewInit {
     progressBar: { enabled: true, mode: 'modal' },
   }
 </script>
+
 ```
 
 </CodeGroup>
@@ -99,6 +97,4 @@ export class AppComponent implements AfterViewInit {
 - `items: Array<{ name: string; priceUsd: number }>`
 - `defaultItemIndex?: number`
 - `onSuccess?: (tx) => void`
-- `theme?`, `progressBar?` supported; see [Progress Bar](/widget/components/progress-bar).
-
-
+- `theme?`, `

@@ -33,7 +33,7 @@ ICPay Widget is a set of framework-agnostic Web Components for payments. Drop in
 ```tsx {{ title: 'Next.js' }}
 'use client'
 import { useEffect, useRef } from 'react'
-import '@icpay/widget'
+import '@ic-pay/widget'
 
 export default function Page() {
   const ref = useRef<any>(null)
@@ -55,7 +55,7 @@ export default function Page() {
 ```vue {{ title: 'Vue.js' }}
 <script setup lang="ts">
 import { onMounted, ref, onBeforeUnmount } from 'vue'
-import '@icpay/widget'
+import '@ic-pay/widget'
 
 const tip = ref<any>(null)
 
@@ -79,7 +79,7 @@ onMounted(() => {
 
 ```ts {{ title: 'Angular' }}
 import { Component, ElementRef, ViewChild, AfterViewInit, OnDestroy } from '@angular/core'
-import '@icpay/widget'
+import '@ic-pay/widget'
 
 @Component({ selector: 'app-root', template: `<icpay-tip-jar #tip></icpay-tip-jar>` })
 export class AppComponent implements AfterViewInit, OnDestroy {
@@ -103,7 +103,7 @@ export class AppComponent implements AfterViewInit, OnDestroy {
 
 ```html {{ title: 'No framework' }}
 <script type="module">
-  import '@icpay/widget'
+  import '@ic-pay/widget'
   // Or bundle via your build tool
 </script>
 
@@ -132,7 +132,7 @@ Each component exposes a `config` property. The widget internally creates an SDK
 ```tsx {{ title: 'Next.js' }}
 'use client'
 import { useEffect, useRef } from 'react'
-import '@icpay/widget'
+import '@ic-pay/widget'
 
 export default function Page() {
   const ref = useRef<any>(null)
@@ -151,7 +151,7 @@ export default function Page() {
 ```vue {{ title: 'Vue.js' }}
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
-import '@icpay/widget'
+import '@ic-pay/widget'
 
 const premium = ref<any>(null)
 
@@ -173,7 +173,7 @@ onMounted(() => {
 
 ```ts {{ title: 'Angular' }}
 import { Component, ElementRef, ViewChild, AfterViewInit } from '@angular/core'
-import '@icpay/widget'
+import '@ic-pay/widget'
 
 @Component({ selector: 'app-root', template: `<icpay-premium-content #premium></icpay-premium-content>` })
 export class AppComponent implements AfterViewInit {
@@ -190,7 +190,7 @@ export class AppComponent implements AfterViewInit {
 
 ```html {{ title: 'No framework' }}
 <script type="module">
-  import '@icpay/widget'
+  import '@ic-pay/widget'
 </script>
 
 <icpay-premium-content id="premium"></icpay-premium-content>
@@ -217,7 +217,7 @@ export class AppComponent implements AfterViewInit {
 ```tsx {{ title: 'Next.js' }}
 'use client'
 import { useEffect, useRef } from 'react'
-import '@icpay/widget'
+import '@ic-pay/widget'
 
 export default function Page() {
   const ref = useRef<any>(null)
@@ -240,7 +240,7 @@ export default function Page() {
 ```vue {{ title: 'Vue.js' }}
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
-import '@icpay/widget'
+import '@ic-pay/widget'
 
 const el = ref<any>(null)
 
@@ -265,7 +265,7 @@ onMounted(() => {
 
 ```ts {{ title: 'Angular' }}
 import { Component, ElementRef, ViewChild, AfterViewInit } from '@angular/core'
-import '@icpay/widget'
+import '@ic-pay/widget'
 
 @Component({ selector: 'app-root', template: `<icpay-tip-jar #el></icpay-tip-jar>` })
 export class AppComponent implements AfterViewInit {
@@ -286,7 +286,7 @@ export class AppComponent implements AfterViewInit {
 
 ```html {{ title: 'No framework' }}
 <script type="module">
-  import '@icpay/widget'
+  import '@ic-pay/widget'
 </script>
 
 <icpay-tip-jar id="el"></icpay-tip-jar>
@@ -350,7 +350,7 @@ window.addEventListener('icpay-error', (e) => {
 Helpers available in the widget package:
 
 ```ts
-import { handleWidgetError, getErrorMessage, getErrorSeverity, getErrorAction } from '@icpay/widget'
+import { handleWidgetError, getErrorMessage, getErrorSeverity, getErrorAction } from '@ic-pay/widget'
 ```
 
 ## Events

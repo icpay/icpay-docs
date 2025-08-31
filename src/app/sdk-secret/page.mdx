@@ -24,13 +24,13 @@ Use the Secret Key only on trusted servers. These methods are accessed via `icpa
 
 ### If you're using pnpm
 ```bash
-pnpm add @icpay/sdk
+pnpm add @ic-pay/sdk
 ```
 
 Get your keys from the [icpay.org dashboard](/icpay-org). Example server init:
 
 ```ts {{ title: 'Initialize (server)' }}
-import { Icpay } from '@icpay/sdk'
+import { Icpay } from '@ic-pay/sdk'
 
 const icpay = new Icpay({ secretKey: process.env.ICPAY_SK!, apiUrl: 'https://api.icpay.org' })
 ```
@@ -229,7 +229,7 @@ For full types see the SDK `types` exports in your editor or the package source.
 Never expose your secret key in the browser. Use the SDK on the server for private methods.
 
 ```ts {{ title: 'Next.js Route Handler (server)' }}
-import { Icpay } from '@icpay/sdk'
+import { Icpay } from '@ic-pay/sdk'
 
 export async function GET() {
   const icpay = new Icpay({ secretKey: process.env.ICPAY_SK!, apiUrl: 'https://api.icpay.org' })

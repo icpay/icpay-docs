@@ -17,7 +17,7 @@ export const sections = [
 ```tsx {{ title: 'Next.js' }}
 'use client'
 import { useEffect, useRef } from 'react'
-import '@icpay/widget'
+import '@ic-pay/widget'
 
 export default function Page() {
   const ref = useRef<any>(null)
@@ -33,12 +33,11 @@ export default function Page() {
   }, [])
   return <icpay-tip-jar ref={ref as any} />
 }
-```
 
 ```vue {{ title: 'Vue.js' }}
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
-import '@icpay/widget'
+import '@ic-pay/widget'
 const el = ref<any>(null)
 onMounted(() => {
   if (!el.value) return
@@ -54,11 +53,10 @@ onMounted(() => {
 <template>
   <icpay-tip-jar ref="el" />
 </template>
-```
 
 ```ts {{ title: 'Angular' }}
 import { Component, ElementRef, ViewChild, AfterViewInit } from '@angular/core'
-import '@icpay/widget'
+import '@ic-pay/widget'
 @Component({ selector: 'app-root', template: `<icpay-tip-jar #el></icpay-tip-jar>` })
 export class AppComponent implements AfterViewInit {
   @ViewChild('el', { static: true }) el!: ElementRef<any>
@@ -72,10 +70,9 @@ export class AppComponent implements AfterViewInit {
     }
   }
 }
-```
 
 ```html {{ title: 'No framework' }}
-<script type="module">import '@icpay/widget'</script>
+<script type="module">import '@ic-pay/widget'</script>
 <icpay-tip-jar id="el"></icpay-tip-jar>
 <script>
   el.config = {
@@ -86,6 +83,7 @@ export class AppComponent implements AfterViewInit {
     progressBar: { enabled: true, mode: 'modal' },
   }
 </script>
+
 ```
 
 </CodeGroup>
@@ -95,9 +93,4 @@ export class AppComponent implements AfterViewInit {
 - `amountsUsd?: number[]`
 - `defaultAmountUsd?: number`
 - `cryptoOptions?: { symbol: string; label: string; canisterId?: string }[]`
-- `theme?: { primaryColor?: string; secondaryColor?: string; textColor?: string; ... }`
-- `progressBar?: { enabled?: boolean; mode?: 'modal' | 'horizontal' | 'vertical' | 'inline' }`
-
-Note: Progress bar styling can be controlled via each widget’s `progressBar` configuration. See [Progress Bar](/widget/components/progress-bar).
-
-
+- `
