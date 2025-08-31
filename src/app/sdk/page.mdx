@@ -34,7 +34,7 @@ Create an account in the [icpay.org dashboard](/icpay-org) to obtain your Publis
 Initialize the SDK with your publishable key on the client. Only when using `sendFunds` or `sendFundsUsd`, you must provide an `actorProvider` and a connected wallet.
 
 ```ts {{ title: 'Client setup (TypeScript)' }}
-import { Icpay, IcpayError } from '@icpay/sdk'
+import { Icpay, IcpayError } from '@ic-pay/sdk'
 
 const icpay = new Icpay({
   publishableKey: process.env.NEXT_PUBLIC_ICPAY_PK!,
@@ -57,7 +57,7 @@ try {
 There are two common ways to pay: fixed token amount or USD amount automatically converted to tokens.
 
 ```ts {{ title: 'Send fixed token amount' }}
-import { Icpay } from '@icpay/sdk'
+import { Icpay } from '@ic-pay/sdk'
 
 const icpay = new Icpay({
   publishableKey: process.env.NEXT_PUBLIC_ICPAY_PK!,

@@ -17,7 +17,7 @@ export const sections = [
 ```tsx {{ title: 'Next.js' }}
 'use client'
 import { useEffect, useRef } from 'react'
-import '@icpay/widget'
+import '@ic-pay/widget'
 
 export default function Page() {
   const ref = useRef<any>(null)
@@ -39,7 +39,7 @@ export default function Page() {
 ```vue {{ title: 'Vue.js' }}
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
-import '@icpay/widget'
+import '@ic-pay/widget'
 const el = ref<any>(null)
 onMounted(() => {
   if (!el.value) return
@@ -60,7 +60,7 @@ onMounted(() => {
 
 ```ts {{ title: 'Angular' }}
 import { Component, ElementRef, ViewChild, AfterViewInit } from '@angular/core'
-import '@icpay/widget'
+import '@ic-pay/widget'
 @Component({ selector: 'app-root', template: `<icpay-premium-content #el></icpay-premium-content>` })
 export class AppComponent implements AfterViewInit {
   @ViewChild('el', { static: true }) el!: ElementRef<any>
@@ -78,7 +78,7 @@ export class AppComponent implements AfterViewInit {
 ```
 
 ```html {{ title: 'No framework' }}
-<script type="module">import '@icpay/widget'</script>
+<script type="module">import '@ic-pay/widget'</script>
 <icpay-premium-content id="el"></icpay-premium-content>
 <script>
   el.config = {
