@@ -3,26 +3,24 @@ import { Heading } from '@/components/Heading'
 
 const guides = [
   {
-    href: '/authentication',
-    name: 'Authentication',
-    description: 'Learn how to authenticate your API requests.',
+    href: '/sdk',
+    name: 'Public SDK',
+    description: 'Learn how to use the ICPay SDK on the frontend with your publishable key.',
   },
   {
-    href: '/pagination',
-    name: 'Pagination',
-    description: 'Understand how to work with paginated responses.',
+    href: '/sdk-secret',
+    name: 'Private SDK',
+    description: 'Understand how to use the ICPay SDK on the server with your secret key.',
   },
   {
-    href: '/errors',
-    name: 'Errors',
-    description:
-      'Read about the different types of errors returned by the API.',
+    href: '/widget-install',
+    name: 'Widget Installation',
+    description: 'Learn how to install and configure the ICPay Widget components.',
   },
   {
     href: '/webhooks',
     name: 'Webhooks',
-    description:
-      'Learn how to programmatically configure webhooks for your app.',
+    description: 'Configure webhooks to receive real-time payment notifications.',
   },
 ]
 
