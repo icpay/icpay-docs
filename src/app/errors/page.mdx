@@ -1,96 +1,79 @@
 export const metadata = {
   title: 'Errors',
   description:
-    'Learn about the different types of errors you might encounter when using the icpay API and how to handle them.',
+    'Learn about the different types of errors you might encounter when using the icpay SDK and how to handle them.',
 }
 
-# Errors
 
-When working with the icpay API, you'll encounter various types of errors. Understanding these errors and how to handle them is crucial for building robust integrations. {{ className: 'lead' }}
+All SDK errors are `IcpayError` with a machine code and message.
 
-## HTTP status codes
+```ts
+import { Icpay, IcpayError } from '@ic-pay/icpay-sdk'
 
-The icpay API uses standard HTTP status codes to indicate the success or failure of a request. These status codes provide a quick way to understand what happened with your request. {{ className: 'lead' }}
-
-Here is a list of the different categories of status codes returned by the icpay API. Use these to understand if a request was successful.
-
-### 2xx Success
-
-- **200 OK**: The request was successful and the response contains the requested data.
-- **201 Created**: The resource was successfully created.
-- **204 No Content**: The request was successful but there is no content to return.
-
-### 4xx Client Errors
-
-- **400 Bad Request**: The request was malformed or invalid.
-- **401 Unauthorized**: Authentication is required and has failed or has not been provided.
-- **403 Forbidden**: The server understood the request but refuses to authorize it.
-- **404 Not Found**: The requested resource could not be found.
-- **422 Unprocessable Entity**: The request was well-formed but was unable to be followed due to semantic errors.
-
-### 5xx Server Errors
-
-- **500 Internal Server Error**: An unexpected error occurred on the server.
-- **502 Bad Gateway**: The server received an invalid response from an upstream server.
-- **503 Service Unavailable**: The server is temporarily unable to handle the request.
-
-## Error responses
-
-Whenever a request is unsuccessful, the icpay API will return an error response with an error type and message. You can use this information to understand better what has gone wrong and how to fix it. Most of the error messages are pretty self-explanatory, but if you're still having trouble, you can always reach out to our support team. {{ className: 'lead' }}
-
-Here is a list of the two error types supported by the icpay API — use these to understand what you have done wrong.
-
-### API Error
-
-An API error occurs when there's an issue with the request itself. This could be due to invalid parameters, missing required fields, or other request-related issues.
-
-```json
-{
-  "error": {
-    "type": "api_error",
-    "message": "Invalid parameter: 'email' must be a valid email address",
-    "param": "email",
-    "code": "invalid_parameter"
+try {
+  await icpay.sendFunds({ ledgerCanisterId: '...', amount: '1000' })
+} catch (e) {
+  if (e instanceof IcpayError) {
+    if (e.isBalanceError()) {
+      // prompt user to add funds
+    } else if (e.isNetworkError()) {
+      // retry or show offline UI
+    }
   }
 }
 ```
 
-### Validation Error
+### Error reference
 
-A validation error occurs when the data you're trying to create or update doesn't meet the required validation rules.
+| Code | Category | Description | What to do |
+|---|---|---|---|
+| WALLET_NOT_CONNECTED | Wallet | A wallet/principal is required but not connected (e.g., before calling `sendFunds`). | Ask the user to connect their wallet; provide an `actorProvider` and `connectedWallet`.
+| WALLET_CONNECTION_FAILED | Wallet | Failed to connect to the selected wallet provider. | Offer retry or let the user pick another provider.
+| WALLET_DISCONNECTED | Wallet | Wallet was disconnected mid-flow. | Reconnect and restart the action.
+| WALLET_SIGNATURE_REJECTED | Wallet | User rejected the signature prompt. | Treat as user cancel; allow retry.
+| WALLET_USER_CANCELLED | Wallet | User cancelled the operation. | Do not show as an error; allow retry.
+| WALLET_PROVIDER_NOT_AVAILABLE | Wallet | Requested wallet provider not available in the environment. | Hide/disable unavailable providers; suggest alternatives.
+| UNSUPPORTED_PROVIDER | Wallet | The provider is not supported by the SDK. | Use a supported provider.
+| NO_PROVIDERS_AVAILABLE | Wallet | No wallet providers detected. | Prompt user to install/enable a wallet.
+| INSUFFICIENT_BALANCE | Balance | User balance on selected ledger is insufficient for the amount/fee. | Ask user to add funds or pick smaller amount.
+| BALANCE_CHECK_FAILED | Balance | Balance fetch could not complete. | Retry; ensure wallet principal and ledger canister ID are correct.
+| BALANCES_FETCH_FAILED | Balance | Failed to get all balances. | Retry or fetch single-ledger balance as a fallback.
+| SINGLE_BALANCE_FETCH_FAILED | Balance | Failed to get a specific ledger balance. | Retry; verify ledger canister ID and connection.
+| TRANSACTION_FAILED | Transaction | Generic failure sending funds or completing a step. | Show message and allow retry; log `details`.
+| TRANSACTION_TIMEOUT | Transaction | Timed out waiting for confirmation. | Show pending state and continue polling or allow retry.
+| TRANSACTION_CANCELLED | Transaction | Transaction was cancelled. | Treat similar to user-cancel.
+| TRANSACTION_INVALID | Transaction | Invalid transaction parameters or state. | Validate inputs; correct configuration or amount.
+| TRANSACTION_STATUS_FETCH_FAILED | Transaction | Could not fetch transaction status. | Retry with backoff; ensure canister/network is reachable.
+| TRANSACTION_SYNC_TRIGGER_FAILED | Transaction | Failed to trigger a sync from canister to API DB. | Retry later; the background sync may still complete.
+| SEND_FUNDS_USD_FAILED | Transaction | Failed when converting USD to token and sending. | Check price availability and retry.
+| NETWORK_ERROR | Network | Network connectivity problem. | Retry with backoff; show offline UI.
+| API_ERROR | Network | Server-side error from API. | Retry; if persistent, contact support and log `details`.
+| RATE_LIMIT_EXCEEDED | Network | Too many requests. | Back off and retry after delay.
+| INVALID_CONFIG | Config | Misconfigured SDK options. | Fix config (e.g., missing actor provider for send calls).
+| MISSING_PUBLISHABLE_KEY | Config | No publishable key provided for public operations. | Provide publishable key.
+| INVALID_PUBLISHABLE_KEY | Config | Provided publishable key is invalid. | Verify and replace key.
+| SECRET_KEY_REQUIRED | Config | Method requires secret key (server-side). | Move call to server and provide `secretKey`.
+| VALIDATION_ERROR | Config | Input validation failed. | Correct parameters and retry.
+| LEDGER_NOT_FOUND | Ledger | Ledger not found (by canister ID or symbol). | Verify canister ID/symbol; use `getVerifiedLedgers()`.
+| LEDGER_NOT_VERIFIED | Ledger | Ledger is not verified for usage. | Choose a verified ledger.
+| TOKEN_NOT_SUPPORTED | Ledger | Token/ledger not supported. | Use a supported ledger.
+| INVALID_LEDGER_SYMBOL | Ledger | Provided symbol is invalid. | Use a non-empty valid symbol.
+| LEDGER_SYMBOL_NOT_FOUND | Ledger | No verified ledger matches the symbol. | Inspect verified ledgers or correct symbol.
+| LEDGER_INFO_FETCH_FAILED | Ledger | Failed to fetch ledger info. | Retry; verify canister ID.
+| LEDGERS_WITH_PRICES_FETCH_FAILED | Ledger | Failed to fetch ledgers with price data. | Retry later.
+| VERIFIED_LEDGERS_FETCH_FAILED | Ledger | Failed to fetch verified ledgers. | Retry later.
+| ACCOUNT_NOT_FOUND | Account | Account not found. | Check account context/keys.
+| ACCOUNT_INACTIVE | Account | Account is inactive. | Reactivate or contact support.
+| ACCOUNT_INFO_FETCH_FAILED | Account | Failed to fetch account info. | Retry; verify keys.
+| ACCOUNT_WALLET_BALANCES_FETCH_FAILED | Account | Failed to fetch account wallet balances. | Retry later.
+| INVALID_USD_AMOUNT | Price | USD amount `<=` 0 for conversion. | Provide a positive amount.
+| PRICE_NOT_AVAILABLE | Price | No price available for the selected ledger. | Pick a priced ledger or try later.
+| PRICE_CALCULATION_FAILED | Price | Failed to compute token amount from USD. | Retry; verify price availability.
+| TRANSACTION_HISTORY_FETCH_FAILED | History | Failed to fetch transactions history. | Retry; verify filters.
+| PAYMENT_HISTORY_FETCH_FAILED | History | Failed to fetch payment history. | Retry; verify filters.
+| PAYMENTS_BY_PRINCIPAL_FETCH_FAILED | History | Failed to fetch payments by principal. | Retry; verify principal and filters.
+| UNKNOWN_ERROR | Generic | Unclassified error. | Show generic message; log `details` for diagnosis.
 
-```json
-{
-  "error": {
-    "type": "validation_error",
-    "message": "The provided data was invalid",
-    "errors": [
-      {
-        "field": "email",
-        "message": "must be a valid email address"
-      }
-    ]
-  }
-}
-```
-
-## Getting help
-
-If you're still having trouble after reading through the error messages and checking your code before contacting icpay support.
-
-## Documentation URL
-
-All error responses include a `documentation_url` field that points to the relevant documentation:
-
-```json
-{
-  "error": {
-    "type": "api_error",
-    "message": "Invalid parameter",
-    "documentation_url": "https://icpay.chat/docs/errors/api_error"
-  }
-}
-```
 
 <div className="not-prose">
   <Button href="/quickstart" variant="text" arrow="right">

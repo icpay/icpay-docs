@@ -1,0 +1,107 @@
+export const metadata = {
+  title: 'Donation Thermometer',
+  description: 'Track progress toward a fundraising goal and accept donations.',
+}
+
+export const sections = [
+  { title: 'Usage', id: 'usage' },
+  { title: 'Configuration', id: 'configuration' },
+]
+
+# Donation Thermometer
+
+## Usage
+
+<CodeGroup title="Donation Thermometer">
+
+```tsx {{ title: 'Next.js' }}
+'use client'
+import { useEffect, useRef } from 'react'
+import '@ic-pay/icpay-widget'
+
+export default function Page() {
+  const ref = useRef<any>(null)
+  useEffect(() => {
+    if (!ref.current) return
+    ref.current.config = {
+      publishableKey: process.env.NEXT_PUBLIC_ICPAY_PK,
+      goalUsd: 100,
+      defaultAmountUsd: 10,
+      amountsUsd: [5,10,25,50],
+      onSuccess: (tx: any) => console.log('Donated', tx),
+      theme: { primaryColor: '#0ea5e9' },
+      progressBar: { enabled: true, mode: 'modal' },
+    }
+  }, [])
+  return <icpay-donation-thermometer ref={ref as any} />
+}
+
+```vue {{ title: 'Vue.js' }}
+<script setup lang="ts">
+import { onMounted, ref } from 'vue'
+import '@ic-pay/icpay-widget'
+const el = ref<any>(null)
+onMounted(() => {
+  if (!el.value) return
+  el.value.config = {
+    publishableKey: import.meta.env.VITE_ICPAY_PK,
+    goalUsd: 100,
+    defaultAmountUsd: 10,
+    amountsUsd: [5,10,25,50],
+    onSuccess: (tx: any) => console.log('Donated', tx),
+    theme: { primaryColor: '#0ea5e9' },
+    progressBar: { enabled: true, mode: 'modal' },
+  }
+})
+</script>
+<template>
+  <icpay-donation-thermometer ref="el" />
+</template>
+
+```ts {{ title: 'Angular' }}
+import { Component, ElementRef, ViewChild, AfterViewInit } from '@angular/core'
+import '@ic-pay/icpay-widget'
+@Component({ selector: 'app-root', template: `<icpay-donation-thermometer #el></icpay-donation-thermometer>` })
+export class AppComponent implements AfterViewInit {
+  @ViewChild('el', { static: true }) el!: ElementRef<any>
+  ngAfterViewInit() {
+    this.el.nativeElement.config = {
+      publishableKey: (window as any).env?.ICPAY_PK || 'pk_test_xxx',
+      goalUsd: 100,
+      defaultAmountUsd: 10,
+      amountsUsd: [5,10,25,50],
+      onSuccess: (tx: any) => console.log('Donated', tx),
+      theme: { primaryColor: '#0ea5e9' },
+      progressBar: { enabled: true, mode: 'modal' },
+    }
+  }
+}
+
+```html {{ title: 'No framework' }}
+<script type="module">import '@ic-pay/icpay-widget'</script>
+<icpay-donation-thermometer id="el"></icpay-donation-thermometer>
+<script>
+  el.config = {
+    publishableKey: 'pk_test_xxx',
+    goalUsd: 100,
+    defaultAmountUsd: 10,
+    amountsUsd: [5,10,25,50],
+    onSuccess: (tx) => console.log('Donated', tx),
+    theme: { primaryColor: '#0ea5e9' },
+    progressBar: { enabled: true, mode: 'modal' },
+  }
+</script>
+
+```
+
+</CodeGroup>
+
+## Configuration
+
+- `goalUsd: number`
+- `defaultAmountUsd?: number`
+- `amountsUsd?: number[]`
+- `onSuccess?: (tx) => void`
+- `theme?`, `progressBar?` supported; see [Progress Bar](/widget/components/progress-bar).
+
+

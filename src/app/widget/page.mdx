@@ -1,0 +1,373 @@
+export const metadata = {
+  title: 'Widget',
+  description:
+    'ICPay Web Components for fast payments: intro, install, quickstart, advanced configuration, SDK integration, events.',
+}
+
+export const sections = [
+  { title: 'Intro', id: 'intro' },
+  { title: 'Quickstart', id: 'quickstart' },
+  { title: 'Create a payment', id: 'create-a-payment' },
+  { title: 'Advanced configuration', id: 'advanced-configuration' },
+  { title: 'SDK config via widget', id: 'sdk-config-via-widget' },
+  { title: 'Secret key access via server', id: 'secret-key-access-via-server' },
+  { title: 'Options reference', id: 'options-reference' },
+  { title: 'Widget errors', id: 'widget-errors' },
+  { title: 'Events', id: 'events' },
+]
+
+# Widget
+
+ICPay Widget is a set of framework-agnostic Web Components for payments. Drop in `icpay-premium-content`, `icpay-tip-jar`, `icpay-article-paywall`, `icpay-coffee-shop`, or `icpay-donation-thermometer` to accept payments instantly. {{ className: 'lead' }}
+
+## Intro
+
+- Built-in wallet flow with optional Plug N Play.
+- Uses the [SDK](/sdk) under the hood; you can pass SDK options through the widget config.
+- Emits global events so your app can react to progress and results.
+
+## Quickstart
+
+<CodeGroup title="Usage examples">
+
+```tsx {{ title: 'Next.js' }}
+'use client'
+import { useEffect, useRef } from 'react'
+import '@ic-pay/icpay-widget'
+
+export default function Page() {
+  const ref = useRef<any>(null)
+  useEffect(() => {
+    if (!ref.current) return
+    ref.current.config = {
+      publishableKey: process.env.NEXT_PUBLIC_ICPAY_PK,
+      amountsUsd: [1,5,10],
+      defaultAmountUsd: 5,
+    }
+    const onDone = (e: any) => console.log('Tip completed', e.detail)
+    window.addEventListener('icpay-sdk-transaction-completed', onDone)
+    return () => window.removeEventListener('icpay-sdk-transaction-completed', onDone)
+  }, [])
+  return <icpay-tip-jar ref={ref as any} />
+}
+```
+
+```vue {{ title: 'Vue.js' }}
+<script setup lang="ts">
+import { onMounted, ref, onBeforeUnmount } from 'vue'
+import '@ic-pay/icpay-widget'
+
+const tip = ref<any>(null)
+
+onMounted(() => {
+  if (!tip.value) return
+  tip.value.config = {
+    publishableKey: import.meta.env.VITE_ICPAY_PK,
+    amountsUsd: [1,5,10],
+    defaultAmountUsd: 5,
+  }
+  const onDone = (e: any) => console.log('Tip completed', e.detail)
+  window.addEventListener('icpay-sdk-transaction-completed', onDone)
+  onBeforeUnmount(() => window.removeEventListener('icpay-sdk-transaction-completed', onDone))
+})
+</script>
+
+<template>
+  <icpay-tip-jar ref="tip" />
+</template>
+```
+
+```ts {{ title: 'Angular' }}
+import { Component, ElementRef, ViewChild, AfterViewInit, OnDestroy } from '@angular/core'
+import '@ic-pay/icpay-widget'
+
+@Component({ selector: 'app-root', template: `<icpay-tip-jar #tip></icpay-tip-jar>` })
+export class AppComponent implements AfterViewInit, OnDestroy {
+  @ViewChild('tip', { static: true }) tip!: ElementRef<any>
+  private onDone = (e: any) => console.log('Tip completed', e.detail)
+
+  ngAfterViewInit() {
+    this.tip.nativeElement.config = {
+      publishableKey: (window as any).env?.ICPAY_PK || 'pk_test_xxx',
+      amountsUsd: [1,5,10],
+      defaultAmountUsd: 5,
+    }
+    window.addEventListener('icpay-sdk-transaction-completed', this.onDone)
+  }
+
+  ngOnDestroy() {
+    window.removeEventListener('icpay-sdk-transaction-completed', this.onDone)
+  }
+}
+```
+
+```html {{ title: 'No framework' }}
+<script type="module">
+  import '@ic-pay/icpay-widget'
+  // Or bundle via your build tool
+</script>
+
+<icpay-tip-jar id="tip"></icpay-tip-jar>
+<script>
+  const el = document.getElementById('tip')
+  el.config = {
+    publishableKey: 'pk_test_xxx',
+    amountsUsd: [1,5,10],
+    defaultAmountUsd: 5,
+  }
+  window.addEventListener('icpay-sdk-transaction-completed', (e) => {
+    console.log('Tip completed', e.detail)
+  })
+</script>
+```
+
+</CodeGroup>
+
+## Create a payment
+
+Each component exposes a `config` property. The widget internally creates an SDK instance and can convert USD to token amounts automatically.
+
+<CodeGroup title="Premium content examples">
+
+```tsx {{ title: 'Next.js' }}
+'use client'
+import { useEffect, useRef } from 'react'
+import '@ic-pay/icpay-widget'
+
+export default function Page() {
+  const ref = useRef<any>(null)
+  useEffect(() => {
+    if (!ref.current) return
+    ref.current.config = {
+      publishableKey: process.env.NEXT_PUBLIC_ICPAY_PK,
+      priceUsd: 5,
+      onSuccess: (tx: any) => console.log('Unlocked', tx),
+    }
+  }, [])
+  return <icpay-premium-content ref={ref as any} />
+}
+```
+
+```vue {{ title: 'Vue.js' }}
+<script setup lang="ts">
+import { onMounted, ref } from 'vue'
+import '@ic-pay/icpay-widget'
+
+const premium = ref<any>(null)
+
+onMounted(() => {
+  if (!premium.value) return
+  premium.value.config = {
+    publishableKey: import.meta.env.VITE_ICPAY_PK,
+    priceUsd: 5,
+    onSuccess: (tx: any) => console.log('Unlocked', tx),
+  }
+})
+</script>
+
+<template>
+  <icpay-premium-content ref="premium" />
+  <!-- or <icpay-article-paywall /> with priceUsd -->
+</template>
+```
+
+```ts {{ title: 'Angular' }}
+import { Component, ElementRef, ViewChild, AfterViewInit } from '@angular/core'
+import '@ic-pay/icpay-widget'
+
+@Component({ selector: 'app-root', template: `<icpay-premium-content #premium></icpay-premium-content>` })
+export class AppComponent implements AfterViewInit {
+  @ViewChild('premium', { static: true }) premium!: ElementRef<any>
+  ngAfterViewInit() {
+    this.premium.nativeElement.config = {
+      publishableKey: (window as any).env?.ICPAY_PK || 'pk_test_xxx',
+      priceUsd: 5,
+      onSuccess: (tx: any) => console.log('Unlocked', tx),
+    }
+  }
+}
+```
+
+```html {{ title: 'No framework' }}
+<script type="module">
+  import '@ic-pay/icpay-widget'
+</script>
+
+<icpay-premium-content id="premium"></icpay-premium-content>
+<script>
+  const w = document.getElementById('premium')
+  w.config = {
+    publishableKey: 'pk_test_xxx',
+    priceUsd: 5,
+    onSuccess: (tx) => console.log('Unlocked', tx),
+  }
+</script>
+```
+
+</CodeGroup>
+
+## Advanced configuration
+
+- `useOwnWallet`: set to true to manage wallet connection yourself; provide `actorProvider` + `connectedWallet`.
+- `plugNPlay`: theme and provider toggles for built-in wallet UX.
+- `progressBar`: choose `modal | horizontal | vertical | inline` progress UI.
+
+<CodeGroup title="Advanced configuration examples">
+
+```tsx {{ title: 'Next.js' }}
+'use client'
+import { useEffect, useRef } from 'react'
+import '@ic-pay/icpay-widget'
+
+export default function Page() {
+  const ref = useRef<any>(null)
+  useEffect(() => {
+    if (!ref.current) return
+    ref.current.config = {
+      publishableKey: process.env.NEXT_PUBLIC_ICPAY_PK,
+      useOwnWallet: true,
+      connectedWallet: { owner: '<principal>' },
+      actorProvider: () => (window as any).pnp.getActor(),
+      plugNPlay: { enabled: false },
+      progressBar: { enabled: true, mode: 'modal' },
+      theme: { primaryColor: '#0ea5e9' },
+    }
+  }, [])
+  return <icpay-tip-jar ref={ref as any} />
+}
+```
+
+```vue {{ title: 'Vue.js' }}
+<script setup lang="ts">
+import { onMounted, ref } from 'vue'
+import '@ic-pay/icpay-widget'
+
+const el = ref<any>(null)
+
+onMounted(() => {
+  if (!el.value) return
+  el.value.config = {
+    publishableKey: import.meta.env.VITE_ICPAY_PK,
+    useOwnWallet: true,
+    connectedWallet: { owner: '<principal>' },
+    actorProvider: () => (window as any).pnp.getActor(),
+    plugNPlay: { enabled: false },
+    progressBar: { enabled: true, mode: 'modal' },
+    theme: { primaryColor: '#0ea5e9' },
+  }
+})
+</script>
+
+<template>
+  <icpay-tip-jar ref="el" />
+</template>
+```
+
+```ts {{ title: 'Angular' }}
+import { Component, ElementRef, ViewChild, AfterViewInit } from '@angular/core'
+import '@ic-pay/icpay-widget'
+
+@Component({ selector: 'app-root', template: `<icpay-tip-jar #el></icpay-tip-jar>` })
+export class AppComponent implements AfterViewInit {
+  @ViewChild('el', { static: true }) el!: ElementRef<any>
+  ngAfterViewInit() {
+    this.el.nativeElement.config = {
+      publishableKey: (window as any).env?.ICPAY_PK || 'pk_test_xxx',
+      useOwnWallet: true,
+      connectedWallet: { owner: '<principal>' },
+      actorProvider: () => (window as any).pnp.getActor(),
+      plugNPlay: { enabled: false },
+      progressBar: { enabled: true, mode: 'modal' },
+      theme: { primaryColor: '#0ea5e9' },
+    }
+  }
+}
+```
+
+```html {{ title: 'No framework' }}
+<script type="module">
+  import '@ic-pay/icpay-widget'
+</script>
+
+<icpay-tip-jar id="el"></icpay-tip-jar>
+<script>
+  const el = document.getElementById('el')
+  el.config = {
+    publishableKey: 'pk_test_xxx',
+    useOwnWallet: true,
+    connectedWallet: { owner: '<principal>' },
+    actorProvider: () => window.pnp.getActor(),
+    plugNPlay: { enabled: false },
+    progressBar: { enabled: true, mode: 'modal' },
+    theme: { primaryColor: '#0ea5e9' },
+  }
+  // Optionally listen for SDK events on window
+  window.addEventListener('icpay-sdk-transaction-completed', (e) => console.log('done', e.detail))
+</script>
+```
+
+</CodeGroup>
+
+## SDK config via widget
+
+The widget passes a subset of options directly to the SDK:
+
+- `publishableKey`, `apiUrl`, `icHost`, `actorProvider`, `connectedWallet`.
+
+See all SDK options in the [SDK configuration](/sdk#configuration).
+
+## Secret key access via server
+
+Secret keys are never used in the widget. If you need server-only data (history, invoices, etc.), call your backend that uses the SDK with `secretKey`. See [SDK: Secret key access](/sdk#secret-key-access-server).
+
+## Options reference
+
+Common widget config (subset):
+
+- `publishableKey` (string) — required
+- `apiUrl?`, `icHost?`, `actorProvider?`, `connectedWallet?`
+- `plugNPlay?` `{ enabled, providers, theme }`
+- `progressBar?` `{ enabled, mode }`
+- Component-specific:
+  - premium-content: `priceUsd`, `cryptoOptions`, `onSuccess(tx)`
+  - tip-jar: `amountsUsd`, `defaultAmountUsd`, `cryptoOptions`, `onSuccess(tx)`
+  - article-paywall: `priceUsd`, `title`, `preview`, `lockedContent`
+  - coffee-shop: `items[{ name, priceUsd }]`, `defaultItemIndex`, `onSuccess(tx)`
+  - donation-thermometer: `goalUsd`, `defaultAmountUsd`, `amountsUsd`, `onSuccess(tx)`
+
+Link SDK options that also apply: [SDK configuration](/sdk#configuration).
+
+## Widget errors
+
+Widgets surface SDK errors to the UI and dispatch an `icpay-error` event. The widget includes helpers to classify and display errors.
+
+```js
+window.addEventListener('icpay-error', (e) => {
+  console.log('Widget error', e.detail)
+})
+```
+
+Helpers available in the widget package:
+
+```ts
+import { handleWidgetError, getErrorMessage, getErrorSeverity, getErrorAction } from '@ic-pay/icpay-widget'
+```
+
+## Events
+
+Widgets forward SDK events to `window` via `CustomEvent`. Subscribe globally:
+
+```js
+window.addEventListener('icpay-sdk-transaction-created', (e) => { /* ... */ })
+window.addEventListener('icpay-sdk-transaction-completed', (e) => { /* ... */ })
+```
+
+For the full list of event names and payloads, see [SDK events](/sdk#events).
+
+<div className="not-prose">
+  <Button href="/ledgers" arrow="right" variant="text">
+    <>Learn about supported ledgers</>
+  </Button>
+</div>
+
+

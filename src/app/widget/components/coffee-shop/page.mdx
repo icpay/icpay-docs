@@ -1,0 +1,100 @@
+export const metadata = {
+  title: 'Coffee Shop',
+  description: 'Sell multiple items with prices and a simple selector.',
+}
+
+export const sections = [
+  { title: 'Usage', id: 'usage' },
+  { title: 'Configuration', id: 'configuration' },
+]
+
+# Coffee Shop
+
+## Usage
+
+<CodeGroup title="Coffee Shop">
+
+```tsx {{ title: 'Next.js' }}
+'use client'
+import { useEffect, useRef } from 'react'
+import '@ic-pay/icpay-widget'
+
+export default function Page() {
+  const ref = useRef<any>(null)
+  useEffect(() => {
+    if (!ref.current) return
+    ref.current.config = {
+      publishableKey: process.env.NEXT_PUBLIC_ICPAY_PK,
+      items: [{ name: 'Espresso', priceUsd: 3 }, { name: 'Latte', priceUsd: 5 }],
+      defaultItemIndex: 0,
+      onSuccess: (tx: any) => console.log('Purchased', tx),
+      theme: { primaryColor: '#0ea5e9' },
+      progressBar: { enabled: true, mode: 'modal' },
+    }
+  }, [])
+  return <icpay-coffee-shop ref={ref as any} />
+}
+
+```vue {{ title: 'Vue.js' }}
+<script setup lang="ts">
+import { onMounted, ref } from 'vue'
+import '@ic-pay/icpay-widget'
+const el = ref<any>(null)
+onMounted(() => {
+  if (!el.value) return
+  el.value.config = {
+    publishableKey: import.meta.env.VITE_ICPAY_PK,
+    items: [{ name: 'Espresso', priceUsd: 3 }, { name: 'Latte', priceUsd: 5 }],
+    defaultItemIndex: 0,
+    onSuccess: (tx: any) => console.log('Purchased', tx),
+    theme: { primaryColor: '#0ea5e9' },
+    progressBar: { enabled: true, mode: 'modal' },
+  }
+})
+</script>
+<template>
+  <icpay-coffee-shop ref="el" />
+</template>
+
+```ts {{ title: 'Angular' }}
+import { Component, ElementRef, ViewChild, AfterViewInit } from '@angular/core'
+import '@ic-pay/icpay-widget'
+@Component({ selector: 'app-root', template: `<icpay-coffee-shop #el></icpay-coffee-shop>` })
+export class AppComponent implements AfterViewInit {
+  @ViewChild('el', { static: true }) el!: ElementRef<any>
+  ngAfterViewInit() {
+    this.el.nativeElement.config = {
+      publishableKey: (window as any).env?.ICPAY_PK || 'pk_test_xxx',
+      items: [{ name: 'Espresso', priceUsd: 3 }, { name: 'Latte', priceUsd: 5 }],
+      defaultItemIndex: 0,
+      onSuccess: (tx: any) => console.log('Purchased', tx),
+      theme: { primaryColor: '#0ea5e9' },
+      progressBar: { enabled: true, mode: 'modal' },
+    }
+  }
+}
+
+```html {{ title: 'No framework' }}
+<script type="module">import '@ic-pay/icpay-widget'</script>
+<icpay-coffee-shop id="el"></icpay-coffee-shop>
+<script>
+  el.config = {
+    publishableKey: 'pk_test_xxx',
+    items: [{ name: 'Espresso', priceUsd: 3 }, { name: 'Latte', priceUsd: 5 }],
+    defaultItemIndex: 0,
+    onSuccess: (tx) => console.log('Purchased', tx),
+    theme: { primaryColor: '#0ea5e9' },
+    progressBar: { enabled: true, mode: 'modal' },
+  }
+</script>
+
+```
+
+</CodeGroup>
+
+## Configuration
+
+- `items: Array<{ name: string; priceUsd: number }>`
+- `defaultItemIndex?: number`
+- `onSuccess?: (tx) => void`
+- `theme?`, `

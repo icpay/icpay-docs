@@ -1,0 +1,248 @@
+export const metadata = {
+  title: 'SDK (Server: Secret key)',
+  description:
+    'Server-only SDK methods that require your ICPay Secret Key. Includes method list and response types.',
+}
+
+export const sections = [
+  { title: 'Overview', id: 'overview' },
+  { title: 'Install & keys', id: 'install-keys' },
+  { title: 'Methods', id: 'methods' },
+  { title: 'Types', id: 'types' },
+]
+
+# SDK (Server: Secret key)
+
+Use the Secret Key only on trusted servers. These methods are accessed via `icpay.protected.*`. {{ className: 'lead' }}
+
+## Overview
+
+- Keep your Secret Key private. Never embed it in client code.
+- All examples assume a Node/Next.js server context.
+
+## Install & keys
+
+### If you're using pnpm
+```bash
+pnpm add @ic-pay/icpay-sdk
+```
+
+Get your keys from the [icpay.org dashboard](/icpay-org). Example server init:
+
+```ts {{ title: 'Initialize (server)' }}
+import { Icpay } from '@ic-pay/icpay-sdk'
+
+const icpay = new Icpay({ secretKey: process.env.ICPAY_SK!, apiUrl: 'https://api.icpay.org' })
+```
+
+## Methods
+
+### getDetailedAccountInfo
+Returns detailed account information for the authenticated account.
+
+```ts
+const account = await icpay.protected.getDetailedAccountInfo()
+```
+
+### getTransactionStatus
+Fetches the transaction status by canister transaction ID from the API.
+
+```ts
+const status = await icpay.protected.getTransactionStatus(123)
+```
+
+### getPaymentHistory
+Lists payments for the account with optional filters (date range, ledger, status, pagination).
+
+```ts
+const history = await icpay.protected.getPaymentHistory({ status: 'completed', limit: 50 })
+```
+
+### getPaymentsByPrincipal
+Lists payments associated with a principal (sender/expected sender) with pagination.
+
+```ts
+const byPrincipal = await icpay.protected.getPaymentsByPrincipal({ principalId: 'aaaa-bbbb-cccc', limit: 10 })
+```
+
+### getVerifiedLedgersPrivate
+Returns verified ledgers available to the account.
+
+```ts
+const ledgers = await icpay.protected.getVerifiedLedgersPrivate()
+```
+
+### getAllLedgersWithPricesPrivate
+Returns ledgers including current price information.
+
+```ts
+const pricedLedgers = await icpay.protected.getAllLedgersWithPricesPrivate()
+```
+
+### getLedgerInfoPrivate
+Returns detailed information about a specific ledger by ID or canister ID.
+
+```ts
+const ledger = await icpay.protected.getLedgerInfoPrivate('ryjl3-tyaaa-aaaaa-aaaba-cai')
+```
+
+### getPaymentById
+Fetch a single payment aggregate (payment + intent + invoice + transaction if present).
+
+```ts
+const payment = await icpay.protected.getPaymentById('pay_123')
+```
+
+### listPayments
+List payments for the account (basic list without filters).
+
+```ts
+const payments = await icpay.protected.listPayments()
+```
+
+### getPaymentIntentById
+Fetch a payment intent by its ID.
+
+```ts
+const intent = await icpay.protected.getPaymentIntentById('pi_123')
+```
+
+### getInvoiceById
+Fetch an invoice by its ID.
+
+```ts
+const invoice = await icpay.protected.getInvoiceById('in_123')
+```
+
+### getTransactionById
+Fetch a transaction by its ID.
+
+```ts
+const tx = await icpay.protected.getTransactionById('tx_123')
+```
+
+### getWalletById
+Fetch a wallet by ID.
+
+```ts
+const wallet = await icpay.protected.getWalletById('wal_123')
+```
+
+### getWebhookEventById
+Fetch a webhook delivery record by ID (admin tooling/observability).
+
+```ts
+const event = await icpay.protected.getWebhookEventById('evt_123')
+```
+
+### getAccountWalletBalances
+Fetch account wallet balances across verified ledgers, with optional total USD if prices are available.
+
+```ts
+const balances = await icpay.protected.getAccountWalletBalances()
+```
+
+## Types
+
+Selected response types from the SDK (simplified):
+
+```ts
+type AccountInfo = {
+  id: string
+  name: string | null
+  email: string | null
+  isActive: boolean
+  isLive: boolean
+  accountCanisterId: number
+  walletAddress: string | null
+  createdAt: Date
+  updatedAt: Date
+}
+
+type PaymentHistoryResponse = {
+  payments: Array<{
+    id: string
+    status: 'pending' | 'completed' | 'failed'
+    amount: string
+    ledgerCanisterId: string
+    ledgerSymbol: string
+    fromAddress?: string
+    toAddress: string
+    fee?: string
+    decimals?: number
+    tokenPrice?: string
+    expectedSenderPrincipal?: string
+    metadata?: Record<string, unknown>
+    createdAt: Date
+    updatedAt: Date
+  }>
+  total: number
+  limit: number
+  offset: number
+  hasMore: boolean
+}
+
+type SdkLedger = {
+  id: string
+  name: string
+  symbol: string
+  canisterId: string
+  standard: 'ICRC-1' | 'ICRC-2' | 'ICRC-3' | 'ICRC-10' | 'ICRC-21' | 'ICP' | 'EXT'
+  decimals: number
+  logoUrl: string | null
+  verified: boolean
+  fee: string | null
+  network: 'mainnet' | 'testnet'
+  description: string | null
+  lastBlockIndex: string | null
+  coingeckoId: string | null
+  currentPrice: number | null
+  priceFetchMethod: 'coingecko' | 'icpswap' | null
+  lastPriceUpdate: string | null
+  createdAt: string
+  updatedAt: string
+}
+
+type AllLedgerBalances = {
+  balances: Array<{
+    ledgerId: string
+    ledgerName: string
+    ledgerSymbol: string
+    canisterId: string
+    balance: string
+    formattedBalance: string
+    decimals: number
+    currentPrice?: number
+    lastPriceUpdate?: Date
+    lastUpdated: Date
+  }>
+  totalBalancesUSD?: number
+  lastUpdated: Date
+}
+```
+
+For full types see the SDK `types` exports in your editor or the package source.
+
+
+## Example Secret key access (server)
+
+Never expose your secret key in the browser. Use the SDK on the server for private methods.
+
+```ts {{ title: 'Next.js Route Handler (server)' }}
+import { Icpay } from '@ic-pay/icpay-sdk'
+
+export async function GET() {
+  const icpay = new Icpay({ secretKey: process.env.ICPAY_SK!, apiUrl: 'https://api.icpay.org' })
+  const account = await icpay.protected.getDetailedAccountInfo()
+  const history = await icpay.protected.getPaymentHistory({ limit: 50 })
+  return Response.json({ account, history })
+}
+```
+
+<div className="not-prose">
+  <Button href="/sdk" variant="text" arrow="right">
+    <>Back to SDK</>
+  </Button>
+</div>
+
+

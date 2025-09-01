@@ -1,0 +1,125 @@
+export const metadata = {
+  title: 'Widget Install',
+  description: 'Install the ICPay Widget and its SDK dependency using your preferred package manager.',
+}
+
+export const sections = [
+  { title: 'Install', id: 'install' },
+  { title: 'Examples', id: 'examples' },
+]
+
+# Widget Install
+
+## Install
+
+### If you're using pnpm
+```bash
+pnpm add @ic-pay/icpay-widget @ic-pay/icpay-sdk
+```
+
+### If you're using npm
+```bash
+npm install @ic-pay/icpay-widget @ic-pay/icpay-sdk
+```
+
+### If you're using yarn
+```bash
+yarn add @ic-pay/icpay-widget @ic-pay/icpay-sdk
+```
+
+## Examples
+
+<CodeGroup title="Usage examples">
+
+```tsx {{ title: 'Next.js' }}
+'use client'
+import { useEffect, useRef } from 'react'
+import '@ic-pay/icpay-widget'
+
+export default function Page() {
+  const ref = useRef<any>(null)
+  useEffect(() => {
+    if (!ref.current) return
+    ref.current.config = {
+      publishableKey: process.env.NEXT_PUBLIC_ICPAY_PK,
+      amountsUsd: [1,5,10],
+      defaultAmountUsd: 5,
+    }
+    const onDone = (e: any) => console.log('Tip completed', e.detail)
+    window.addEventListener('icpay-sdk-transaction-completed', onDone)
+    return () => window.removeEventListener('icpay-sdk-transaction-completed', onDone)
+  }, [])
+  return <icpay-tip-jar ref={ref as any} />
+}
+```
+
+```vue {{ title: 'Vue.js' }}
+<script setup lang="ts">
+import { onMounted, ref, onBeforeUnmount } from 'vue'
+import '@ic-pay/icpay-widget'
+
+const tip = ref<any>(null)
+
+onMounted(() => {
+  if (!tip.value) return
+  tip.value.config = {
+    publishableKey: import.meta.env.VITE_ICPAY_PK,
+    amountsUsd: [1,5,10],
+    defaultAmountUsd: 5,
+  }
+  const onDone = (e: any) => console.log('Tip completed', e.detail)
+  window.addEventListener('icpay-sdk-transaction-completed', onDone)
+  onBeforeUnmount(() => window.removeEventListener('icpay-sdk-transaction-completed', onDone))
+})
+</script>
+
+<template>
+  <icpay-tip-jar ref="tip" />
+</template>
+```
+
+```ts {{ title: 'Angular' }}
+import { Component, ElementRef, ViewChild, AfterViewInit, OnDestroy } from '@angular/core'
+import '@ic-pay/icpay-widget'
+
+@Component({ selector: 'app-root', template: `<icpay-tip-jar #tip></icpay-tip-jar>` })
+export class AppComponent implements AfterViewInit, OnDestroy {
+  @ViewChild('tip', { static: true }) tip!: ElementRef<any>
+  private onDone = (e: any) => console.log('Tip completed', e.detail)
+
+  ngAfterViewInit() {
+    this.tip.nativeElement.config = {
+      publishableKey: (window as any).env?.ICPAY_PK || 'pk_test_xxx',
+      amountsUsd: [1,5,10],
+      defaultAmountUsd: 5,
+    }
+    window.addEventListener('icpay-sdk-transaction-completed', this.onDone)
+  }
+
+  ngOnDestroy() {
+    window.removeEventListener('icpay-sdk-transaction-completed', this.onDone)
+  }
+}
+```
+
+```html {{ title: 'No framework' }}
+<script type="module">
+  import '@ic-pay/icpay-widget'
+  // Or bundle via your build tool
+</script>
+
+<icpay-tip-jar id="tip"></icpay-tip-jar>
+<script>
+  const el = document.getElementById('tip')
+  el.config = {
+    publishableKey: 'pk_test_xxx',
+    amountsUsd: [1,5,10],
+    defaultAmountUsd: 5,
+  }
+  window.addEventListener('icpay-sdk-transaction-completed', (e) => {
+    console.log('Tip completed', e.detail)
+  })
+</script>
+```
+
+</CodeGroup>

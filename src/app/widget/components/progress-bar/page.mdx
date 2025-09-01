@@ -1,0 +1,89 @@
+export const metadata = {
+  title: 'Progress Bar',
+  description: 'Built-in progress indicator for widget flows with configurable modes.',
+}
+
+export const sections = [
+  { title: 'Usage', id: 'usage' },
+  { title: 'Configuration', id: 'configuration' },
+]
+
+# Progress Bar
+
+Every widget can render a progress indicator and it is turned on by default. You can choose the visual mode and toggle it per widget via the `progressBar` option.
+
+## Usage
+
+<CodeGroup title="Progress Bar">
+
+```tsx {{ title: 'Next.js' }}
+'use client'
+import { useEffect, useRef } from 'react'
+import '@ic-pay/icpay-widget'
+export default function Page() {
+  const ref = useRef<any>(null)
+  useEffect(() => {
+    if (!ref.current) return
+    ref.current.config = {
+      publishableKey: process.env.NEXT_PUBLIC_ICPAY_PK,
+      progressBar: { enabled: true, mode: 'modal' },
+    }
+  }, [])
+  return <icpay-tip-jar ref={ref as any} />
+}
+```
+
+```vue {{ title: 'Vue.js' }}
+<script setup lang="ts">
+import { onMounted, ref } from 'vue'
+import '@ic-pay/icpay-widget'
+const el = ref<any>(null)
+onMounted(() => {
+  if (!el.value) return
+  el.value.config = {
+    publishableKey: import.meta.env.VITE_ICPAY_PK,
+    progressBar: { enabled: true, mode: 'horizontal' },
+  }
+})
+</script>
+<template>
+  <icpay-tip-jar ref="el" />
+</template>
+```
+
+```ts {{ title: 'Angular' }}
+import { Component, ElementRef, ViewChild, AfterViewInit } from '@angular/core'
+import '@ic-pay/icpay-widget'
+@Component({ selector: 'app-root', template: `<icpay-tip-jar #el></icpay-tip-jar>` })
+export class AppComponent implements AfterViewInit {
+  @ViewChild('el', { static: true }) el!: ElementRef<any>
+  ngAfterViewInit() {
+    this.el.nativeElement.config = {
+      publishableKey: (window as any).env?.ICPAY_PK || 'pk_test_xxx',
+      progressBar: { enabled: true, mode: 'vertical' },
+    }
+  }
+}
+```
+
+```html {{ title: 'No framework' }}
+<script type="module">import '@ic-pay/icpay-widget'</script>
+<icpay-tip-jar id="el"></icpay-tip-jar>
+<script>
+  el.config = {
+    publishableKey: 'pk_test_xxx',
+    progressBar: { enabled: true, mode: 'inline' },
+  }
+</script>
+```
+
+</CodeGroup>
+
+## Configuration
+
+- `progressBar.enabled?: boolean` default true
+- `progressBar.mode?: 'modal' | 'horizontal' | 'vertical' | 'inline'`
+
+Tip: Style preferences can be combined with `theme` (e.g., `primaryColor`) on each widget. Other widgets can link here to centralize progress bar options.
+
+

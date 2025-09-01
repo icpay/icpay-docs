@@ -1,0 +1,51 @@
+export const metadata = {
+  title: 'ICPay SDK Overview',
+  description:
+    'Understand the two modes of the ICPay SDK: public (frontend) with publishable key and private (server) with secret key.',
+}
+
+export const sections = [
+  { title: 'What is the SDK?', id: 'what-is-the-sdk' },
+  { title: 'Public SDK (frontend)', id: 'public-sdk' },
+  { title: 'Private SDK (server)', id: 'private-sdk' },
+  { title: 'When to use which', id: 'when-to-use-which' },
+]
+
+# ICPay SDK Overview
+
+The ICPay SDK ships as a single package that supports two usage modes. Use the public SDK on the frontend with your Publishable Key; use the private SDK on the server with your Secret Key. {{ className: 'lead' }}
+
+## What is the SDK?
+
+- One npm package: `@ic-pay/icpay-sdk`.
+- Public methods are safe for client apps and do not require your Secret Key.
+- Private methods live under `icpay.protected.*` and require your Secret Key; they must only be used server-side.
+
+## Public SDK (frontend)
+
+- Initialize with `publishableKey`.
+- Typical tasks: get verified ledgers, resolve canister IDs, price calculation, and initiate payments from the user’s wallet via `sendFunds`/`sendFundsUsd` (requires wallet + actor provider).
+- See: [Public SDK guide](/sdk)
+
+## Private SDK (server)
+
+- Initialize with `secretKey`.
+- Typical tasks: account details, payment history, transactions, ledgers with prices for your account, webhook event lookups, etc.
+- Exposed via `icpay.protected.*` methods.
+- See: [Private SDK (server)](/sdk-secret)
+
+## When to use which
+
+- Use the Public SDK in browsers to let users pay from their own wallets. Never embed the Secret Key in client apps.
+- Use the Private SDK on your server or serverless functions to manage your account data securely with the Secret Key.
+
+<div className="not-prose">
+  <Button href="/sdk" variant="text" arrow="right">
+    <>Go to Public SDK</>
+  </Button>
+  <Button href="/sdk-secret" variant="text" arrow="right" className="ml-2">
+    <>Go to Private SDK</>
+  </Button>
+</div>
+
+

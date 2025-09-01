@@ -1,0 +1,109 @@
+export const metadata = {
+  title: 'Article Paywall',
+  description: 'Gate an article with preview/locked content and unlock on payment.',
+}
+
+export const sections = [
+  { title: 'Usage', id: 'usage' },
+  { title: 'Configuration', id: 'configuration' },
+]
+
+# Article Paywall
+
+## Usage
+
+<CodeGroup title="Article Paywall">
+
+```tsx {{ title: 'Next.js' }}
+'use client'
+import { useEffect, useRef } from 'react'
+import '@ic-pay/icpay-widget'
+
+export default function Page() {
+  const ref = useRef<any>(null)
+  useEffect(() => {
+    if (!ref.current) return
+    ref.current.config = {
+      publishableKey: process.env.NEXT_PUBLIC_ICPAY_PK,
+      priceUsd: 2,
+      title: 'Premium Article',
+      preview: 'This is a short preview...',
+      lockedContent: 'Full content goes here...',
+      theme: { primaryColor: '#0ea5e9' },
+      progressBar: { enabled: true, mode: 'modal' },
+    }
+  }, [])
+  return <icpay-article-paywall ref={ref as any} />
+}
+```
+
+```vue {{ title: 'Vue.js' }}
+<script setup lang="ts">
+import { onMounted, ref } from 'vue'
+import '@ic-pay/icpay-widget'
+const el = ref<any>(null)
+onMounted(() => {
+  if (!el.value) return
+  el.value.config = {
+    publishableKey: import.meta.env.VITE_ICPAY_PK,
+    priceUsd: 2,
+    title: 'Premium Article',
+    preview: 'This is a short preview...',
+    lockedContent: 'Full content goes here...',
+    theme: { primaryColor: '#0ea5e9' },
+    progressBar: { enabled: true, mode: 'modal' },
+  }
+})
+</script>
+<template>
+  <icpay-article-paywall ref="el" />
+</template>
+```
+
+```ts {{ title: 'Angular' }}
+import { Component, ElementRef, ViewChild, AfterViewInit } from '@angular/core'
+import '@ic-pay/icpay-widget'
+@Component({ selector: 'app-root', template: `<icpay-article-paywall #el></icpay-article-paywall>` })
+export class AppComponent implements AfterViewInit {
+  @ViewChild('el', { static: true }) el!: ElementRef<any>
+  ngAfterViewInit() {
+    this.el.nativeElement.config = {
+      publishableKey: (window as any).env?.ICPAY_PK || 'pk_test_xxx',
+      priceUsd: 2,
+      title: 'Premium Article',
+      preview: 'This is a short preview...',
+      lockedContent: 'Full content goes here...',
+      theme: { primaryColor: '#0ea5e9' },
+      progressBar: { enabled: true, mode: 'modal' },
+    }
+  }
+}
+```
+
+```html {{ title: 'No framework' }}
+<script type="module">import '@ic-pay/icpay-widget'</script>
+<icpay-article-paywall id="el"></icpay-article-paywall>
+<script>
+  el.config = {
+    publishableKey: 'pk_test_xxx',
+    priceUsd: 2,
+    title: 'Premium Article',
+    preview: 'This is a short preview...',
+    lockedContent: 'Full content goes here...',
+    theme: { primaryColor: '#0ea5e9' },
+    progressBar: { enabled: true, mode: 'modal' },
+  }
+</script>
+```
+
+</CodeGroup>
+
+## Configuration
+
+- `priceUsd: number`
+- `title?: string`
+- `preview?: string`
+- `lockedContent?: string`
+- `theme?`, `progressBar?` as in other widgets — see [Progress Bar](/widget/components/progress-bar).
+
+

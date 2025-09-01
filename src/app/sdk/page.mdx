@@ -1,0 +1,207 @@
+export const metadata = {
+  title: 'SDK',
+  description:
+    'Developer SDK for integrating ICPay into web apps and servers. Install, configure, create payments, subscribe to events, and handle errors.',
+}
+
+export const sections = [
+  { title: 'Intro', id: 'intro' },
+  { title: 'Get your keys', id: 'get-your-keys' },
+  { title: 'Quickstart', id: 'quickstart' },
+  { title: 'Create a payment', id: 'create-a-payment' },
+  { title: 'Configuration', id: 'configuration' },
+  { title: 'Secret key access (server)', id: 'secret-key-access-server' },
+  { title: 'Events', id: 'events' },
+]
+
+# SDK
+
+The ICPay SDK provides a typed API for payments on the Internet Computer. It supports public client-side operations with a publishable key and private server-side operations with a secret key. {{ className: 'lead' }}
+
+## Intro
+
+- Public operations: fetch account info, verified ledgers, pricing, start payments from a connected wallet.
+- Private operations: account details, payment history, transactions. Use only on servers with your secret key.
+
+{/* Install moved to /sdk-install */}
+
+## Get your keys
+
+Create an account in the [icpay.org dashboard](/icpay-org) to obtain your Publishable Key (client) and Secret Key (server). Keep your Secret Key private.
+
+## Quickstart
+
+Initialize the SDK with your publishable key on the client. Only when using `sendFunds` or `sendFundsUsd`, you must provide an `actorProvider` and a connected wallet.
+
+```ts {{ title: 'Client setup (TypeScript)' }}
+import { Icpay, IcpayError } from '@ic-pay/icpay-sdk'
+
+const icpay = new Icpay({
+  publishableKey: process.env.NEXT_PUBLIC_ICPAY_PK!,
+
+  // actorProvider + connected wallet are required only when calling
+  // sendFunds or sendFundsUsd (e.g. Plug, Internet Identity, Oisy)
+})
+
+try {
+  // Add your code here
+} catch (e) {
+  if (e instanceof IcpayError) {
+    // Handle gracefully
+  }
+}
+```
+
+## Create a payment
+
+There are two common ways to pay: fixed token amount or USD amount automatically converted to tokens.
+
+```ts {{ title: 'Send fixed token amount' }}
+import { Icpay } from '@ic-pay/icpay-sdk'
+
+const icpay = new Icpay({
+  publishableKey: process.env.NEXT_PUBLIC_ICPAY_PK!,
+  actorProvider: (canisterId, idl) => /* return agent-js actor from your wallet */ (window as any).pnp.getActor(),
+  connectedWallet: { owner: '<principal-id>' },
+})
+
+const ledgers = await icpay.getVerifiedLedgers()
+const icpLedger = ledgers.find(l => l.symbol === 'ICP')!
+let ledgerCanisterId = icpLedger.canisterId
+// or
+// ledgerCanisterId = await icpay.getLedgerCanisterIdBySymbol('ICP')
+
+const tx = await icpay.sendFunds({
+  ledgerCanisterId, // ICP ledger or any ICRC ledger
+  amount: '150000000', // smallest unit (e.g. 1.5 ICP with 8 decimals)
+  metadata: { myProductId: '511234', myOrderId: '511234', anyInternalField: 'allowed' },
+})
+```
+
+```ts {{ title: 'Send by USD amount (auto conversion)' }}
+const res = await icpay.sendFundsUsd({
+  usdAmount: 5,
+  ledgerCanisterId,
+  metadata: { context: 'tip-jar', myProductId: '511234', myOrderId: '511234', anyInternalField: 'allowed' },
+})
+```
+
+Events are emitted throughout the flow when `enableEvents` is true. See Events section below.
+
+## Configuration
+
+`IcpayConfig` options:
+
+- `publishableKey` (string): Public key for client operations.
+- `secretKey` (string): Server-only key for private endpoints.
+- `environment` ('development' | 'production'): Default 'production'.
+- `apiUrl` (string): Default `https://api.icpay.org`.
+- `connectedWallet` (object): Connected wallet/principal for signing.
+- `icHost` (string): IC network host for agent-js. Default `https://ic0.app`.
+- `actorProvider` (fn): `(canisterId, idl) => Actor` used to sign ICRC transfers.
+- `debug` (boolean): Verbose logging in SDK internals.
+- `enableEvents` (boolean): Emit SDK lifecycle events.
+- `awaitServerNotification` (boolean): Await server-side notify step in `sendFunds` and `sendFundsUsd`.
+
+Price helpers and ledger info:
+
+```ts
+// Get list of Verified Ledgers
+const ledgers = await icpay.getVerifiedLedgers()
+// Get Ledger Canister Id by Symbol string. eg. ckUSDC or ICP
+const bySymbol = await icpay.getLedgerCanisterIdBySymbol('ICP')
+// Get all information (eg. decimals, current price, ...) about a ledger by passing a Ledger Canister Id (eg. ICP ledger id is 'ryjl3-tyaaa-aaaaa-aaaba-cai')
+const info = await icpay.getLedgerInfo('ryjl3-tyaaa-aaaaa-aaaba-cai')
+// Fetch all ledgers with current price for 1 token unit
+const priced = await icpay.getAllLedgersWithPrices()
+// Get number of token that is needed for a fixed price in USD
+const calc = await icpay.calculateTokenAmountFromUSD({ usdAmount: 10, ledgerCanisterId: info.canisterId })
+```
+
+## Events
+
+Enable with `enableEvents: true`. Subscribe via `on` or standard `addEventListener`.
+
+Event names:
+
+- `icpay-sdk-error`
+- `icpay-sdk-transaction-created`
+- `icpay-sdk-transaction-updated`
+- `icpay-sdk-transaction-completed`
+- `icpay-sdk-transaction-failed`
+- `icpay-sdk-connect-wallet`
+- `icpay-sdk-method-start`
+- `icpay-sdk-method-success`
+- `icpay-sdk-method-error`
+
+```ts
+const unsubscribe = icpay.on('icpay-sdk-transaction-completed', (detail) => {
+  // e.g., show success toast, update UI
+})
+
+// Later
+unsubscribe()
+```
+
+## Types reference (payments)
+
+Payment objects now include split-aware fields when applicable:
+
+```ts
+type SdkPayment = {
+  id: string
+  accountId: string
+  paymentIntentId: string
+  transactionId: string | null
+  transactionSplitId?: string | null
+  canisterTxId: number | null
+  amount: string
+  ledgerCanisterId: string
+  ledgerTxId?: string | null
+  accountCanisterId?: number | null
+  basePaymentAccountId?: string | null
+  status: 'pending' | 'completed' | 'failed' | 'canceled' | 'refunded'
+  invoiceId: string | null
+  metadata: Record<string, unknown>
+  createdAt: string
+  updatedAt: string
+}
+```
+
+Public responses (publishable key) expose the same fields via `PaymentPublic` where returned.
+
+Alternatively, DOM-style listeners:
+
+```ts
+const onCompleted = (evt: any) => {
+  const detail = evt && typeof evt === 'object' ? (evt as any).detail ?? evt : evt
+  // e.g., show success toast, update UI
+}
+
+icpay.addEventListener('icpay-sdk-transaction-completed', onCompleted)
+
+// Later
+icpay.removeEventListener('icpay-sdk-transaction-completed', onCompleted)
+```
+
+### Event reference
+
+| Event | When it fires | Payload (shape) |
+|---|---|---|
+| `icpay-sdk-error` | Any SDK error is emitted (if `enableEvents` is true) | `IcpayError` instance (`code`, `message`, `details?`, `retryable?`, `userAction?`) |
+| `icpay-sdk-transaction-created` | After creating a payment intent before transfer | `{ paymentIntentId, amount, ledgerCanisterId, expectedSenderPrincipal }` |
+| `icpay-sdk-transaction-updated` | While polling/awaiting status; intermediate updates | `TransactionResponse`-like: `{ transactionId, status, amount, recipientCanister, timestamp, description?, metadata?, payment? }` |
+| `icpay-sdk-transaction-completed` | When the transaction reaches completed | Same as above (final status `completed`) |
+| `icpay-sdk-transaction-failed` | When the transaction reaches failed | Same as above (final status `failed`) |
+| `icpay-sdk-connect-wallet` | When a connect-wallet flow is surfaced (if used by integrator) | Implementation-defined (string/provider or structured data) |
+| `icpay-sdk-method-start` | At the start of an SDK method | `{ name: string, args?: any }` |
+| `icpay-sdk-method-success` | On successful method completion | `{ name: string, result?: any }` |
+| `icpay-sdk-method-error` | On method-level error (plus `icpay-sdk-error`) | `{ name: string, error: any }` |
+
+<div className="not-prose">
+  <Button href="/widget" arrow="right" variant="text">
+    <>Use the web components widget</>
+  </Button>
+</div>
+
+

@@ -142,9 +142,11 @@ function CodePanel({
   label?: string
   code?: string
 }) {
-  let child = Children.only(children)
+  // Normalize to a single child; tolerate stray whitespace/text nodes
+  const childArray = Children.toArray(children).filter(Boolean)
+  let child = (childArray && childArray.length > 0 ? childArray[0] : null) as any
 
-  if (isValidElement(child)) {
+  if (child && isValidElement(child)) {
     const props = child.props as { tag?: string; label?: string; code?: string }
     tag = props.tag ?? tag
     label = props.label ?? label
