@@ -19,7 +19,7 @@ The Pay Button component renders a compact, single-action checkout button for a 
 ```tsx {{ title: 'Next.js' }}
 'use client'
 import { useEffect, useRef } from 'react'
-import '@ic-pay/widget'
+import '@ic-pay/icpay-widget'
 
 export default function Page() {
   const ref = useRef<any>(null)
@@ -41,7 +41,7 @@ export default function Page() {
 ```vue {{ title: 'Vue.js' }}
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
-import '@ic-pay/widget'
+import '@ic-pay/icpay-widget'
 const el = ref<any>(null)
 onMounted(() => {
   if (!el.value) return
@@ -60,7 +60,7 @@ onMounted(() => {
 
 ```ts {{ title: 'Angular' }}
 import { Component, ElementRef, ViewChild, AfterViewInit } from '@angular/core'
-import '@ic-pay/widget'
+import '@ic-pay/icpay-widget'
 @Component({ selector: 'app-root', template: `<icpay-pay-button #el></icpay-pay-button>` })
 export class AppComponent implements AfterViewInit {
   @ViewChild('el', { static: true }) el!: ElementRef<any>
@@ -76,7 +76,7 @@ export class AppComponent implements AfterViewInit {
 }
 
 ```html {{ title: 'No framework' }}
-<script type="module">import '@ic-pay/widget'</script>
+<script type="module">import '@ic-pay/icpay-widget'</script>
 <icpay-pay-button id="el"></icpay-pay-button>
 <script>
   el.config = {

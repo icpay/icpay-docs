@@ -14,17 +14,17 @@ export const sections = [
 
 ### If you're using pnpm
 ```bash
-pnpm add @ic-pay/widget @ic-pay/icpay-sdk
+pnpm add @ic-pay/icpay-widget @ic-pay/icpay-sdk
 ```
 
 ### If you're using npm
 ```bash
-npm install @ic-pay/widget @ic-pay/icpay-sdk
+npm install @ic-pay/icpay-widget @ic-pay/icpay-sdk
 ```
 
 ### If you're using yarn
 ```bash
-yarn add @ic-pay/widget @ic-pay/icpay-sdk
+yarn add @ic-pay/icpay-widget @ic-pay/icpay-sdk
 ```
 
 ## Examples
@@ -34,7 +34,7 @@ yarn add @ic-pay/widget @ic-pay/icpay-sdk
 ```tsx {{ title: 'Next.js' }}
 'use client'
 import { useEffect, useRef } from 'react'
-import '@ic-pay/widget'
+import '@ic-pay/icpay-widget'
 
 export default function Page() {
   const ref = useRef<any>(null)
@@ -56,7 +56,7 @@ export default function Page() {
 ```vue {{ title: 'Vue.js' }}
 <script setup lang="ts">
 import { onMounted, ref, onBeforeUnmount } from 'vue'
-import '@ic-pay/widget'
+import '@ic-pay/icpay-widget'
 
 const tip = ref<any>(null)
 
@@ -80,7 +80,7 @@ onMounted(() => {
 
 ```ts {{ title: 'Angular' }}
 import { Component, ElementRef, ViewChild, AfterViewInit, OnDestroy } from '@angular/core'
-import '@ic-pay/widget'
+import '@ic-pay/icpay-widget'
 
 @Component({ selector: 'app-root', template: `<icpay-tip-jar #tip></icpay-tip-jar>` })
 export class AppComponent implements AfterViewInit, OnDestroy {
@@ -104,7 +104,7 @@ export class AppComponent implements AfterViewInit, OnDestroy {
 
 ```html {{ title: 'No framework' }}
 <script type="module">
-  import '@ic-pay/widget'
+  import '@ic-pay/icpay-widget'
   // Or bundle via your build tool
 </script>
 
