@@ -1,43 +1,55 @@
 import { Guides } from '@/components/Guides'
-import { Resources } from '@/components/Resources'
+import { Widgets } from '@/components/Widgets'
 import { HeroPattern } from '@/components/HeroPattern'
 
 export const metadata = {
-  title: 'API Documentation',
+  title: 'ICPay SDK & Widget Documentation',
   description:
-    'Learn everything there is to know about the icpay API and integrate icpay into your product.',
+    'Use the ICPay SDK to accept payments from users wallets and manage your account operations. Choose between our Public SDK for frontend payment flows, Private SDK for server-side account management, or Widget Components for quick payment UI integration.',
 }
 
 export const sections = [
   { title: 'Guides', id: 'guides' },
-  { title: 'Resources', id: 'resources' },
+  { title: 'Widget Components', id: 'widgets' },
 ]
 
 <HeroPattern />
 
-# API Documentation
+# Welcome to ICPay Docs
 
-Use the icpay API to access contacts, conversations, group messages, and more and seamlessly integrate your product into the workflows of dozens of devoted icpay users. {{ className: 'lead' }}
+Use the ICPay SDK to accept payments from users' wallets and manage your account operations. Choose between our Public SDK for frontend payment flows, Private SDK for server-side account management, or Widget Components for quick payment UI integration. {{ className: 'lead' }}
 
 <div className="not-prose mt-6 mb-16 flex gap-3">
-  <Button href="/quickstart" arrow="right">
-    <>Quickstart</>
+  <Button href="/sdk" arrow="right">
+    <>Get Started</>
   </Button>
-  <Button href="/sdks" variant="outline">
-    <>Explore SDKs</>
+  <Button href="/widget" variant="outline">
+    <>Explore Widgets</>
   </Button>
 </div>
 
 ## Getting started {{ anchor: false }}
 
-To get started, create a new application in your [developer settings](#), then read about how to make requests for the resources you need to access using our HTTP APIs or dedicated client SDKs. When your integration is ready to go live, publish it to our [integrations directory](#) to reach the icpay community. {{ className: 'lead' }}
+The ICPay SDK ships as a single package that supports two usage modes. Use the public SDK on the frontend with your Publishable Key; use the private SDK on the server with your Secret Key. {{ className: 'lead' }}
+
+**Public SDK (frontend)**: Initialize with `publishableKey` for typical tasks like getting verified ledgers, resolving canister IDs, price calculation, and initiating payments from the user's wallet via `sendFunds`/`sendFundsUsd`.
+
+**Private SDK (server)**: Initialize with `secretKey` for account details, payment history, transactions, ledgers with prices for your account, webhook event lookups, and other server-side operations.
+
+**Widget Components**: For quick payment UI integration, use our framework-agnostic Web Components that let you accept payments without building UI flows from scratch. Perfect for tips, premium content, donation thermometers, and shop items.
 
 <div className="not-prose">
-  <Button href="/sdks" variant="text" arrow="right">
-    <>Get your API key</>
+  <Button href="/sdk" variant="text" arrow="right">
+    <>Public SDK Guide</>
+  </Button>
+  <Button href="/sdk-secret" variant="text" arrow="right" className="ml-2">
+    <>Private SDK Guide</>
+  </Button>
+  <Button href="/widget" variant="text" arrow="right" className="ml-2">
+    <>Widget Components</>
   </Button>
 </div>
 
 <Guides />
 
-<Resources />
+<Widgets />
