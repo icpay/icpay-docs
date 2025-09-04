@@ -104,6 +104,11 @@ export class AppComponent implements AfterViewInit {
 - `title?: string`
 - `preview?: string`
 - `lockedContent?: string`
-- `theme?`, `progressBar?` as in other widgets — see [Progress Bar](/widget/components/progress-bar).
+- `cryptoOptions?: { symbol: string; label: string; canisterId?: string }[]`
+- `defaultSymbol?: string`
+- `buttonLabel?: string` (supports `{amount}` and `{symbol}` placeholders)
+- `onSuccess?: (tx) => void`
+- Token selector: use global `showLedgerDropdown?: 'buttons' | 'dropdown' | 'none'`
+- Common options: `progressBar?`, `theme?`, `useOwnWallet?`, `plugNPlay?`, `debug?`, `disablePaymentButton?`, `disableAfterSuccess?`
 
 

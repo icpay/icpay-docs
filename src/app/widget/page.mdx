@@ -211,6 +211,9 @@ export class AppComponent implements AfterViewInit {
 - `useOwnWallet`: set to true to manage wallet connection yourself; provide `actorProvider` + `connectedWallet`.
 - `plugNPlay`: theme and provider toggles for built-in wallet UX.
 - `progressBar`: choose `modal | horizontal | vertical | inline` progress UI.
+- `showLedgerDropdown`: global token selector control across widgets — `'buttons' | 'dropdown' | 'none'`.
+- `debug`: enable verbose console logging in widget and SDK.
+- `disablePaymentButton` / `disableAfterSuccess`: disable the pay button immediately, or after a success.
 
 <CodeGroup title="Advanced configuration examples">
 
@@ -322,18 +325,29 @@ Secret keys are never used in the widget. If you need server-only data (history,
 
 ## Options reference
 
-Common widget config (subset):
+Common widget config (full):
 
 - `publishableKey` (string) — required
-- `apiUrl?`, `icHost?`, `actorProvider?`, `connectedWallet?`
-- `plugNPlay?` `{ enabled, providers, theme }`
-- `progressBar?` `{ enabled, mode }`
-- Component-specific:
-  - premium-content: `priceUsd`, `cryptoOptions`, `onSuccess(tx)`
-  - tip-jar: `amountsUsd`, `defaultAmountUsd`, `cryptoOptions`, `onSuccess(tx)`
-  - article-paywall: `priceUsd`, `title`, `preview`, `lockedContent`
-  - coffee-shop: `items[{ name, priceUsd }]`, `defaultItemIndex`, `onSuccess(tx)`
-  - donation-thermometer: `goalUsd`, `defaultAmountUsd`, `amountsUsd`, `onSuccess(tx)`
+- `apiUrl?`, `icHost?`
+- `actorProvider?`, `connectedWallet?`, `useOwnWallet?`
+- `plugNPlay?`
+  - `enabled?`
+  - `providers?` `{ internetIdentity?: boolean; oisy?: boolean; plug?: boolean }`
+  - `theme?` `{ modalBackground?, modalBorderRadius?, buttonBackground?, buttonHoverBackground?, textColor?, primaryColor? }`
+- `theme?`
+  - `{ primaryColor?, secondaryColor?, accentColor?, textColor?, mutedTextColor?, surfaceColor?, surfaceAltColor?, borderColor?, fontFamily? }`
+- `debug?` (boolean)
+- `progressBar?` `{ enabled?: boolean, mode?: 'modal' | 'horizontal' | 'vertical' | 'inline' }`
+- `disablePaymentButton?` (boolean)
+- `disableAfterSuccess?` (boolean)
+- `showLedgerDropdown?` `'buttons' | 'dropdown' | 'none'` — global token selector behavior
+
+Component-specific (highlights):
+  - premium-content: `priceUsd`, `imageUrl?`, `cryptoOptions?`, `defaultSymbol?`, `buttonLabel?`, `onSuccess(tx)`
+  - tip-jar: `amountsUsd?`, `defaultAmountUsd?`, `cryptoOptions?`, `defaultSymbol?`, `buttonLabel?`, `onSuccess(tx)`
+  - article-paywall: `priceUsd`, `title?`, `preview?`, `lockedContent?`, `cryptoOptions?`, `defaultSymbol?`, `buttonLabel?`, `onSuccess(tx)`
+  - coffee-shop: `items[{ name, priceUsd }]`, `defaultItemIndex?`, `cryptoOptions?`, `defaultSymbol?`, `buttonLabel?`, `onSuccess(tx)`
+  - donation-thermometer: `goalUsd`, `defaultAmountUsd?`, `amountsUsd?`, `cryptoOptions?`, `defaultSymbol?`, `buttonLabel?`, `onSuccess(tx)`
 
 Link SDK options that also apply: [SDK configuration](/sdk#configuration).
 

@@ -101,14 +101,18 @@ export class AppComponent implements AfterViewInit {
 
 - `amountUsd?: number`
 - `cryptoOptions?: { symbol: string; label: string; canisterId?: string }[]`
-- `showLedgerDropdown?: boolean` (default: false)
+- Token selector:
+  - Per-component legacy: `showLedgerDropdown?: boolean` (default: false)
+  - Global (recommended): `showLedgerDropdown?: 'buttons' | 'dropdown' | 'none'`
 - `defaultSymbol?: string` (e.g., `'ICP'`)
 - `buttonLabel?: string` (used if `amountUsd` not set)
 - `progressBar?: { enabled?: boolean; mode?: 'modal' | 'horizontal' | 'vertical' | 'inline' }`
 
 Notes:
-- When `showLedgerDropdown` is false, the button uses `defaultSymbol` and displays it (e.g., "Pay $49.99 with ICP").
-- When `showLedgerDropdown` is true, the button shows generic brand text (e.g., "Pay $49.99 with ICPay").
+- With the global `showLedgerDropdown` string:
+  - `'buttons'` shows selector chips when multiple ledgers are available; hides selector if only one.
+  - `'dropdown'` always shows a dropdown.
+  - `'none'` hides the selector and uses `defaultSymbol`.
 - For non-modal progress modes, the bar appears only during processing.
 
 
