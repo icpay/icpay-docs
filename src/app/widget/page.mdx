@@ -14,6 +14,7 @@ export const sections = [
   { title: 'Options reference', id: 'options-reference' },
   { title: 'Widget errors', id: 'widget-errors' },
   { title: 'Events', id: 'events' },
+  { title: 'Onramp (Transak)', id: 'onramp' },
 ]
 
 # Widget
@@ -341,6 +342,7 @@ Common widget config (full):
 - `disablePaymentButton?` (boolean)
 - `disableAfterSuccess?` (boolean)
 - `showLedgerDropdown?` `'buttons' | 'dropdown' | 'none'` — global token selector behavior
+ - `onramp?` `{ environment?: 'STAGING' | 'PRODUCTION'; apiKey?: string | null; width?: number|string; height?: number|string; autoOpen?: boolean; creditCardLabel?: string }`
 
 Component-specific (highlights):
   - premium-content: `priceUsd`, `imageUrl?`, `cryptoOptions?`, `defaultSymbol?`, `buttonLabel?`, `onSuccess(tx)`
@@ -377,6 +379,16 @@ window.addEventListener('icpay-sdk-transaction-completed', (e) => { /* ... */ })
 ```
 
 For the full list of event names and payloads, see [SDK events](/sdk#events).
+
+## Onramp (Transak)
+
+All widgets expose a “Pay with credit card” action when `config.onramp` is set. The onramp flow:
+
+1) Creates an ICPay payment intent flagged as `onramp_ic` and returns Transak `sessionId`.
+2) Opens Transak and listens for `TRANSAK_ORDER_SUCCESSFUL` from the iframe.
+3) Closes the Transak modal on success and begins notifying ICPay until completion.
+
+The progress bar updates the first step label to “Transak Started” with tooltip “Awaiting Transak information” during onramp.
 
 <div className="not-prose">
   <Button href="/ledgers" arrow="right" variant="text">

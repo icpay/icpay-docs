@@ -6,6 +6,7 @@ export const metadata = {
 export const sections = [
   { title: 'Usage', id: 'usage' },
   { title: 'Configuration', id: 'configuration' },
+  { title: 'Onramp (Transak)', id: 'onramp' },
 ]
 
 # Donation Thermometer
@@ -107,5 +108,36 @@ export class AppComponent implements AfterViewInit {
 - `onSuccess?: (tx) => void`
 - Token selector: use global `showLedgerDropdown?: 'buttons' | 'dropdown' | 'none'`
 - Common options: `progressBar?`, `theme?`, `useOwnWallet?`, `plugNPlay?`, `debug?`, `disablePaymentButton?`, `disableAfterSuccess?`
+
+## Onramp (Transak)
+
+Accept card donations by enabling Transak onramp. The widget opens Transak and continues automatically on success.
+
+```tsx
+'use client'
+import { useEffect, useRef } from 'react'
+import '@ic-pay/icpay-widget'
+
+export default function Page() {
+  const ref = useRef<any>(null)
+  useEffect(() => {
+    if (!ref.current) return
+    ref.current.config = {
+      publishableKey: process.env.NEXT_PUBLIC_ICPAY_PK,
+      goalUsd: 100,
+      defaultAmountUsd: 10,
+      onramp: {
+        environment: 'STAGING',
+        apiKey: process.env.NEXT_PUBLIC_TRANSAK_PK,
+        creditCardLabel: 'Pay with credit card',
+      },
+      progressBar: { enabled: true, mode: 'modal' },
+    }
+  }, [])
+  return <icpay-donation-thermometer ref={ref as any} />
+}
+```
+
+The progress bar’s first step reflects “Transak Started” during the onramp flow.
 
 

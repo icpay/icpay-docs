@@ -6,6 +6,7 @@ export const metadata = {
 export const sections = [
   { title: 'Usage', id: 'usage' },
   { title: 'Configuration', id: 'configuration' },
+  { title: 'Events', id: 'events' },
 ]
 
 # Progress Bar
@@ -86,4 +87,20 @@ export class AppComponent implements AfterViewInit {
 
 Tip: Style preferences can be combined with `theme` (e.g., `primaryColor`) on each widget. Other widgets can link here to centralize progress bar options.
 
+
+## Events
+
+The progress bar listens to SDK events and reflects state automatically:
+
+- `icpay-sdk-transaction-created`, `-updated`, `-completed`, `-failed`
+- `icpay-sdk-transaction-mismatched` — treated as error; shows message “Amount mismatch. Requested X, paid Y.”
+
+Example custom listener:
+
+```ts
+window.addEventListener('icpay-sdk-transaction-mismatched', (e: any) => {
+  const { requestedAmount, paidAmount } = e.detail || {}
+  console.warn('Payment amount mismatch', { requestedAmount, paidAmount })
+})
+```
 

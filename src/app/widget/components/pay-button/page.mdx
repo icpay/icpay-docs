@@ -6,6 +6,7 @@ export const metadata = {
 export const sections = [
   { title: 'Usage', id: 'usage' },
   { title: 'Configuration', id: 'configuration' },
+  { title: 'Onramp (Transak)', id: 'onramp' },
 ]
 
 # Pay Button
@@ -114,5 +115,39 @@ Notes:
   - `'dropdown'` always shows a dropdown.
   - `'none'` hides the selector and uses `defaultSymbol`.
 - For non-modal progress modes, the bar appears only during processing.
+
+## Onramp (Transak)
+
+Enable card onramp from the wallet selector by configuring `onramp` and handle the success event. The component will:
+
+- Create an onramp intent via the SDK (`sendFundsUsd` with `onrampPayment: true`).
+- Open Transak using the returned `sessionId`.
+- Close the Transak modal on `TRANSAK_ORDER_SUCCESSFUL` and start notifying ICPay until completion.
+
+```tsx
+'use client'
+import { useEffect, useRef } from 'react'
+import '@ic-pay/icpay-widget'
+
+export default function Page() {
+  const ref = useRef<any>(null)
+  useEffect(() => {
+    if (!ref.current) return
+    ref.current.config = {
+      publishableKey: process.env.NEXT_PUBLIC_ICPAY_PK,
+      amountUsd: 49.99,
+      onramp: {
+        environment: 'STAGING',
+        apiKey: process.env.NEXT_PUBLIC_TRANSAK_PK,
+        creditCardLabel: 'Pay with credit card',
+      },
+      progressBar: { enabled: true, mode: 'modal' },
+    }
+  }, [])
+  return <icpay-pay-button ref={ref as any} />
+}
+```
+
+The progress bar updates “wallet” to “Transak Started – Awaiting Transak information” during onramp.
 
 
