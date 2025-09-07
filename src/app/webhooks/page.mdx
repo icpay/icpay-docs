@@ -73,7 +73,7 @@ Deliveries use this canonical shape:
 }
 ```
 
-Example `payment.completed`:
+Example `payment.completed` (includes mismatch context when applicable). When a normal transaction has an amount mismatch, the payment status is `mismatched` and both amounts are present:
 
 ```json
 {
@@ -91,7 +91,9 @@ Example `payment.completed`:
       "ledgerCanisterId": "ryjl3-tyaaa-aaaaa-aaaba-cai",
       "ledgerTxId": "ltx_001",
       "accountCanisterId": 42,
-      "status": "completed",
+      "status": "mismatched",
+      "requestedAmount": "150000000",
+      "paidAmount": "140000000", // If the amounts match, `status` will be `completed`.
       "invoiceId": "inv_001",
       "metadata": {"orderId": "ORD-123"},
       "createdAt": "2025-01-01T12:00:00Z",

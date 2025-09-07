@@ -6,6 +6,7 @@ export const metadata = {
 export const sections = [
   { title: 'Usage', id: 'usage' },
   { title: 'Configuration', id: 'configuration' },
+  { title: 'Onramp (Transak)', id: 'onramp' },
 ]
 
 # Tip Jar
@@ -100,4 +101,34 @@ export class AppComponent implements AfterViewInit {
   - Per-component: `showLedgerDropdown?: boolean` (legacy) — if `true`, always render a dropdown.
   - Global: `showLedgerDropdown?: 'buttons' | 'dropdown' | 'none'` — recommended. If `'buttons'`, renders chips when multiple ledgers are available; `'dropdown'` forces dropdown; `'none'` hides selector.
 - Common options: `progressBar?`, `theme?`, `useOwnWallet?`, `plugNPlay?`, `debug?`, `disablePaymentButton?`, `disableAfterSuccess?`
-- `
+
+## Onramp (Transak)
+
+Enable card tips with Transak:
+
+```tsx
+'use client'
+import { useEffect, useRef } from 'react'
+import '@ic-pay/icpay-widget'
+
+export default function Page() {
+  const ref = useRef<any>(null)
+  useEffect(() => {
+    if (!ref.current) return
+    ref.current.config = {
+      publishableKey: process.env.NEXT_PUBLIC_ICPAY_PK,
+      amountsUsd: [1,5,10],
+      defaultAmountUsd: 5,
+      onramp: {
+        environment: 'STAGING',
+        apiKey: process.env.NEXT_PUBLIC_TRANSAK_PK,
+        creditCardLabel: 'Pay with credit card',
+      },
+      progressBar: { enabled: true, mode: 'modal' },
+    }
+  }, [])
+  return <icpay-tip-jar ref={ref as any} />
+}
+```
+
+The first step shows “Transak Started — Awaiting Transak information” during onramp.

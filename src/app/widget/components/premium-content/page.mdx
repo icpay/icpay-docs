@@ -6,6 +6,7 @@ export const metadata = {
 export const sections = [
   { title: 'Usage', id: 'usage' },
   { title: 'Configuration', id: 'configuration' },
+  { title: 'Onramp (Transak)', id: 'onramp' },
 ]
 
 # Premium Content
@@ -105,4 +106,34 @@ export class AppComponent implements AfterViewInit {
 - Token selector:
   - Global `showLedgerDropdown?: 'buttons' | 'dropdown' | 'none'` controls selector UI
 - Common options: `progressBar?`, `theme?`, `useOwnWallet?`, `plugNPlay?`, `debug?`, `disablePaymentButton?`, `disableAfterSuccess?`
+
+## Onramp (Transak)
+
+Offer card checkout for premium unlocks by setting `onramp`:
+
+```tsx
+'use client'
+import { useEffect, useRef } from 'react'
+import '@ic-pay/icpay-widget'
+
+export default function Page() {
+  const ref = useRef<any>(null)
+  useEffect(() => {
+    if (!ref.current) return
+    ref.current.config = {
+      publishableKey: process.env.NEXT_PUBLIC_ICPAY_PK,
+      priceUsd: 5,
+      onramp: {
+        environment: 'STAGING',
+        apiKey: process.env.NEXT_PUBLIC_TRANSAK_PK,
+        creditCardLabel: 'Pay with credit card',
+      },
+      progressBar: { enabled: true, mode: 'modal' },
+    }
+  }, [])
+  return <icpay-premium-content ref={ref as any} />
+}
+```
+
+On success, the Transak modal closes and the widget proceeds to confirmation and completion.
 

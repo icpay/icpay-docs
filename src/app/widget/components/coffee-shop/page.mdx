@@ -6,6 +6,7 @@ export const metadata = {
 export const sections = [
   { title: 'Usage', id: 'usage' },
   { title: 'Configuration', id: 'configuration' },
+  { title: 'Onramp (Transak)', id: 'onramp' },
 ]
 
 # Coffee Shop
@@ -102,3 +103,33 @@ export class AppComponent implements AfterViewInit {
 - `onSuccess?: (tx) => void`
 - Token selector: use global `showLedgerDropdown?: 'buttons' | 'dropdown' | 'none'`
 - Common options: `progressBar?`, `theme?`, `useOwnWallet?`, `plugNPlay?`, `debug?`, `disablePaymentButton?`, `disableAfterSuccess?`
+
+## Onramp (Transak)
+
+Let buyers pay by card using Transak. Add the `onramp` block to enable the “Pay with credit card” action.
+
+```tsx
+'use client'
+import { useEffect, useRef } from 'react'
+import '@ic-pay/icpay-widget'
+
+export default function Page() {
+  const ref = useRef<any>(null)
+  useEffect(() => {
+    if (!ref.current) return
+    ref.current.config = {
+      publishableKey: process.env.NEXT_PUBLIC_ICPAY_PK,
+      items: [{ name: 'Espresso', priceUsd: 3 }, { name: 'Latte', priceUsd: 5 }],
+      onramp: {
+        environment: 'STAGING',
+        apiKey: process.env.NEXT_PUBLIC_TRANSAK_PK,
+        creditCardLabel: 'Pay with credit card',
+      },
+      progressBar: { enabled: true, mode: 'modal' },
+    }
+  }, [])
+  return <icpay-coffee-shop ref={ref as any} />
+}
+```
+
+Progress updates match other widgets (wallet step set to “Transak Started”).

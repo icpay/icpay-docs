@@ -88,6 +88,41 @@ const res = await icpay.sendFundsUsd({
 
 Events are emitted throughout the flow when `enableEvents` is true. See Events section below.
 
+### Onramp (Transak)
+
+For card onramp, call USD payments with `onrampPayment: true`. The API will create a payment intent of type `onramp_ic` and respond with Transak session metadata. Open the Transak session in your app, and only when you receive `TRANSAK_ORDER_SUCCESSFUL` from Transak, begin notifying ICPay about the intent until completion.
+
+```ts {{ title: 'Start onramp and notify until completion' }}
+import { Icpay } from '@ic-pay/icpay-sdk'
+
+const icpay = new Icpay({ publishableKey: process.env.NEXT_PUBLIC_ICPAY_PK!, enableEvents: true })
+
+// 1) Create intent for onramp (no wallet needed)
+const ledgers = await icpay.getVerifiedLedgers()
+const icpLedger = ledgers.find(l => l.symbol === 'ICP')!
+const start = await icpay.sendFundsUsd({
+  usdAmount: 25,
+  ledgerCanisterId: icpLedger.canisterId,
+  metadata: { context: 'onramp' },
+  onrampPayment: true,
+})
+
+// Transak session id and intent id
+const sessionId = start?.metadata?.onramp?.sessionId || start?.metadata?.onramp?.session_id
+const paymentIntentId = start?.metadata?.paymentIntentId || start?.paymentIntentId
+
+// 2) Open Transak using sessionId and redirectUrl (see Transak docs). When you receive
+//    TRANSAK_ORDER_SUCCESSFUL from the Transak iframe, begin notifying:
+
+const controller = icpay.notifyPaymentIntentOnRamp({ paymentIntentId, intervalMs: 5000 })
+
+// Emits icpay-sdk-transaction-updated ONLY when status changes
+// Emits icpay-sdk-transaction-completed on final status
+
+// Optional: stop polling
+// controller.stop()
+```
+
 ## Configuration
 
 `IcpayConfig` options:
@@ -129,6 +164,7 @@ Event names:
 - `icpay-sdk-transaction-updated`
 - `icpay-sdk-transaction-completed`
 - `icpay-sdk-transaction-failed`
+- `icpay-sdk-transaction-mismatched`
 - `icpay-sdk-connect-wallet`
 - `icpay-sdk-method-start`
 - `icpay-sdk-method-success`
@@ -137,6 +173,10 @@ Event names:
 ```ts
 const unsubscribe = icpay.on('icpay-sdk-transaction-completed', (detail) => {
   // e.g., show success toast, update UI
+})
+
+icpay.on('icpay-sdk-transaction-mismatched', (detail) => {
+  // detail.requestedAmount, detail.paidAmount
 })
 
 // Later
@@ -160,7 +200,10 @@ type SdkPayment = {
   ledgerTxId?: string | null
   accountCanisterId?: number | null
   basePaymentAccountId?: string | null
-  status: 'pending' | 'completed' | 'failed' | 'canceled' | 'refunded'
+  status: 'pending' | 'completed' | 'failed' | 'canceled' | 'refunded' | 'mismatched'
+  // Optional clarity fields on webhook payloads and some responses
+  requestedAmount?: string | null // from payment_intent.amount
+  paidAmount?: string | null // from transaction.amount
   invoiceId: string | null
   metadata: Record<string, unknown>
   createdAt: string
@@ -192,7 +235,8 @@ icpay.removeEventListener('icpay-sdk-transaction-completed', onCompleted)
 | `icpay-sdk-transaction-created` | After creating a payment intent before transfer | `{ paymentIntentId, amount, ledgerCanisterId, expectedSenderPrincipal }` |
 | `icpay-sdk-transaction-updated` | While polling/awaiting status; intermediate updates | `TransactionResponse`-like: `{ transactionId, status, amount, recipientCanister, timestamp, description?, metadata?, payment? }` |
 | `icpay-sdk-transaction-completed` | When the transaction reaches completed | Same as above (final status `completed`) |
-| `icpay-sdk-transaction-failed` | When the transaction reaches failed | Same as above (final status `failed`) |
+| `icpay-sdk-transaction-failed` | When the transaction reaches failed | Same as above (final status `failed`). Also emitted when amounts mismatch. |
+| `icpay-sdk-transaction-mismatched` | When on-ledger paid amount differs from requested | `{ ...TransactionResponse, requestedAmount?: string, paidAmount?: string }` |
 | `icpay-sdk-connect-wallet` | When a connect-wallet flow is surfaced (if used by integrator) | Implementation-defined (string/provider or structured data) |
 | `icpay-sdk-method-start` | At the start of an SDK method | `{ name: string, args?: any }` |
 | `icpay-sdk-method-success` | On successful method completion | `{ name: string, result?: any }` |
