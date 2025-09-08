@@ -141,6 +141,8 @@ Notes:
 
 Add card onramp by configuring `onramp`. The widget will create an onramp intent (`onramp_ic`), open Transak, close on `TRANSAK_ORDER_SUCCESSFUL`, then notify ICPay until completion.
 
+- `onramp.enabled?: boolean` — enable/disable card payments in the wallet modal (default: enabled)
+
 ```tsx
 'use client'
 import { useEffect, useRef } from 'react'
@@ -158,6 +160,7 @@ export default function Page() {
         environment: 'STAGING',
         apiKey: process.env.NEXT_PUBLIC_TRANSAK_PK,
         creditCardLabel: 'Pay with credit card',
+        enabled: true,
       },
       progressBar: { enabled: true, mode: 'modal' },
     }
