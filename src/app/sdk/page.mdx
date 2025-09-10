@@ -65,6 +65,7 @@ const icpay = new Icpay({
   connectedWallet: { owner: '<principal-id>' },
 })
 
+// We can send either symbol or ledgerCanisterId field to the sendFunds and sendFundsUsd (symbol is preferred)
 const ledgers = await icpay.getVerifiedLedgers()
 const icpLedger = ledgers.find(l => l.symbol === 'ICP')!
 let ledgerCanisterId = icpLedger.canisterId
@@ -73,6 +74,7 @@ let ledgerCanisterId = icpLedger.canisterId
 
 const tx = await icpay.sendFunds({
   ledgerCanisterId, // ICP ledger or any ICRC ledger
+  symbol: 'ICP', // Its either symbol or ledgerCanisterId (symbol is preferred)
   amount: '150000000', // smallest unit (e.g. 1.5 ICP with 8 decimals)
   metadata: { myProductId: '511234', myOrderId: '511234', anyInternalField: 'allowed' },
 })
@@ -82,6 +84,7 @@ const tx = await icpay.sendFunds({
 const res = await icpay.sendFundsUsd({
   usdAmount: 5,
   ledgerCanisterId,
+  symbol: 'ICP', // Its either symbol or ledgerCanisterId (symbol is preferred)
   metadata: { context: 'tip-jar', myProductId: '511234', myOrderId: '511234', anyInternalField: 'allowed' },
 })
 ```
@@ -98,11 +101,9 @@ import { Icpay } from '@ic-pay/icpay-sdk'
 const icpay = new Icpay({ publishableKey: process.env.NEXT_PUBLIC_ICPAY_PK!, enableEvents: true })
 
 // 1) Create intent for onramp (no wallet needed)
-const ledgers = await icpay.getVerifiedLedgers()
-const icpLedger = ledgers.find(l => l.symbol === 'ICP')!
 const start = await icpay.sendFundsUsd({
   usdAmount: 25,
-  ledgerCanisterId: icpLedger.canisterId,
+  symbol: 'ICP',
   metadata: { context: 'onramp' },
   onrampPayment: true,
 })
