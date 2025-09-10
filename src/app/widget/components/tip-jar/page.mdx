@@ -35,6 +35,8 @@ export default function Page() {
   return <icpay-tip-jar ref={ref as any} />
 }
 
+```
+
 ```vue {{ title: 'Vue.js' }}
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
@@ -55,6 +57,8 @@ onMounted(() => {
   <icpay-tip-jar ref="el" />
 </template>
 
+```
+
 ```ts {{ title: 'Angular' }}
 import { Component, ElementRef, ViewChild, AfterViewInit } from '@angular/core'
 import '@ic-pay/icpay-widget'
@@ -71,6 +75,8 @@ export class AppComponent implements AfterViewInit {
     }
   }
 }
+
+```
 
 ```html {{ title: 'No framework' }}
 <script type="module">import '@ic-pay/icpay-widget'</script>
