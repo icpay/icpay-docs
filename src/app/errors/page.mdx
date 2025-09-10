@@ -11,7 +11,7 @@ All SDK errors are `IcpayError` with a machine code and message.
 import { Icpay, IcpayError } from '@ic-pay/icpay-sdk'
 
 try {
-  await icpay.sendFunds({ ledgerCanisterId: '...', amount: '1000' })
+  await icpay.sendFunds({ symbol: 'ICP', amount: '1000' })
 } catch (e) {
   if (e instanceof IcpayError) {
     if (e.isBalanceError()) {

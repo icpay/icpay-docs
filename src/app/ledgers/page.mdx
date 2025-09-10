@@ -73,7 +73,7 @@ const info = await icpay.getLedgerInfo(idBySymbol)
 const withPrices = await icpay.getAllLedgersWithPrices()
 
 // Convert 10 USD to token amount for a ledger
-const calc = await icpay.calculateTokenAmountFromUSD({ usdAmount: 10, ledgerCanisterId: idBySymbol })
+const calc = await icpay.calculateTokenAmountFromUSD({ usdAmount: 10, ledgerSymbol: 'ICP' })
 ```
 
 ## Using with Widget
