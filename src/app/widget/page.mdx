@@ -19,7 +19,7 @@ export const sections = [
 
 # Widget
 
-ICPay Widget is a set of framework-agnostic Web Components for payments. Drop in `icpay-premium-content`, `icpay-tip-jar`, `icpay-article-paywall`, `icpay-coffee-shop`, `icpay-donation-thermometer`, `icpay-pay-button` or `icpay-amount-input` to accept payments instantly. {{ className: 'lead' }}
+ICPay Widget is a set of framework-agnostic Web Components for payments. Drop in `icpay-premium-content`, `icpay-tip-jar`, `icpay-article-paywall`, `icpay-coffee-shop`, `icpay-donation-thermometer`, `icpay-pay-button` or `icpay-amount-input` to accept payments instantly. For React, wrappers are provided to use idiomatic props (e.g., `onSuccess`). {{ className: 'lead' }}
 
 ## Intro
 
@@ -31,25 +31,22 @@ ICPay Widget is a set of framework-agnostic Web Components for payments. Drop in
 
 <CodeGroup title="Usage examples">
 
-```tsx {{ title: 'Next.js' }}
+```tsx {{ title: 'Next.js (React wrapper)' }}
 'use client'
-import { useEffect, useRef } from 'react'
-import '@ic-pay/icpay-widget'
+import { IcpayTipJar, IcpaySuccess } from '@ic-pay/icpay-widget/react'
 
 export default function Page() {
-  const ref = useRef<any>(null)
-  useEffect(() => {
-    if (!ref.current) return
-    ref.current.config = {
-      publishableKey: process.env.NEXT_PUBLIC_ICPAY_PK,
-      amountsUsd: [1,5,10],
-      defaultAmountUsd: 5,
-    }
-    const onDone = (e: any) => console.log('Tip completed', e.detail)
-    window.addEventListener('icpay-sdk-transaction-completed', onDone)
-    return () => window.removeEventListener('icpay-sdk-transaction-completed', onDone)
-  }, [])
-  return <icpay-tip-jar ref={ref as any} />
+  const config = {
+    publishableKey: process.env.NEXT_PUBLIC_ICPAY_PK,
+    amountsUsd: [1,5,10],
+    defaultAmountUsd: 5,
+  }
+  return (
+    <IcpayTipJar
+      config={config}
+      onSuccess={(detail: IcpaySuccess) => console.log('Tip completed', detail)}
+    />
+  )
 }
 ```
 
@@ -78,7 +75,7 @@ onMounted(() => {
 </template>
 ```
 
-```ts {{ title: 'Angular' }}
+```ts {{ title: 'Angular (Web Component)' }}
 import { Component, ElementRef, ViewChild, AfterViewInit, OnDestroy } from '@angular/core'
 import '@ic-pay/icpay-widget'
 
@@ -102,7 +99,7 @@ export class AppComponent implements AfterViewInit, OnDestroy {
 }
 ```
 
-```html {{ title: 'No framework' }}
+```html {{ title: 'No framework (Web Component)' }}
 <script type="module">
   import '@ic-pay/icpay-widget'
   // Or bundle via your build tool
@@ -130,22 +127,21 @@ Each component exposes a `config` property. The widget internally creates an SDK
 
 <CodeGroup title="Premium content examples">
 
-```tsx {{ title: 'Next.js' }}
+```tsx {{ title: 'Next.js (React wrapper)' }}
 'use client'
-import { useEffect, useRef } from 'react'
-import '@ic-pay/icpay-widget'
+import { IcpayPremiumContent, IcpaySuccess } from '@ic-pay/icpay-widget/react'
 
 export default function Page() {
-  const ref = useRef<any>(null)
-  useEffect(() => {
-    if (!ref.current) return
-    ref.current.config = {
-      publishableKey: process.env.NEXT_PUBLIC_ICPAY_PK,
-      priceUsd: 5,
-      onSuccess: (tx: any) => console.log('Unlocked', tx),
-    }
-  }, [])
-  return <icpay-premium-content ref={ref as any} />
+  const config = {
+    publishableKey: process.env.NEXT_PUBLIC_ICPAY_PK,
+    priceUsd: 5,
+  }
+  return (
+    <IcpayPremiumContent
+      config={config}
+      onSuccess={(detail: IcpaySuccess) => console.log('Unlocked', detail)}
+    />
+  )
 }
 ```
 
