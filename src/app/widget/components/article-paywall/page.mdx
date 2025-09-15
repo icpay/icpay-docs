@@ -6,7 +6,7 @@ export const metadata = {
 export const sections = [
   { title: 'Usage', id: 'usage' },
   { title: 'Configuration', id: 'configuration' },
-  { title: 'Onramp (Transak)', id: 'onramp' },
+  // onramp: { title: 'Onramp (Transak)', id: 'onramp' },
 ]
 
 # Article Paywall
@@ -112,6 +112,7 @@ export class AppComponent implements AfterViewInit {
 - Token selector: use global `showLedgerDropdown?: 'buttons' | 'dropdown' | 'none'`
 - Common options: `progressBar?`, `theme?`, `useOwnWallet?`, `plugNPlay?`, `debug?`, `disablePaymentButton?`, `disableAfterSuccess?`
 
+<!-- onramp-start
 ## Onramp (Transak)
 
 Enable card payments via Transak by adding `onramp` to the config. On success, the widget closes the Transak modal and continues until confirmation.
@@ -143,5 +144,6 @@ export default function Page() {
 ```
 
 The first progress step reads “Transak Started — Awaiting Transak information” during onramp.
+onramp-end -->
 
 

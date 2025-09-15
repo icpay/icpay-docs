@@ -6,7 +6,7 @@ export const metadata = {
 export const sections = [
   { title: 'Usage', id: 'usage' },
   { title: 'Configuration', id: 'configuration' },
-  { title: 'Onramp (Transak)', id: 'onramp' },
+  // onramp: { title: 'Onramp (Transak)', id: 'onramp' },
 ]
 
 # Premium Content
@@ -107,6 +107,7 @@ export class AppComponent implements AfterViewInit {
   - Global `showLedgerDropdown?: 'buttons' | 'dropdown' | 'none'` controls selector UI
 - Common options: `progressBar?`, `theme?`, `useOwnWallet?`, `plugNPlay?`, `debug?`, `disablePaymentButton?`, `disableAfterSuccess?`
 
+<!-- onramp-start
 ## Onramp (Transak)
 
 Offer card checkout for premium unlocks by setting `onramp`:
@@ -137,4 +138,5 @@ export default function Page() {
 ```
 
 On success, the Transak modal closes and the widget proceeds to confirmation and completion.
+onramp-end -->
 

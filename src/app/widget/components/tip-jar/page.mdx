@@ -6,7 +6,7 @@ export const metadata = {
 export const sections = [
   { title: 'Usage', id: 'usage' },
   { title: 'Configuration', id: 'configuration' },
-  { title: 'Onramp (Transak)', id: 'onramp' },
+  // onramp: { title: 'Onramp (Transak)', id: 'onramp' },
 ]
 
 # Tip Jar
@@ -108,6 +108,7 @@ export class AppComponent implements AfterViewInit {
   - Global: `showLedgerDropdown?: 'buttons' | 'dropdown' | 'none'` — recommended. If `'buttons'`, renders chips when multiple ledgers are available; `'dropdown'` forces dropdown; `'none'` hides selector.
 - Common options: `progressBar?`, `theme?`, `useOwnWallet?`, `plugNPlay?`, `debug?`, `disablePaymentButton?`, `disableAfterSuccess?`
 
+<!-- onramp-start
 ## Onramp (Transak)
 
 Enable card tips with Transak:
@@ -139,3 +140,4 @@ export default function Page() {
 ```
 
 The first step shows “Transak Started — Awaiting Transak information” during onramp.
+onramp-end -->

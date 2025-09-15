@@ -32,7 +32,7 @@ Get your keys from the [icpay.org dashboard](/icpay-org). Example server init:
 ```ts {{ title: 'Initialize (server)' }}
 import { Icpay } from '@ic-pay/icpay-sdk'
 
-const icpay = new Icpay({ secretKey: process.env.ICPAY_SK!, apiUrl: 'https://api.icpay.org' })
+const icpay = new Icpay({ secretKey: process.env.ICPAY_SK! })
 ```
 
 ## Methods
@@ -187,20 +187,14 @@ type SdkLedger = {
   name: string
   symbol: string
   canisterId: string
-  standard: 'ICRC-1' | 'ICRC-2' | 'ICRC-3' | 'ICRC-10' | 'ICRC-21' | 'ICP' | 'EXT'
   decimals: number
   logoUrl: string | null
   verified: boolean
   fee: string | null
   network: 'mainnet' | 'testnet'
   description: string | null
-  lastBlockIndex: string | null
-  coingeckoId: string | null
   currentPrice: number | null
-  priceFetchMethod: 'coingecko' | 'icpswap' | null
   lastPriceUpdate: string | null
-  createdAt: string
-  updatedAt: string
 }
 
 type AllLedgerBalances = {
@@ -214,7 +208,6 @@ type AllLedgerBalances = {
     decimals: number
     currentPrice?: number
     lastPriceUpdate?: Date
-    lastUpdated: Date
   }>
   totalBalancesUSD?: number
   lastUpdated: Date
@@ -232,7 +225,7 @@ Never expose your secret key in the browser. Use the SDK on the server for priva
 import { Icpay } from '@ic-pay/icpay-sdk'
 
 export async function GET() {
-  const icpay = new Icpay({ secretKey: process.env.ICPAY_SK!, apiUrl: 'https://api.icpay.org' })
+  const icpay = new Icpay({ secretKey: process.env.ICPAY_SK! })
   const account = await icpay.protected.getDetailedAccountInfo()
   const history = await icpay.protected.getPaymentHistory({ limit: 50 })
   return Response.json({ account, history })

@@ -47,7 +47,6 @@ type SdkLedger = {
   name: string
   symbol: string
   canisterId: string
-  standard: 'ICRC-1' | 'ICRC-2' | 'ICRC-3' | 'ICRC-10' | 'ICRC-21' | 'ICP' | 'EXT'
   decimals: number
   verified: boolean
   fee: string | null
@@ -56,7 +55,6 @@ type SdkLedger = {
   lastBlockIndex: string | null
   coingeckoId: string | null
   currentPrice: number | null
-  priceFetchMethod: 'coingecko' | 'icpswap' | null
   lastPriceUpdate: string | null
 }
 ```
