@@ -240,16 +240,6 @@ export const navigation: Array<NavGroup> = [
     ],
   },
   {
-    title: 'ICPay SDK',
-    links: [
-      { title: 'Overview', href: '/sdk-overview' },
-      { title: 'Install', href: '/sdk-install' },
-      { title: 'SDK (frontend)', href: '/sdk' },
-      { title: 'SDK (server)', href: '/sdk-secret' },
-      { title: 'Errors', href: '/errors' },
-    ],
-  },
-  {
     title: 'Widget',
     links: [
       { title: 'Overview', href: '/widget-overview' },
@@ -263,6 +253,16 @@ export const navigation: Array<NavGroup> = [
       { title: 'Component: Progress Bar', href: '/widget/components/progress-bar' },
       { title: 'Component: Pay Button', href: '/widget/components/pay-button' },
       { title: 'Component: Amount Input', href: '/widget/components/amount-input' },
+    ],
+  },
+  {
+    title: 'ICPay SDK',
+    links: [
+      { title: 'Overview', href: '/sdk-overview' },
+      { title: 'Install', href: '/sdk-install' },
+      { title: 'SDK (frontend)', href: '/sdk' },
+      { title: 'SDK (server)', href: '/sdk-secret' },
+      { title: 'Errors', href: '/errors' },
     ],
   },
   {
