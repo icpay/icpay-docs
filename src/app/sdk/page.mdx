@@ -137,7 +137,6 @@ const controller = icpay.notifyPaymentIntentOnRamp({ paymentIntentId, intervalMs
 - `actorProvider` (fn): `(canisterId, idl) => Actor` used to sign ICRC transfers.
 - `debug` (boolean): Verbose logging in SDK internals.
 - `enableEvents` (boolean): Emit SDK lifecycle events.
-- `awaitServerNotification` (boolean): Await server-side notify step in `sendFunds` and `sendFundsUsd`.
 
 Price helpers and ledger info:
 
@@ -235,18 +234,4 @@ icpay.removeEventListener('icpay-sdk-transaction-completed', onCompleted)
 | `icpay-sdk-error` | Any SDK error is emitted (if `enableEvents` is true) | `IcpayError` instance (`code`, `message`, `details?`, `retryable?`, `userAction?`) |
 | `icpay-sdk-transaction-created` | After creating a payment intent before transfer | `{ paymentIntentId, amount, ledgerCanisterId, expectedSenderPrincipal }` |
 | `icpay-sdk-transaction-updated` | While polling/awaiting status; intermediate updates | `TransactionResponse`-like: `{ transactionId, status, amount, recipientCanister, timestamp, description?, metadata?, payment? }` |
-| `icpay-sdk-transaction-completed` | When the transaction reaches completed | Same as above (final status `completed`) |
-| `icpay-sdk-transaction-failed` | When the transaction reaches failed | Same as above (final status `failed`). Also emitted when amounts mismatch. |
-| `icpay-sdk-transaction-mismatched` | When on-ledger paid amount differs from requested | `{ ...TransactionResponse, requestedAmount?: string, paidAmount?: string }` |
-| `icpay-sdk-connect-wallet` | When a connect-wallet flow is surfaced (if used by integrator) | Implementation-defined (string/provider or structured data) |
-| `icpay-sdk-method-start` | At the start of an SDK method | `{ name: string, args?: any }` |
-| `icpay-sdk-method-success` | On successful method completion | `{ name: string, result?: any }` |
-| `icpay-sdk-method-error` | On method-level error (plus `icpay-sdk-error`) | `{ name: string, error: any }` |
-
-<div className="not-prose">
-  <Button href="/widget" arrow="right" variant="text">
-    <>Use the web components widget</>
-  </Button>
-</div>
-
-
+| `icpay-sdk-transaction-completed`
