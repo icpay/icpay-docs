@@ -168,7 +168,7 @@ onMounted(() => {
 
 <template>
   <icpay-premium-content ref="premium" />
-  <!-- or <icpay-article-paywall /> with priceUsd -->
+  {/* or <icpay-article-paywall /> with priceUsd */}
 </template>
 ```
 
@@ -383,7 +383,7 @@ window.addEventListener('icpay-sdk-transaction-completed', (e) => { /* ... */ })
 
 For the full list of event names and payloads, see [SDK events](/sdk#events).
 
-<!-- onramp-start
+{/* onramp-start */}
 ## Onramp (Transak)
 
 All widgets expose a “Pay with credit card” action when `config.onramp` is set. The onramp flow:
@@ -401,4 +401,4 @@ The progress bar updates the first step label to “Transak Started” with tool
 </div>
 
 
-onramp-end -->
+{/* onramp-end */}
