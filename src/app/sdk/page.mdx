@@ -31,7 +31,7 @@ Create an account in the [icpay.org dashboard](/icpay-org) to obtain your Publis
 
 ## Quickstart
 
-Initialize the SDK with your publishable key on the client. Only when using `sendFunds` or `sendFundsUsd`, you must provide an `actorProvider` and a connected wallet.
+Initialize the SDK with your publishable key on the client. Only when using `createPayment` or `createPaymentUsd`, you must provide an `actorProvider` and a connected wallet.
 
 ```ts {{ title: 'Client setup (TypeScript)' }}
 import { Icpay, IcpayError } from '@ic-pay/icpay-sdk'
@@ -40,7 +40,7 @@ const icpay = new Icpay({
   publishableKey: process.env.NEXT_PUBLIC_ICPAY_PK!,
 
   // actorProvider + connected wallet are required only when calling
-  // sendFunds or sendFundsUsd (e.g. Plug, Internet Identity, Oisy)
+  // createPayment or createPaymentUsd (e.g. Plug, Internet Identity, Oisy)
 })
 
 try {
@@ -65,14 +65,14 @@ const icpay = new Icpay({
   connectedWallet: { owner: '<principal-id>' },
 })
 
-// We can send either symbol or ledgerCanisterId field to the sendFunds and sendFundsUsd (symbol is preferred)
+// We can send either symbol or ledgerCanisterId field to the createPayment and createPaymentUsd (symbol is preferred)
 const ledgers = await icpay.getVerifiedLedgers()
 const icpLedger = ledgers.find(l => l.symbol === 'ICP')!
 let ledgerCanisterId = icpLedger.canisterId
 // or
 // ledgerCanisterId = await icpay.getLedgerCanisterIdBySymbol('ICP')
 
-const tx = await icpay.sendFunds({
+const tx = await icpay.createPayment({
   ledgerCanisterId, // ICP ledger or any ICRC ledger
   symbol: 'ICP', // Its either symbol or ledgerCanisterId (symbol is preferred)
   amount: '150000000', // smallest unit (e.g. 1.5 ICP with 8 decimals)
@@ -81,7 +81,7 @@ const tx = await icpay.sendFunds({
 ```
 
 ```ts {{ title: 'Send by USD amount (auto conversion)' }}
-const res = await icpay.sendFundsUsd({
+const res = await icpay.createPaymentUsd({
   usdAmount: 5,
   ledgerCanisterId,
   symbol: 'ICP', // Its either symbol or ledgerCanisterId (symbol is preferred)
@@ -101,7 +101,7 @@ import { Icpay } from '@ic-pay/icpay-sdk'
 const icpay = new Icpay({ publishableKey: process.env.NEXT_PUBLIC_ICPAY_PK!, enableEvents: true })
 
 // 1) Create intent for onramp (no wallet needed)
-const start = await icpay.sendFundsUsd({
+const start = await icpay.createPaymentUsd({
   usdAmount: 25,
   symbol: 'ICP',
   metadata: { context: 'onramp' },

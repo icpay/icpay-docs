@@ -32,7 +32,7 @@ Use the ICPay SDK to accept payments from users' wallets and manage your account
 
 The ICPay SDK ships as a single package that supports two usage modes. Use the public SDK on the frontend with your Publishable Key; use the private SDK on the server with your Secret Key. {{ className: 'lead' }}
 
-**Public SDK (frontend)**: Initialize with `publishableKey` for typical tasks like getting verified ledgers, resolving canister IDs, price calculation, and initiating payments from the user's wallet via `sendFunds`/`sendFundsUsd`.
+**Public SDK (frontend)**: Initialize with `publishableKey` for typical tasks like getting verified ledgers, resolving canister IDs, price calculation, and initiating payments from the user's wallet via `createPayment`/`createPaymentUsd`.
 
 **Private SDK (server)**: Initialize with `secretKey` for account details, payment history, transactions, ledgers with prices for your account, webhook event lookups, and other server-side operations.
 
