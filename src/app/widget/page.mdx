@@ -342,7 +342,8 @@ Common widget config (full):
 - `disablePaymentButton?` (boolean)
 - `disableAfterSuccess?` (boolean)
 - `showLedgerDropdown?` `'buttons' | 'dropdown' | 'none'` — global token selector behavior
- - `onramp?` `{ environment?: 'STAGING' | 'PRODUCTION'; apiKey?: string | null; width?: number|string; height?: number|string; autoOpen?: boolean; creditCardLabel?: string }`
+ - `onrampDisabled?` (boolean) — global kill switch to hide Transak card option (default: true)
+ - `onramp?` `{ environment?: 'STAGING' | 'PRODUCTION'; apiKey?: string | null; width?: number|string; height?: number|string; autoOpen?: boolean; creditCardLabel?: string; enabled?: boolean }` Currently disabled
 
 Component-specific (highlights):
   - premium-content: `priceUsd`, `imageUrl?`, `cryptoOptions?`, `defaultSymbol?`, `buttonLabel?`, `onSuccess(tx)`
