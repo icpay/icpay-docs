@@ -15,6 +15,26 @@ export const sections = [
 
 <CodeGroup title="Tip Jar">
 
+```tsx {{ title: 'Next.js (React wrapper)' }}
+'use client'
+import { IcpayTipJar, IcpaySuccess } from '@ic-pay/icpay-widget/react'
+
+export default function Page() {
+  const config = {
+    publishableKey: process.env.NEXT_PUBLIC_ICPAY_PK,
+    amountsUsd: [1,5,10],
+    defaultAmountUsd: 5,
+    progressBar: { enabled: true, mode: 'modal' },
+  }
+  return (
+    <IcpayTipJar
+      config={config}
+      onSuccess={(detail: IcpaySuccess) => console.log('Tip completed', detail)}
+    />
+  )
+}
+```
+
 ```tsx {{ title: 'Next.js' }}
 'use client'
 import { useEffect, useRef } from 'react'

@@ -17,6 +17,27 @@ The Pay Button component renders a compact, single-action checkout button for a 
 
 <CodeGroup title="Pay Button">
 
+```tsx {{ title: 'Next.js (React wrapper)' }}
+'use client'
+import { IcpayPayButton, IcpaySuccess } from '@ic-pay/icpay-widget/react'
+
+export default function Page() {
+  const config = {
+    publishableKey: process.env.NEXT_PUBLIC_ICPAY_PK,
+    amountUsd: 49.99,
+    defaultSymbol: 'ICP',
+    showLedgerDropdown: 'none',
+    progressBar: { enabled: true, mode: 'modal' },
+  }
+  return (
+    <IcpayPayButton
+      config={config}
+      onSuccess={(detail: IcpaySuccess) => console.log('Paid', detail)}
+    />
+  )
+}
+```
+
 ```tsx {{ title: 'Next.js' }}
 'use client'
 import { useEffect, useRef } from 'react'
