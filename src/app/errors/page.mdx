@@ -11,7 +11,7 @@ All SDK errors are `IcpayError` with a machine code and message.
 import { Icpay, IcpayError } from '@ic-pay/icpay-sdk'
 
 try {
-  await icpay.sendFunds({ symbol: 'ICP', amount: '1000' })
+  await icpay.createPayment({ symbol: 'ICP', amount: '1000' })
 } catch (e) {
   if (e instanceof IcpayError) {
     if (e.isBalanceError()) {
@@ -27,7 +27,7 @@ try {
 
 | Code | Category | Description | What to do |
 |---|---|---|---|
-| WALLET_NOT_CONNECTED | Wallet | A wallet/principal is required but not connected (e.g., before calling `sendFunds`). | Ask the user to connect their wallet; provide an `actorProvider` and `connectedWallet`.
+| WALLET_NOT_CONNECTED | Wallet | A wallet/principal is required but not connected (e.g., before calling `createPayment`). | Ask the user to connect their wallet; provide an `actorProvider` and `connectedWallet`.
 | WALLET_CONNECTION_FAILED | Wallet | Failed to connect to the selected wallet provider. | Offer retry or let the user pick another provider.
 | WALLET_DISCONNECTED | Wallet | Wallet was disconnected mid-flow. | Reconnect and restart the action.
 | WALLET_SIGNATURE_REJECTED | Wallet | User rejected the signature prompt. | Treat as user cancel; allow retry.
