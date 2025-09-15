@@ -15,6 +15,29 @@ export const sections = [
 
 <CodeGroup title="Coffee Shop">
 
+```tsx {{ title: 'Next.js (React wrapper)' }}
+'use client'
+import { IcpayCoffeeShop, IcpayCoffeeSuccess } from '@ic-pay/icpay-widget/react'
+
+export default function Page() {
+  const config = {
+    publishableKey: process.env.NEXT_PUBLIC_ICPAY_PK,
+    items: [
+      { name: 'Espresso', priceUsd: 3 },
+      { name: 'Latte', priceUsd: 5 },
+    ],
+    defaultItemIndex: 0,
+    progressBar: { enabled: true, mode: 'modal' },
+  }
+  return (
+    <IcpayCoffeeShop
+      config={config}
+      onSuccess={(detail: IcpayCoffeeSuccess) => console.log('Purchased', detail)}
+    />
+  )
+}
+```
+
 ```tsx {{ title: 'Next.js' }}
 'use client'
 import { useEffect, useRef } from 'react'

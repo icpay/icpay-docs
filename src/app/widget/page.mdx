@@ -8,6 +8,7 @@ export const sections = [
   { title: 'Intro', id: 'intro' },
   { title: 'Quickstart', id: 'quickstart' },
   { title: 'Create a payment', id: 'create-a-payment' },
+  { title: 'React wrapper examples', id: 'react-examples' },
   { title: 'Advanced configuration', id: 'advanced-configuration' },
   { title: 'SDK config via widget', id: 'sdk-config-via-widget' },
   { title: 'Secret key access via server', id: 'secret-key-access-via-server' },
@@ -144,6 +145,118 @@ export default function Page() {
   )
 }
 ```
+
+## React wrapper examples
+
+<CodeGroup title="React wrappers for all widgets">
+
+```tsx {{ title: 'Pay Button' }}
+'use client'
+import { IcpayPayButton, IcpaySuccess } from '@ic-pay/icpay-widget/react'
+
+export default function Page() {
+  const config = {
+    publishableKey: process.env.NEXT_PUBLIC_ICPAY_PK,
+    amountUsd: 12,
+    defaultSymbol: 'ICP',
+    showLedgerDropdown: 'none',
+  }
+  return (
+    <IcpayPayButton
+      config={config}
+      onSuccess={(detail: IcpaySuccess) => console.log('Paid', detail)}
+    />
+  )
+}
+```
+
+```tsx {{ title: 'Amount Input' }}
+'use client'
+import { IcpayAmountInput, IcpaySuccess } from '@ic-pay/icpay-widget/react'
+
+export default function Page() {
+  const config = {
+    publishableKey: process.env.NEXT_PUBLIC_ICPAY_PK,
+    defaultAmountUsd: 20,
+    minUsd: 1,
+    maxUsd: 1000,
+    stepUsd: 1,
+    showLedgerDropdown: 'dropdown',
+  }
+  return (
+    <IcpayAmountInput
+      config={config}
+      onSuccess={(detail: IcpaySuccess) => console.log('Paid', detail)}
+    />
+  )
+}
+```
+
+```tsx {{ title: 'Donation Thermometer' }}
+'use client'
+import { IcpayDonationThermometer, IcpaySuccess } from '@ic-pay/icpay-widget/react'
+
+export default function Page() {
+  const config = {
+    publishableKey: process.env.NEXT_PUBLIC_ICPAY_PK,
+    goalUsd: 1000,
+    defaultAmountUsd: 10,
+    amountsUsd: [1, 10, 25, 50, 100],
+  }
+  return (
+    <IcpayDonationThermometer
+      config={config}
+      onSuccess={(detail: IcpaySuccess) => console.log('Donated', detail)}
+    />
+  )
+}
+```
+
+```tsx {{ title: 'Coffee Shop' }}
+'use client'
+import { IcpayCoffeeShop, IcpayCoffeeSuccess } from '@ic-pay/icpay-widget/react'
+
+export default function Page() {
+  const config = {
+    publishableKey: process.env.NEXT_PUBLIC_ICPAY_PK,
+    items: [
+      { name: 'Americano', priceUsd: 3.5 },
+      { name: 'Latte', priceUsd: 4.25 },
+      { name: 'Cappuccino', priceUsd: 4.75 },
+    ],
+    defaultItemIndex: 0,
+  }
+  return (
+    <IcpayCoffeeShop
+      config={config}
+      onSuccess={(detail: IcpayCoffeeSuccess) => console.log('Ordered', detail)}
+    />
+  )
+}
+```
+
+```tsx {{ title: 'Article Paywall' }}
+'use client'
+import { IcpayArticlePaywall, IcpaySuccess } from '@ic-pay/icpay-widget/react'
+
+export default function Page() {
+  const config = {
+    publishableKey: process.env.NEXT_PUBLIC_ICPAY_PK,
+    priceUsd: 1.99,
+    title: 'Demo Article',
+    preview: 'Short preview...',
+    lockedContent: 'Hidden content goes here.',
+  }
+  return (
+    <IcpayArticlePaywall
+      config={config}
+      onSuccess={(detail: IcpaySuccess) => console.log('Unlocked', detail)}
+    />
+  )
+}
+```
+
+</CodeGroup>
 
 ```vue {{ title: 'Vue.js' }}
 <script setup lang="ts">

@@ -17,6 +17,33 @@ The Amount Input component lets users enter a custom USD amount and pay, optiona
 
 <CodeGroup title="Amount Input">
 
+```tsx {{ title: 'Next.js (React wrapper)' }}
+'use client'
+import { IcpayAmountInput, IcpaySuccess } from '@ic-pay/icpay-widget/react'
+
+export default function Page() {
+  const config = {
+    publishableKey: process.env.NEXT_PUBLIC_ICPAY_PK,
+    defaultAmountUsd: 20,
+    minUsd: 1,
+    stepUsd: 1,
+    defaultSymbol: 'ICP',
+    showLedgerDropdown: 'dropdown',
+    cryptoOptions: [
+      { symbol: 'ICP', label: 'ICP' },
+      { symbol: 'ckUSDC', label: 'USDC' },
+    ],
+    progressBar: { enabled: true, mode: 'modal' },
+  }
+  return (
+    <IcpayAmountInput
+      config={config}
+      onSuccess={(detail: IcpaySuccess) => console.log('Paid', detail)}
+    />
+  )
+}
+```
+
 ```tsx {{ title: 'Next.js' }}
 'use client'
 import { useEffect, useRef } from 'react'
