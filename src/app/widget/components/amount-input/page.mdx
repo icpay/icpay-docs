@@ -6,7 +6,7 @@ export const metadata = {
 export const sections = [
   { title: 'Usage', id: 'usage' },
   { title: 'Configuration', id: 'configuration' },
-  { title: 'Onramp (Transak)', id: 'onramp' },
+  // onramp: { title: 'Onramp (Transak)', id: 'onramp' },
 ]
 
 # Amount Input
@@ -137,6 +137,7 @@ Notes:
   - `'none'` hides the selector and uses `defaultSymbol`.
 - For non-modal progress modes, the bar appears only during processing.
 
+<!-- onramp-start
 ## Onramp (Transak)
 
 Add card onramp by configuring `onramp`. The widget will create an onramp intent (`onramp_ic`), open Transak, close on `TRANSAK_ORDER_SUCCESSFUL`, then notify ICPay until completion.
@@ -170,5 +171,6 @@ export default function Page() {
 ```
 
 During onramp, the progress bar updates the first step label to “Transak Started” with tooltip “Awaiting Transak information”.
+onramp-end -->
 
 

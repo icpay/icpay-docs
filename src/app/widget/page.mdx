@@ -14,12 +14,12 @@ export const sections = [
   { title: 'Options reference', id: 'options-reference' },
   { title: 'Widget errors', id: 'widget-errors' },
   { title: 'Events', id: 'events' },
-  { title: 'Onramp (Transak)', id: 'onramp' },
+  // onramp: { title: 'Onramp (Transak)', id: 'onramp' },
 ]
 
 # Widget
 
-ICPay Widget is a set of framework-agnostic Web Components for payments. Drop in `icpay-premium-content`, `icpay-tip-jar`, `icpay-article-paywall`, `icpay-coffee-shop`, or `icpay-donation-thermometer` to accept payments instantly. {{ className: 'lead' }}
+ICPay Widget is a set of framework-agnostic Web Components for payments. Drop in `icpay-premium-content`, `icpay-tip-jar`, `icpay-article-paywall`, `icpay-coffee-shop`, `icpay-donation-thermometer`, `icpay-pay-button` or `icpay-amount-input` to accept payments instantly. {{ className: 'lead' }}
 
 ## Intro
 
@@ -342,8 +342,10 @@ Common widget config (full):
 - `disablePaymentButton?` (boolean)
 - `disableAfterSuccess?` (boolean)
 - `showLedgerDropdown?` `'buttons' | 'dropdown' | 'none'` — global token selector behavior
+ <!-- onramp-start
  - `onrampDisabled?` (boolean) — global kill switch to hide Transak card option (default: true)
  - `onramp?` `{ environment?: 'STAGING' | 'PRODUCTION'; apiKey?: string | null; width?: number|string; height?: number|string; autoOpen?: boolean; creditCardLabel?: string; enabled?: boolean }` Currently disabled
+ onramp-end -->
 
 Component-specific (highlights):
   - premium-content: `priceUsd`, `imageUrl?`, `cryptoOptions?`, `defaultSymbol?`, `buttonLabel?`, `onSuccess(tx)`
@@ -381,6 +383,7 @@ window.addEventListener('icpay-sdk-transaction-completed', (e) => { /* ... */ })
 
 For the full list of event names and payloads, see [SDK events](/sdk#events).
 
+<!-- onramp-start
 ## Onramp (Transak)
 
 All widgets expose a “Pay with credit card” action when `config.onramp` is set. The onramp flow:
@@ -398,3 +401,4 @@ The progress bar updates the first step label to “Transak Started” with tool
 </div>
 
 
+onramp-end -->

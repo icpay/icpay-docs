@@ -6,7 +6,7 @@ export const metadata = {
 export const sections = [
   { title: 'Usage', id: 'usage' },
   { title: 'Configuration', id: 'configuration' },
-  { title: 'Onramp (Transak)', id: 'onramp' },
+  // onramp: { title: 'Onramp (Transak)', id: 'onramp' },
 ]
 
 # Donation Thermometer
@@ -109,6 +109,7 @@ export class AppComponent implements AfterViewInit {
 - Token selector: use global `showLedgerDropdown?: 'buttons' | 'dropdown' | 'none'`
 - Common options: `progressBar?`, `theme?`, `useOwnWallet?`, `plugNPlay?`, `debug?`, `disablePaymentButton?`, `disableAfterSuccess?`
 
+<!-- onramp-start
 ## Onramp (Transak)
 
 Accept card donations by enabling Transak onramp. The widget opens Transak and continues automatically on success.
@@ -140,5 +141,6 @@ export default function Page() {
 ```
 
 The progress bar’s first step reflects “Transak Started” during the onramp flow.
+onramp-end -->
 
 
