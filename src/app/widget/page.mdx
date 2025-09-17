@@ -321,6 +321,7 @@ export class AppComponent implements AfterViewInit {
 - `useOwnWallet`: set to true to manage wallet connection yourself; provide `actorProvider` + `connectedWallet`.
 - `plugNPlay`: theme and provider toggles for built-in wallet UX.
 - `progressBar`: choose `modal | horizontal | vertical | inline` progress UI.
+- `derivationOrigin`: optional override for wallet derivation origin (used by Internet Identity). If omitted, the widget derives it from the current site origin and collapses subdomains to the apex domain (e.g., `demo.example.com` → `https://example.com`).
 - `showLedgerDropdown`: global token selector control across widgets — `'buttons' | 'dropdown' | 'none'`.
 - `debug`: enable verbose console logging in widget and SDK.
 - `disablePaymentButton` / `disableAfterSuccess`: disable the pay button immediately, or after a success.
@@ -344,6 +345,9 @@ export default function Page() {
       plugNPlay: { enabled: false },
       progressBar: { enabled: true, mode: 'modal' },
       theme: { primaryColor: '#0ea5e9' },
+      // Optional: override derivation origin used by Internet Identity
+      // By default, the widget will derive and use the apex of the current domain
+      derivationOrigin: 'https://example.com',
     }
   }, [])
   return <icpay-tip-jar ref={ref as any} />
@@ -438,7 +442,7 @@ Secret keys are never used in the widget. If you need server-only data (history,
 Common widget config (full):
 
 - `publishableKey` (string) — required
-- `apiUrl?`, `icHost?`
+- `apiUrl?`, `icHost?`, `derivationOrigin?`
 - `actorProvider?`, `connectedWallet?`, `useOwnWallet?`
 - `plugNPlay?`
   - `enabled?`
