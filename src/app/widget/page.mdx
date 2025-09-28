@@ -321,6 +321,7 @@ export class AppComponent implements AfterViewInit {
 - `useOwnWallet`: set to true to manage wallet connection yourself; provide `actorProvider` + `connectedWallet`.
 - `plugNPlay`: theme and provider toggles for built-in wallet UX.
 - `progressBar`: choose `modal | horizontal | vertical | inline` progress UI.
+- `metadata`: object of custom fields to attach to created payment intents (merged with per-call metadata).
 - `derivationOrigin`: optional override for wallet derivation origin (used by Internet Identity). If omitted, the widget derives it from the current site origin and collapses subdomains to the apex domain (e.g., `demo.example.com` → `https://example.com`).
 - `showLedgerDropdown`: global token selector control across widgets — `'buttons' | 'dropdown' | 'none'`.
 - `debug`: enable verbose console logging in widget and SDK.
@@ -452,6 +453,7 @@ Common widget config (full):
   - `{ primaryColor?, secondaryColor?, accentColor?, textColor?, mutedTextColor?, surfaceColor?, surfaceAltColor?, borderColor?, fontFamily? }`
 - `debug?` (boolean)
 - `progressBar?` `{ enabled?: boolean, mode?: 'modal' | 'horizontal' | 'vertical' | 'inline' }`
+- `metadata?` (object) — custom fields merged into payment intent metadata for every widget
 - `disablePaymentButton?` (boolean)
 - `disableAfterSuccess?` (boolean)
 - `showLedgerDropdown?` `'buttons' | 'dropdown' | 'none'` — global token selector behavior
