@@ -65,6 +65,23 @@ Lists payments associated with a principal (sender/expected sender) with paginat
 const byPrincipal = await icpay.protected.getPaymentsByPrincipal({ principalId: 'aaaa-bbbb-cccc', limit: 10 })
 ```
 
+### getPaymentsByMetadata
+Search payments by metadata using your Secret key. Useful for looking up orders by `orderId` (e.g., from WooCommerce).
+
+```ts
+// Example: find payments where metadata.orderId === '12345'
+const byMetadata = await icpay.protected.getPaymentsByMetadata({
+  metadata: { orderId: '12345' },
+  status: 'completed', // optional: filter by status
+  limit: 50,           // optional
+})
+
+// Iterate results
+for (const p of byMetadata.payments) {
+  console.log(p.id, p.status, p.metadata?.orderId)
+}
+```
+
 ### getVerifiedLedgersPrivate
 Returns verified ledgers available to the account.
 
