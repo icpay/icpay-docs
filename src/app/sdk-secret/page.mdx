@@ -68,6 +68,8 @@ const byPrincipal = await icpay.protected.getPaymentsByPrincipal({ principalId: 
 ### getPaymentsByMetadata
 Search payments by metadata using your Secret key. Useful for looking up orders by `orderId` (e.g., from WooCommerce).
 
+Note: The raw REST response may include an aggregate shape per item: `{ payment, intent, invoice, transaction }`. The SDK method `icpay.protected.getPaymentsByMetadata` flattens this into `PaymentHistoryResponse.payments[]` using the `payment` object for fields like `id`, `status`, `amount`, while still exposing relevant details (e.g., `expectedSenderPrincipal`) from the intent when available.
+
 ```ts
 // Example: find payments where metadata.orderId === '12345'
 const byMetadata = await icpay.protected.getPaymentsByMetadata({
