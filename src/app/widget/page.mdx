@@ -449,6 +449,7 @@ Common widget config (full):
   - `enabled?`
   - `providers?` `{ internetIdentity?: boolean; oisy?: boolean; plug?: boolean }`
   - `theme?` `{ modalBackground?, modalBorderRadius?, buttonBackground?, buttonHoverBackground?, textColor?, primaryColor? }`
+- `openOisyInNewTab?` (boolean) — If `true`, Oisy opens in a new tab for connect/transfer. Default: `false` (popup). Useful if your site/browser blocks popups or breaks window.opener.
 - `theme?`
   - `{ primaryColor?, secondaryColor?, accentColor?, textColor?, mutedTextColor?, surfaceColor?, surfaceAltColor?, borderColor?, fontFamily? }`
 - `debug?` (boolean)
@@ -486,6 +487,25 @@ Helpers available in the widget package:
 ```ts
 import { handleWidgetError, getErrorMessage, getErrorSeverity, getErrorAction } from '@ic-pay/icpay-widget'
 ```
+
+## Troubleshooting wallet popups (Oisy)
+
+- By default, Oisy opens in a popup. If your site/app sets an opener-isolation policy (e.g., `Cross-Origin-Opener-Policy: same-origin`) the popup cannot establish a channel and may show “Waiting for the dApp interaction…”.
+- Fix on Next.js: add a headers rule with `Cross-Origin-Opener-Policy: same-origin-allow-popups` for pages that render the widget (or site-wide if acceptable). Example in `next.config.ts`:
+
+```ts
+export default {
+  async headers() {
+    return [
+      { source: '/:path*', headers: [
+        { key: 'Cross-Origin-Opener-Policy', value: 'same-origin-allow-popups' },
+      ]}
+    ]
+  }
+}
+```
+
+- If you cannot adjust headers, enable the widget option `openOisyInNewTab: true` so Oisy opens in a new tab instead of a popup.
 
 ## Events
 
