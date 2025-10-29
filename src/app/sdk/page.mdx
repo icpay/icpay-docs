@@ -59,9 +59,14 @@ There are two common ways to pay: fixed token amount or USD amount automatically
 ```ts {{ title: 'Send fixed token amount' }}
 import { Icpay } from '@ic-pay/icpay-sdk'
 
+// If you want a drop-in wallet selector, use the widget's helper:
+// import { createWalletSelect } from '@ic-pay/icpay-widget'
+// const walletSelect = createWalletSelect()
+
 const icpay = new Icpay({
   publishableKey: process.env.NEXT_PUBLIC_ICPAY_PK!,
-  actorProvider: (canisterId, idl) => /* return agent-js actor from your wallet */ (window as any).pnp.getActor(),
+  actorProvider: (canisterId, idl) => /* return agent-js actor from your wallet */
+    walletSelect.getActor({ canisterId, idl, requiresSigning: true, anon: false }),
   connectedWallet: { owner: '<principal-id>' },
 })
 

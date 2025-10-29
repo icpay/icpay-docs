@@ -24,7 +24,7 @@ ICPay Widget is a set of framework-agnostic Web Components for payments. Drop in
 
 ## Intro
 
-- Built-in wallet flow with optional Plug N Play.
+- Built-in wallet selector for Plug, Internet Identity, and Oisy.
 - Uses the [SDK](/sdk) under the hood; you can pass SDK options through the widget config.
 - Emits global events so your app can react to progress and results.
 
@@ -121,6 +121,25 @@ export class AppComponent implements AfterViewInit, OnDestroy {
 ```
 
 </CodeGroup>
+
+### WalletSelect helper for custom flows
+
+If you prefer to manage wallets yourself while using ICPay components, you can use the helper exported by the widget package:
+
+```ts
+import { createWalletSelect } from '@ic-pay/icpay-widget'
+
+const walletSelect = createWalletSelect({ icHost: 'https://icp-api.io' })
+
+// Prompt the user to connect (optionally specify a provider id: 'plug' | 'ii' | 'oisy')
+await walletSelect.connect()
+
+// Use the signed actor in your integrations
+const actor = walletSelect.getActor({ canisterId, idl, requiresSigning: true, anon: false })
+
+// Later
+await walletSelect.disconnect()
+```
 
 ## Create a payment
 
@@ -342,7 +361,9 @@ export default function Page() {
       publishableKey: process.env.NEXT_PUBLIC_ICPAY_PK,
       useOwnWallet: true,
       connectedWallet: { owner: '<principal>' },
-      actorProvider: () => (window as any).pnp.getActor(),
+      // Example if you manage wallets yourself using the helper below:
+      // const walletSelect = createWalletSelect()
+      // actorProvider: (canisterId, idl) => walletSelect.getActor({ canisterId, idl, requiresSigning: true, anon: false }),
       plugNPlay: { enabled: false },
       progressBar: { enabled: true, mode: 'modal' },
       theme: { primaryColor: '#0ea5e9' },
@@ -368,7 +389,7 @@ onMounted(() => {
     publishableKey: import.meta.env.VITE_ICPAY_PK,
     useOwnWallet: true,
     connectedWallet: { owner: '<principal>' },
-    actorProvider: () => (window as any).pnp.getActor(),
+    // actorProvider: (canisterId, idl) => walletSelect.getActor({ canisterId, idl, requiresSigning: true, anon: false }),
     plugNPlay: { enabled: false },
     progressBar: { enabled: true, mode: 'modal' },
     theme: { primaryColor: '#0ea5e9' },
@@ -393,7 +414,7 @@ export class AppComponent implements AfterViewInit {
       publishableKey: (window as any).env?.ICPAY_PK || 'pk_test_xxx',
       useOwnWallet: true,
       connectedWallet: { owner: '<principal>' },
-      actorProvider: () => (window as any).pnp.getActor(),
+      // actorProvider: (canisterId, idl) => walletSelect.getActor({ canisterId, idl, requiresSigning: true, anon: false }),
       plugNPlay: { enabled: false },
       progressBar: { enabled: true, mode: 'modal' },
       theme: { primaryColor: '#0ea5e9' },
@@ -414,7 +435,7 @@ export class AppComponent implements AfterViewInit {
     publishableKey: 'pk_test_xxx',
     useOwnWallet: true,
     connectedWallet: { owner: '<principal>' },
-    actorProvider: () => window.pnp.getActor(),
+    // actorProvider: (canisterId, idl) => walletSelect.getActor({ canisterId, idl, requiresSigning: true, anon: false }),
     plugNPlay: { enabled: false },
     progressBar: { enabled: true, mode: 'modal' },
     theme: { primaryColor: '#0ea5e9' },
