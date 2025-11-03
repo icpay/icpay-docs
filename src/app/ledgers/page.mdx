@@ -17,7 +17,7 @@ ICPay supports verified ICRC ledgers (including ICP). You can fetch the list, ge
 
 ## Overview
 
-- Each ledger provides `id`, `name`, `symbol`, `canisterId`, `decimals`, `fee`, `verified`, and optional price data.
+- Each ledger provides `id`, `name`, `symbol`, `family`, `canisterId`, `decimals`, `fee`, `verified`, and optional price data.
 - Prices are available when configured; USD conversions are supported via SDK helpers.
 
 ## Data model
@@ -29,6 +29,7 @@ type LedgerPublic = {
   id: string
   name: string
   symbol: string
+  family: string
   canisterId: string
   decimals: number
   logoUrl: string | null
@@ -46,6 +47,7 @@ type SdkLedger = {
   id: string
   name: string
   symbol: string
+  family: string
   canisterId: string
   decimals: number
   verified: boolean
@@ -58,6 +60,10 @@ type SdkLedger = {
   lastPriceUpdate: string | null
 }
 ```
+
+### Family grouping
+
+The `family` field groups the same token across chains and standards (for example, USDC on EVM, ICP, or Solana). Use it to present a single token choice to users and then offer only the networks where that family has a variant. If only one family is configured, you can skip token selection and show network options directly.
 
 ## Using with SDK
 
