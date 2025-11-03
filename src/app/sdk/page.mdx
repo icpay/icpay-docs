@@ -56,6 +56,10 @@ try {
 
 There are two common ways to pay: fixed token amount or USD amount automatically converted to tokens.
 
+Note on chains:
+
+- `chainId` (optional, UUID): Target chain for the payment intent. If omitted, the intent defaults to the Internet Computer chain. Use this when directing payments to another supported chain.
+
 ```ts {{ title: 'Send fixed token amount' }}
 import { Icpay } from '@ic-pay/icpay-sdk'
 
@@ -82,6 +86,7 @@ const tx = await icpay.createPayment({
   symbol: 'ICP', // Its either symbol or ledgerCanisterId (symbol is preferred)
   amount: '150000000', // smallest unit (e.g. 1.5 ICP with 8 decimals)
   metadata: { myProductId: '511234', myOrderId: '511234', anyInternalField: 'allowed' },
+  // chainId: '<uuid>', // Optional: defaults to Internet Computer when omitted
 })
 ```
 
@@ -91,6 +96,7 @@ const res = await icpay.createPaymentUsd({
   ledgerCanisterId,
   symbol: 'ICP', // Its either symbol or ledgerCanisterId (symbol is preferred)
   metadata: { context: 'tip-jar', myProductId: '511234', myOrderId: '511234', anyInternalField: 'allowed' },
+  // chainId: '<uuid>', // Optional: defaults to Internet Computer when omitted
 })
 ```
 
