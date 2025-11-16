@@ -1,0 +1,182 @@
+export const metadata = {
+  title: 'X402 payments',
+  description:
+    'How ICPay uses X402: building the authorization header with EIP-712, requesting a wallet signature, and settling the payment via the SDK.',
+}
+
+export const sections = [
+  { title: 'What is X402?', id: 'what-is-x402' },
+  { title: 'High-level flow', id: 'high-level-flow' },
+  { title: 'Acceptance object (server response)', id: 'acceptance-object' },
+  { title: 'Typed data and signature (EIP-712)', id: 'typed-data' },
+  { title: 'X402 header format', id: 'x402-header' },
+  { title: 'Settlement request', id: 'settlement-request' },
+  { title: 'SDK usage example', id: 'sdk-usage' },
+  { title: 'Events and statuses', id: 'events' },
+  { title: 'Troubleshooting', id: 'troubleshooting' },
+]
+
+# X402 payments
+
+ICPay supports X402, a “Payment Required” pattern for card/onramp-friendly flows. Instead of sending tokens directly from the user’s wallet to a contract, the wallet signs an authorization payload which is sent to ICPay’s settlement endpoint. ICPay verifies and settles the payment, then returns the intent/payment status. {{ className: 'lead' }}
+
+## What is X402?
+
+- **Server produces Accepts:** The API returns one or more payment “acceptance” records describing what to sign (scheme/network/amount/recipient).
+- **Client signs authorization:** The SDK builds EIP-712 typed data (EIP-3009 Permit or TransferWithAuthorization), requests a wallet signature, and packages this into an X402 header.
+- **Settlement:** The SDK sends a settle request with the X402 header; ICPay validates and processes payment, then your app waits until a terminal status.
+
+## High-level flow
+
+1. App requests an X402 intent using the SDK.
+2. API may return:
+   - `accepts[]` → proceed with X402 flow (sign and settle).
+   - A fallback recommendation → SDK falls back to the regular flow automatically.
+3. SDK builds EIP-712 typed data, requests signature from the user’s EVM wallet (`eth_signTypedData_v4`).
+4. SDK constructs an X402 header (base64 JSON) and calls the settle endpoint.
+5. SDK emits events and awaits a terminal status (completed/failed/mismatched/etc.).
+
+## Acceptance object (server response)
+
+An X402 acceptance describes the exact authorization you must sign:
+
+```ts
+type X402Acceptance = {
+  scheme: string            // usually 'exact'
+  network: string           // EVM chain ID (decimal string), e.g. '84532'
+  maxAmountRequired: string // amount in smallest unit (wei-like)
+  resource?: string | null  // optional
+  description?: string | null
+  mimeType?: string | null
+  payTo: string             // EVM address (recipient / verifying contract)
+  maxTimeoutSeconds?: number
+  asset?: string            // token address (may match payTo)
+  extra?: {
+    intentId?: string
+    provider?: string
+    ledgerId?: string
+    facilitatorUrl?: string | null
+    name?: string                // token name for domain
+    eip3009Version?: string      // e.g. '1'
+    primaryType?: 'Permit' | 'TransferWithAuthorization' // optional hint
+  }
+}
+```
+
+## Typed data and signature (EIP-712)
+
+The SDK constructs an EIP-712 domain and message from the acceptance, then asks the wallet to sign:
+- Domain:
+  - `name`: `extra.name` or `'Token'`
+  - `version`: `extra.eip3009Version` or `'1'`
+  - `chainId`: decimal `network` from the acceptance
+  - `verifyingContract`: `asset` or `payTo`
+- Primary type:
+  - If `extra.primaryType === 'Permit'`, the SDK builds a `Permit` message.
+  - Otherwise it builds a `TransferWithAuthorization` message.
+- Message fields:
+  - TransferWithAuthorization: `{ from, to, value, validAfter, validBefore, nonce }`
+  - Permit: `{ owner, spender, value, nonce, deadline }`
+- Nonce and validity:
+  - `nonce`: 32-byte random value (hex).
+  - `validAfter`: now - 86400s; `validBefore`/`deadline`: now + `maxTimeoutSeconds` (default ~300s).
+
+The signature is collected using `eth_signTypedData_v4`.
+
+## X402 header format
+
+After signing, the SDK builds a base64-encoded JSON header that looks like:
+
+```json
+{
+  "x402Version": 1,
+  "scheme": "exact",
+  "network": "84532",
+  "payload": {
+    "authorization": {
+      "from": "0xUserAddr",
+      "to": "0xPayTo",
+      "value": "1000000",
+      "validAfter": "1690000000",
+      "validBefore": "1690000300",
+      "nonce": "0x...32-bytes..."
+    },
+    "signature": "0x...signature..."
+  }
+}
+```
+
+The SDK then base64-encodes this JSON and sends it as `paymentHeader` to the settle endpoint.
+
+## Settlement request
+
+The SDK calls ICPay’s settle endpoint:
+
+```ts
+await publicApiClient.post('/sdk/public/payments/x402/settle', {
+  paymentIntentId,         // provided by the API during X402 initiation
+  paymentHeader,           // base64 string described above
+  paymentRequirements: acceptance, // echo of the acceptance object
+})
+```
+
+ICPay verifies the signature and authorizes the payment. The response contains status info (e.g., `succeeded` / `failed`) and may include a `txHash`. The SDK then proceeds to await a terminal status via notify/long-polling if needed.
+
+## SDK usage example
+
+```ts
+import { Icpay } from '@ic-pay/icpay-sdk'
+
+// Ensure window.ethereum is available for EIP-712 signing
+const icpay = new Icpay({
+  publishableKey: process.env.NEXT_PUBLIC_ICPAY_PK!,
+  enableEvents: true,
+  debug: true,
+  // Optionally pass your own provider; otherwise SDK uses window.ethereum
+  // evmProvider: window.ethereum,
+})
+
+// Prefer symbol; ledgerCanisterId is optional for X402 (server resolves it)
+const result = await icpay.createPaymentX402Usd({
+  usdAmount: 10,
+  symbol: 'ICP',
+  metadata: { orderId: 'A-1001' },
+  // chainId: '<uuid>', // optional
+})
+
+// Handle terminal response (completed / failed / pending -> continued waiting)
+if (result.status === 'completed') {
+  // success
+}
+```
+
+What the SDK does for you:
+- Initiates the X402 intent (`/sdk/public/payments/intents/x402`).
+- If the server returns `accepts[]`, it:
+  - Ensures wallet is on the desired chain (best-effort).
+  - Builds domain + message for EIP-712 (Permit or TransferWithAuthorization).
+  - Requests signature (`eth_signTypedData_v4`) from the wallet.
+  - Builds a base64 X402 header and calls ICPay settle.
+  - Emits lifecycle events and awaits terminal status.
+- If the server suggests fallback or does not return `accepts`, it transparently falls back to `createPaymentUsd`.
+
+## Events and statuses
+
+Enable with `enableEvents: true`. X402 flows emit the same lifecycle events as regular payments:
+- `icpay-sdk-transaction-created`
+- `icpay-sdk-transaction-updated`
+- `icpay-sdk-transaction-completed`
+- `icpay-sdk-transaction-failed`
+- `icpay-sdk-transaction-mismatched`
+
+The settle response can be terminal or transitional. When non-terminal, the SDK continues notifying the API until a terminal state is observed.
+
+## Troubleshooting
+
+- **No EVM provider**: Ensure `window.ethereum` is present or pass `evmProvider` in `Icpay` config.
+- **Wrong chain**: The SDK will try to `wallet_switchEthereumChain`. Provide `rpcUrlPublic` and `chainName` in the intent (server side) if add-and-switch is needed.
+- **Signature rejected**: Users can cancel the signature request. Catch `IcpayError` and handle `isUserCancelled()`.
+- **Minimum limits**: If settlement fails due to minimums (e.g., `x402_minimum_amount_not_met`), the SDK emits a failure and then falls back to the normal flow.
+- **Server returns HTTP 402**: The SDK extracts `accepts`/`intentId` from the response and begins settlement/wait accordingly.
+
+

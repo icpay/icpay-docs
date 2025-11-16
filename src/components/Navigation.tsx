@@ -260,6 +260,7 @@ export const navigation: Array<NavGroup> = [
     links: [
       { title: 'Overview', href: '/sdk-overview' },
       { title: 'Install', href: '/sdk-install' },
+      { title: 'X402 payments', href: '/x402' },
       { title: 'SDK (frontend)', href: '/sdk' },
       { title: 'SDK (server)', href: '/sdk-secret' },
       { title: 'Errors', href: '/errors' },

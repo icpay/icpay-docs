@@ -10,6 +10,9 @@ export const sections = [
   { title: 'Quickstart', id: 'quickstart' },
   { title: 'Create a payment', id: 'create-a-payment' },
   { title: 'Configuration', id: 'configuration' },
+  { title: 'Wallet helpers', id: 'wallet-helpers' },
+  { title: 'Public API reference', id: 'public-api-reference' },
+  { title: 'Low-level utilities', id: 'low-level-utilities' },
   { title: 'Secret key access (server)', id: 'secret-key-access-server' },
   { title: 'Events', id: 'events' },
 ]
@@ -100,6 +103,25 @@ const res = await icpay.createPaymentUsd({
 })
 ```
 
+```ts {{ title: 'X402 payments (cards-enabled flow with fallback)' }}
+// Attempts X402 flow first; falls back to regular USD flow if not available
+const out = await icpay.createPaymentX402Usd({
+  usdAmount: 10,
+  symbol: 'ICP',
+  metadata: { context: 'subscription' },
+})
+
+// If X402 responds with Payment Required (402), the SDK will handle header signing
+// and settlement, then wait for terminal status, emitting events along the way.
+```
+
+```ts {{ title: 'Onramp intent polling (e.g., Transak order lifecycle)' }}
+// After starting an onramp intent, poll until terminal status:
+const ctrl = icpay.notifyPaymentIntentOnRamp({ paymentIntentId: '<intentId>', intervalMs: 5000 })
+// ...later, you may stop polling:
+// ctrl.stop()
+```
+
 Events are emitted throughout the flow when `enableEvents` is true. See Events section below.
 
 {/*
@@ -164,6 +186,107 @@ const info = await icpay.getLedgerInfo('ryjl3-tyaaa-aaaaa-aaaba-cai')
 const priced = await icpay.getAllLedgersWithPrices()
 // Get number of token that is needed for a fixed price in USD
 const calc = await icpay.calculateTokenAmountFromUSD({ usdAmount: 10, ledgerCanisterId: info.canisterId })
+```
+
+```ts {{ title: 'Types reference (balances)' }}
+type LedgerBalance = {
+  ledgerId: string
+  ledgerName: string
+  ledgerSymbol: string
+  canisterId: string
+  eip3009Version?: string | null
+  x402Accepts?: boolean
+  balance: string                 // smallest unit
+  formattedBalance: string        // human-readable
+  decimals: number
+  currentPrice?: number
+  lastPriceUpdate?: Date
+  lastUpdated: Date
+  // Chain metadata (when available)
+  chainId?: string
+  chainName?: string | null
+  rpcUrlPublic?: string | null
+  chainUuid?: string | null
+  // Required amount helpers (when amount/amountUsd passed)
+  requiredAmount?: string
+  requiredAmountFormatted?: string
+  hasSufficientBalance?: boolean
+  logoUrl?: string | null
+}
+```
+
+## Wallet helpers
+
+Helpers to connect and manage wallets when initiating payments:
+
+- `showWalletModal()` → Prompts user to connect with the first available provider.
+- `connectWallet(providerId)` → Connect a specific provider: `'internet-identity' | 'oisy' | 'plug'`.
+- `getWalletProviders()` → Returns supported providers.
+- `isWalletProviderAvailable(providerId)` → Check availability in current environment.
+- `getAccountAddress()` → Principal/address of connected wallet.
+- `disconnectWallet()` / `isWalletConnected()` / `getConnectedWalletProvider()`
+
+```ts
+const providers = icpay.getWalletProviders()
+if (icpay.isWalletProviderAvailable('plug')) {
+  await icpay.connectWallet('plug')
+}
+const principal = icpay.getAccountAddress()
+```
+
+## Public API reference
+
+- Account and chains:
+  - `getAccountInfo()` → Public account info: id/live/canister/branding.
+  - `getVerifiedLedgers()` → Verified ledgers with price metadata.
+  - `getChains()` → Enabled chains (IC/EVM) with RPC/explorer data.
+  - `getLedgerCanisterIdBySymbol(symbol)` → Resolve ICPay-verified symbol to canister id.
+- Ledger info and prices:
+  - `getLedgerInfo(ledgerCanisterId)` → Detailed ledger metadata, price, decimals.
+  - `getAllLedgersWithPrices()` → All ledgers including current price.
+  - `calculateTokenAmountFromUSD({ usdAmount, ledgerCanisterId | ledgerSymbol })` → Price quote to smallest unit.
+- Balances:
+  - `getSingleLedgerBalance(ledgerCanisterId)` → Connected wallet balance + price context for one ledger.
+  - `getExternalWalletBalances({ network, address|principal, ... })` → Aggregate balances for an external EVM/IC wallet. Useful for showing “Pay with …” choices and sufficiency checks.
+- Payments:
+  - `createPayment(request)` → Token-denominated payment.
+  - `createPaymentUsd(request)` → USD-denominated payment (auto conversion).
+  - `createPaymentX402Usd(request)` → X402 flow with automatic fallback to regular path.
+  - `notifyPaymentIntentOnRamp({ paymentIntentId, ... })` → Poll an onramp intent until terminal status.
+  - `triggerTransactionSync(canisterTransactionId)` → Ask ICPay to sync a canister tx to API DB now.
+
+```ts {{ title: 'External wallet balances (public)' }}
+const all = await icpay.getExternalWalletBalances({
+  network: 'evm',               // 'evm' | 'ic'
+  address: '0xabc...',          // or principal: 'aaaa-bbbb...'
+  amountUsd: 10,                // optional: compute requiredAmount per ledger
+  chainShortcodes: ['base-sep'],// optional filter
+  ledgerShortcodes: ['ckusdc'], // optional filter
+})
+for (const b of all.balances) {
+  console.log(b.ledgerSymbol, b.formattedBalance, b.hasSufficientBalance)
+}
+```
+
+```ts {{ title: 'Single-ledger balance (connected wallet)' }}
+const b = await icpay.getSingleLedgerBalance('ryjl3-tyaaa-aaaaa-aaaba-cai')
+console.log(b.ledgerSymbol, b.formattedBalance, b.currentPrice)
+```
+
+## Low-level utilities
+
+Advanced helpers used internally by flows; you can use them for custom UX:
+
+- `pollTransactionStatus(canisterId, txId, accountCanisterId, indexReceived, intervalMs?, maxAttempts?)` → Anonymous polling for status.
+- `notifyLedgerTransaction(icpayCanisterId, ledgerCanisterId, blockIndex)` → Notify ICPay canister about a ledger tx.
+- `getTransactionStatusPublic(icpayCanisterId, canisterTxId, indexReceived, accountCanisterId)` → Public status endpoint via actor.
+- `getTransactionByFilter(canisterTxId)` → Fallback lookup by scanning transactions.
+- `sendFundsToLedger(ledgerCanisterId, toPrincipal, amount, memo?, host?)` → ICRC-1 transfer (requires `actorProvider`).
+- `packEvmId(accountCanisterId, intentCode)` → Build bytes32 id used by EVM PaymentProcessor.
+
+```ts
+// Example: pack EVM id (bytes32) for custom contract calls
+const idHex = icpay.packEvmId('42', 1234)
 ```
 
 ## Events
