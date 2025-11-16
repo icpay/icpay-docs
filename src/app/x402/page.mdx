@@ -1,7 +1,7 @@
 export const metadata = {
   title: 'X402 payments',
   description:
-    'How ICPay uses X402: building the authorization header with EIP-712, requesting a wallet signature, and settling the payment via the SDK.',
+    'How ICPay uses X402: building the authorization header with EIP-712, requesting a wallet signature, and settling the 402 payment via the SDK.',
 }
 
 export const sections = [
@@ -20,11 +20,11 @@ export const sections = [
 
 ICPay supports X402, a “Payment Required” pattern for card/onramp-friendly flows. Instead of sending tokens directly from the user’s wallet to a contract, the wallet signs an authorization payload which is sent to ICPay’s settlement endpoint. ICPay verifies and settles the payment, then returns the intent/payment status. {{ className: 'lead' }}
 
-## What is X402?
+## Summary of X402 in icpay
 
 - **Server produces Accepts:** The API returns one or more payment “acceptance” records describing what to sign (scheme/network/amount/recipient).
 - **Client signs authorization:** The SDK builds EIP-712 typed data (EIP-3009 Permit or TransferWithAuthorization), requests a wallet signature, and packages this into an X402 header.
-- **Settlement:** The SDK sends a settle request with the X402 header; ICPay validates and processes payment, then your app waits until a terminal status.
+- **Settlement:** The SDK sends a settle request with the X402 header; ICPay validates and processes payment, then your app waits until a confirmation terminal status.
 
 ## High-level flow
 
@@ -67,8 +67,8 @@ type X402Acceptance = {
 
 The SDK constructs an EIP-712 domain and message from the acceptance, then asks the wallet to sign:
 - Domain:
-  - `name`: `extra.name` or `'Token'`
-  - `version`: `extra.eip3009Version` or `'1'`
+  - `name`: `extra.name`
+  - `version`: `extra.eip3009Version`
   - `chainId`: decimal `network` from the acceptance
   - `verifyingContract`: `asset` or `payTo`
 - Primary type:
