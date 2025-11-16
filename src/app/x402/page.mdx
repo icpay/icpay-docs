@@ -136,12 +136,11 @@ const icpay = new Icpay({
   // evmProvider: window.ethereum,
 })
 
-// Prefer symbol; ledgerCanisterId is optional for X402 (server resolves it)
+// Prefer tokenShortcode; server derives ledger/chain from shortcode
 const result = await icpay.createPaymentX402Usd({
   usdAmount: 10,
-  symbol: 'ICP',
+  tokenShortcode: 'ic_icp',
   metadata: { orderId: 'A-1001' },
-  // chainId: '<uuid>', // optional
 })
 
 // Handle terminal response (completed / failed / pending -> continued waiting)
@@ -159,6 +158,9 @@ What the SDK does for you:
   - Builds a base64 X402 header and calls ICPay settle.
   - Emits lifecycle events and awaits terminal status.
 - If the server suggests fallback or does not return `accepts`, it transparently falls back to `createPaymentUsd`.
+
+### Deprecated inputs (still supported)
+You can still pass `symbol`, `ledgerCanisterId`, or `chainId`, but `tokenShortcode` is now the primary input for selecting a token. The server resolves token ledger and chain from the shortcode automatically.
 
 ## Events and statuses
 
