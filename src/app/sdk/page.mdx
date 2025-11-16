@@ -59,11 +59,13 @@ try {
 
 There are two common ways to pay: fixed token amount or USD amount automatically converted to tokens.
 
+Primary input going forward is the token shortcode. Each verified token ledger exposes a unique, human‑readable `shortcode` (e.g. `ic_icp`, `base_usdcoin`). Prefer sending `tokenShortcode` instead of `symbol`/`ledgerCanisterId`/`chainId`. Legacy fields still work for backward compatibility but are deprecated.
+
 Note on chains:
 
 - `chainId` (optional, UUID): Target chain for the payment intent. If omitted, the intent defaults to the Internet Computer chain. Use this when directing payments to another supported chain.
 
-```ts {{ title: 'Send fixed token amount' }}
+```ts {{ title: 'Send fixed token amount (preferred: tokenShortcode)' }}
 import { Icpay } from '@ic-pay/icpay-sdk'
 
 // If you want a drop-in wallet selector, use the widget's helper:
@@ -77,29 +79,18 @@ const icpay = new Icpay({
   connectedWallet: { owner: '<principal-id>' },
 })
 
-// We can send either symbol or ledgerCanisterId field to the createPayment and createPaymentUsd (symbol is preferred)
-const ledgers = await icpay.getVerifiedLedgers()
-const icpLedger = ledgers.find(l => l.symbol === 'ICP')!
-let ledgerCanisterId = icpLedger.canisterId
-// or
-// ledgerCanisterId = await icpay.getLedgerCanisterIdBySymbol('ICP')
-
 const tx = await icpay.createPayment({
-  ledgerCanisterId, // ICP ledger or any ICRC ledger
-  symbol: 'ICP', // Its either symbol or ledgerCanisterId (symbol is preferred)
+  tokenShortcode: 'ic_icp', // primary way (server resolves token ledger/chain from shortcode)
   amount: '150000000', // smallest unit (e.g. 1.5 ICP with 8 decimals)
   metadata: { myProductId: '511234', myOrderId: '511234', anyInternalField: 'allowed' },
-  // chainId: '<uuid>', // Optional: defaults to Internet Computer when omitted
 })
 ```
 
-```ts {{ title: 'Send by USD amount (auto conversion)' }}
+```ts {{ title: 'Send by USD amount (auto conversion, preferred: tokenShortcode)' }}
 const res = await icpay.createPaymentUsd({
   usdAmount: 5,
-  ledgerCanisterId,
-  symbol: 'ICP', // Its either symbol or ledgerCanisterId (symbol is preferred)
+  tokenShortcode: 'ic_icp',
   metadata: { context: 'tip-jar', myProductId: '511234', myOrderId: '511234', anyInternalField: 'allowed' },
-  // chainId: '<uuid>', // Optional: defaults to Internet Computer when omitted
 })
 ```
 
@@ -107,7 +98,7 @@ const res = await icpay.createPaymentUsd({
 // Attempts X402 flow first; falls back to regular USD flow if not available
 const out = await icpay.createPaymentX402Usd({
   usdAmount: 10,
-  symbol: 'ICP',
+  tokenShortcode: 'ic_icp',
   metadata: { context: 'subscription' },
 })
 
@@ -254,12 +245,15 @@ const all = await icpay.getExternalWalletBalances({
   address: '0xabc...',          // or principal: 'aaaa-bbbb...'
   amountUsd: 10,                // optional: compute requiredAmount per ledger
   chainShortcodes: ['base-sep'],// optional filter
-  tokenShortcodes: ['ckusdc'], // optional filter
+  ledgerShortcodes: ['base_usdcoin'], // optional filter by token shortcode
 })
 for (const b of all.balances) {
   console.log(b.ledgerSymbol, b.formattedBalance, b.hasSufficientBalance)
 }
 ```
+
+### Deprecated inputs (still supported)
+- `symbol`, `ledgerCanisterId`, and `chainId` continue to work, but new integrations should use `tokenShortcode`. The server derives the ledger and chain from the shortcode automatically.
 
 ```ts {{ title: 'Single-ledger balance (connected wallet)' }}
 const b = await icpay.getSingleLedgerBalance('ryjl3-tyaaa-aaaaa-aaaba-cai')
