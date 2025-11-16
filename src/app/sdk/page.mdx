@@ -115,13 +115,6 @@ const out = await icpay.createPaymentX402Usd({
 // and settlement, then wait for terminal status, emitting events along the way.
 ```
 
-```ts {{ title: 'Onramp intent polling (e.g., Transak order lifecycle)' }}
-// After starting an onramp intent, poll until terminal status:
-const ctrl = icpay.notifyPaymentIntentOnRamp({ paymentIntentId: '<intentId>', intervalMs: 5000 })
-// ...later, you may stop polling:
-// ctrl.stop()
-```
-
 Events are emitted throughout the flow when `enableEvents` is true. See Events section below.
 
 {/*
@@ -261,7 +254,7 @@ const all = await icpay.getExternalWalletBalances({
   address: '0xabc...',          // or principal: 'aaaa-bbbb...'
   amountUsd: 10,                // optional: compute requiredAmount per ledger
   chainShortcodes: ['base-sep'],// optional filter
-  ledgerShortcodes: ['ckusdc'], // optional filter
+  tokenShortcodes: ['ckusdc'], // optional filter
 })
 for (const b of all.balances) {
   console.log(b.ledgerSymbol, b.formattedBalance, b.hasSufficientBalance)
