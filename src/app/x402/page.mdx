@@ -24,7 +24,7 @@ ICPay supports X402, a “Payment Required” pattern for card/onramp-friendly f
 
 - **Server produces Accepts:** The API returns one or more payment “acceptance” records describing what to sign (scheme/network/amount/recipient).
 - **Client signs authorization:** The SDK builds EIP-712 typed data (EIP-3009 Permit or TransferWithAuthorization), requests a wallet signature, and packages this into an X402 header.
-- **Settlement:** The SDK sends a settle request with the X402 header; ICPay validates and processes payment, then your app waits until a confirmation terminal status.
+- **Settlement:** The SDK sends a settle request with the X402 header; ICPay validates and processes payment, then your app waits until a terminal status.
 
 ## High-level flow
 
@@ -161,6 +161,12 @@ What the SDK does for you:
 
 ### Deprecated inputs (still supported)
 You can still pass `symbol`, `ledgerCanisterId`, or `chainId`, but `tokenShortcode` is now the primary input for selecting a token. The server resolves token ledger and chain from the shortcode automatically.
+
+
+### Scope and networks
+- X402 is currently an EVM-based flow in the SDK (signing via `eth_signTypedData_v4`).
+- For the Internet Computer (IC) network, the SDK uses native ICRC-1 transfers (see `createPayment` / `createPaymentUsd`) and then notifies/awaits terminal status. X402 is not used on IC at this time.
+
 
 ## Events and statuses
 

@@ -25,9 +25,11 @@ export default function Page() {
   const config = {
     publishableKey: process.env.NEXT_PUBLIC_ICPAY_PK,
     amountUsd: 49.99,
-    defaultSymbol: 'ICP',
-    showLedgerDropdown: 'none',
-    progressBar: { enabled: true, mode: 'modal' },
+    // Optional: constrain wallets/tokens shown
+    // chainTypes: ['ic','evm'],
+    // chainShortcodes: ['ic','base'],
+    // tokenShortcodes: ['icp','ckusdc'],
+    // progressBar: { enabled: true },
   }
   return (
     <IcpayPayButton
@@ -50,11 +52,8 @@ export default function Page() {
     ref.current.config = {
       publishableKey: process.env.NEXT_PUBLIC_ICPAY_PK,
       amountUsd: 49.99,
-      defaultSymbol: 'ICP',
-      // Hide dropdown → button shows selected symbol: "Pay $49.99 with ICP"
-      showLedgerDropdown: false,
-      // Modal progress bar is recommended for buttons
-      progressBar: { enabled: true, mode: 'modal' },
+      // Optional
+      // progressBar: { enabled: true },
     }
   }, [])
   return <icpay-pay-button ref={ref as any} />
@@ -70,9 +69,8 @@ onMounted(() => {
   el.value.config = {
     publishableKey: import.meta.env.VITE_ICPAY_PK,
     amountUsd: 49.99,
-    defaultSymbol: 'ICP',
-    showLedgerDropdown: false,
-    progressBar: { enabled: true, mode: 'modal' },
+    // Optional
+    // progressBar: { enabled: true },
   }
 })
 </script>
@@ -90,9 +88,8 @@ export class AppComponent implements AfterViewInit {
     this.el.nativeElement.config = {
       publishableKey: (window as any).env?.ICPAY_PK || 'pk_test_xxx',
       amountUsd: 49.99,
-      defaultSymbol: 'ICP',
-      showLedgerDropdown: false,
-      progressBar: { enabled: true, mode: 'modal' },
+      // Optional
+      // progressBar: { enabled: true },
     }
   }
 }
@@ -104,15 +101,9 @@ export class AppComponent implements AfterViewInit {
   el.config = {
     publishableKey: 'pk_test_xxx',
     amountUsd: 49.99,
-    defaultSymbol: 'ICP',
-    showLedgerDropdown: false,
-    progressBar: { enabled: true, mode: 'modal' },
+    // Optional
+    // progressBar: { enabled: true },
   }
-  // Optional: provide dropdown choices
-  // el.config = { ...el.config, showLedgerDropdown: true, cryptoOptions: [
-  //   { symbol: 'ICP', label: 'ICP', canisterId: 'ryjl3-tyaaa-aaaaa-aaaba-cai' },
-  //   { symbol: 'ckUSDC', label: 'USDC', canisterId: 'xevnm-gaaaa-aaaar-qafnq-cai' },
-  // ] }
 </script>
 
 ```

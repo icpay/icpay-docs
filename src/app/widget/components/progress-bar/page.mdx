@@ -1,6 +1,6 @@
 export const metadata = {
   title: 'Progress Bar',
-  description: 'Built-in progress indicator for widget flows with configurable modes.',
+  description: 'Built-in progress indicator for widget flows.',
 }
 
 export const sections = [
@@ -11,7 +11,7 @@ export const sections = [
 
 # Progress Bar
 
-Every widget can render a progress indicator and it is turned on by default. You can choose the visual mode and toggle it per widget via the `progressBar` option.
+Every widget can render a progress indicator and it is turned on by default. You can enable or disable it per widget via the `progressBar.enabled` option.
 
 ## Usage
 
@@ -27,7 +27,8 @@ export default function Page() {
     if (!ref.current) return
     ref.current.config = {
       publishableKey: process.env.NEXT_PUBLIC_ICPAY_PK,
-      progressBar: { enabled: true, mode: 'modal' },
+      amountUsd: 49.99,
+      progressBar: { enabled: true },
     }
   }, [])
   return <icpay-tip-jar ref={ref as any} />
@@ -43,7 +44,8 @@ onMounted(() => {
   if (!el.value) return
   el.value.config = {
     publishableKey: import.meta.env.VITE_ICPAY_PK,
-    progressBar: { enabled: true, mode: 'horizontal' },
+    amountUsd: 49.99,
+    progressBar: { enabled: true },
   }
 })
 </script>
@@ -61,7 +63,8 @@ export class AppComponent implements AfterViewInit {
   ngAfterViewInit() {
     this.el.nativeElement.config = {
       publishableKey: (window as any).env?.ICPAY_PK || 'pk_test_xxx',
-      progressBar: { enabled: true, mode: 'vertical' },
+      amountUsd: 49.99,
+      progressBar: { enabled: true },
     }
   }
 }
@@ -73,7 +76,8 @@ export class AppComponent implements AfterViewInit {
 <script>
   el.config = {
     publishableKey: 'pk_test_xxx',
-    progressBar: { enabled: true, mode: 'inline' },
+    amountUsd: 49.99,
+    progressBar: { enabled: true },
   }
 </script>
 ```
@@ -83,7 +87,6 @@ export class AppComponent implements AfterViewInit {
 ## Configuration
 
 - `progressBar.enabled?: boolean` default true
-- `progressBar.mode?: 'modal' | 'horizontal' | 'vertical' | 'inline'`
 
 Tip: Style preferences can be combined with `theme` (e.g., `primaryColor`) on each widget. Other widgets can link here to centralize progress bar options.
 
