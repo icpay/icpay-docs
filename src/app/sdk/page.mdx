@@ -245,7 +245,7 @@ const all = await icpay.getExternalWalletBalances({
   address: '0xabc...',          // or principal: 'aaaa-bbbb...'
   amountUsd: 10,                // optional: compute requiredAmount per ledger
   chainShortcodes: ['base-sep'],// optional filter
-  ledgerShortcodes: ['base_usdcoin'], // optional filter by token shortcode
+  tokenShortcodes: ['base_usdcoin'], // optional filter by token shortcode
 })
 for (const b of all.balances) {
   console.log(b.ledgerSymbol, b.formattedBalance, b.hasSufficientBalance)
