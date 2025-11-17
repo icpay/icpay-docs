@@ -23,8 +23,9 @@ export const sections = [
 ICPay Widget is a set of framework-agnostic Web Components for payments. Drop in `icpay-premium-content`, `icpay-tip-jar`, `icpay-article-paywall`, `icpay-coffee-shop`, `icpay-donation-thermometer`, `icpay-pay-button` or `icpay-amount-input` to accept payments instantly. For React, wrappers are provided to use idiomatic props (e.g., `onSuccess`). {{ className: 'lead' }}
 
 ## Intro
-
-- Built-in wallet selector for Plug, Internet Identity, and Oisy.
+- Built-in wallet selector for IC and EVM wallets:
+  - IC: Plug, Oisy, Internet Identity (II), NFID
+  - EVM: MetaMask, Coinbase, Brave, Rabby, Phantom, OKX (Rainbow/WalletConnect currently disabled)
 - Uses the [SDK](/sdk) under the hood; you can pass SDK options through the widget config.
 - Emits global events so your app can react to progress and results.
 
@@ -41,6 +42,10 @@ export default function Page() {
     publishableKey: process.env.NEXT_PUBLIC_ICPAY_PK,
     amountsUsd: [1,5,10],
     defaultAmountUsd: 5,
+    // Optional filters for multichain UX:
+    // chainTypes: ['ic','evm'],
+    // chainShortcodes: ['ic','base'],
+    // tokenShortcodes: ['icp','ckusdc'],
   }
   return (
     <IcpayTipJar
@@ -131,8 +136,9 @@ import { createWalletSelect } from '@ic-pay/icpay-widget'
 
 const walletSelect = createWalletSelect({ icHost: 'https://icp-api.io' })
 
-// Prompt the user to connect (optionally specify a provider id: 'plug' | 'ii' | 'oisy')
-await walletSelect.connect()
+// Prompt the user to connect; optionally specify a provider id:
+// 'plug' | 'oisy' | 'ii' | 'nfid' | 'metamask' | 'coinbase' | 'brave' | 'rabby' | 'phantom' | 'okx'
+await walletSelect.connect('metamask')
 
 // Use the signed actor in your integrations
 const actor = walletSelect.getActor({ canisterId, idl, requiresSigning: true, anon: false })
@@ -177,8 +183,6 @@ export default function Page() {
   const config = {
     publishableKey: process.env.NEXT_PUBLIC_ICPAY_PK,
     amountUsd: 12,
-    defaultSymbol: 'ICP',
-    showLedgerDropdown: 'none',
   }
   return (
     <IcpayPayButton
@@ -200,7 +204,6 @@ export default function Page() {
     minUsd: 1,
     maxUsd: 1000,
     stepUsd: 1,
-    showLedgerDropdown: 'dropdown',
   }
   return (
     <IcpayAmountInput
@@ -339,12 +342,16 @@ export class AppComponent implements AfterViewInit {
 
 - `useOwnWallet`: set to true to manage wallet connection yourself; provide `actorProvider` + `connectedWallet`.
 - `plugNPlay`: theme and provider toggles for built-in wallet UX.
-- `progressBar`: choose `modal | horizontal | vertical | inline` progress UI.
+- `progressBar`: enable/disable the built-in progress bar (default: enabled).
 - `metadata`: object of custom fields to attach to created payment intents (merged with per-call metadata).
 - `derivationOrigin`: optional override for wallet derivation origin (used by Internet Identity). If omitted, the widget derives it from the current site origin and collapses subdomains to the apex domain (e.g., `demo.example.com` → `https://example.com`).
-- `showLedgerDropdown`: global token selector control across widgets — `'buttons' | 'dropdown' | 'none'`.
 - `debug`: enable verbose console logging in widget and SDK.
 - `disablePaymentButton` / `disableAfterSuccess`: disable the pay button immediately, or after a success.
+- Multichain filters and selection:
+  - `chainName?` (string), `chainId?` (number)
+  - `chainTypes?: Array<'ic' | 'evm'>`
+  - `chainShortcodes?: string[]` (e.g., `['ic','base']`)
+  - `tokenShortcodes?: string[]` (e.g., `['icp','ckusdc']`)
 
 <CodeGroup title="Advanced configuration examples">
 
@@ -370,6 +377,10 @@ export default function Page() {
       // Optional: override derivation origin used by Internet Identity
       // By default, the widget will derive and use the apex of the current domain
       derivationOrigin: 'https://example.com',
+      // Optional multichain filters to constrain balances/choices shown
+      chainTypes: ['ic','evm'],
+      chainShortcodes: ['ic','base'],
+      tokenShortcodes: ['icp','ckusdc'],
     }
   }, [])
   return <icpay-tip-jar ref={ref as any} />
@@ -451,7 +462,7 @@ export class AppComponent implements AfterViewInit {
 
 The widget passes a subset of options directly to the SDK:
 
-- `publishableKey`, `apiUrl`, `icHost`, `actorProvider`, `connectedWallet`.
+- `publishableKey`, `apiUrl`, `icHost`, `actorProvider`, `connectedWallet`, `evmProvider`.
 
 See all SDK options in the [SDK configuration](/sdk#configuration).
 
@@ -464,32 +475,35 @@ Secret keys are never used in the widget. If you need server-only data (history,
 Common widget config (full):
 
 - `publishableKey` (string) — required
-- `apiUrl?`, `icHost?`, `derivationOrigin?`
-- `actorProvider?`, `connectedWallet?`, `useOwnWallet?`
+- `apiUrl?`, `icHost?`, `derivationOrigin?`, `evmProvider?`
+- `actorProvider?`, `connectedWallet?`, `useOwnWallet?`, `debug?`
 - `plugNPlay?`
   - `enabled?`
   - `providers?` `{ internetIdentity?: boolean; oisy?: boolean; plug?: boolean }`
   - `theme?` `{ modalBackground?, modalBorderRadius?, buttonBackground?, buttonHoverBackground?, textColor?, primaryColor? }`
-- `openOisyInNewTab?` (boolean) — If `true`, Oisy opens in a new tab for connect/transfer. Default: `false` (popup). Useful if your site/browser blocks popups or breaks window.opener.
+- `openOisyInNewTab?` (boolean) — If `true`, Oisy opens in a new tab for connect/transfer. Default: `false` (popup).
 - `theme?`
   - `{ primaryColor?, secondaryColor?, accentColor?, textColor?, mutedTextColor?, surfaceColor?, surfaceAltColor?, borderColor?, fontFamily? }`
-- `debug?` (boolean)
-- `progressBar?` `{ enabled?: boolean, mode?: 'modal' | 'horizontal' | 'vertical' | 'inline' }`
+- `progressBar?` `{ enabled?: boolean }`
 - `metadata?` (object) — custom fields merged into payment intent metadata for every widget
 - `disablePaymentButton?` (boolean)
 - `disableAfterSuccess?` (boolean)
-- `showLedgerDropdown?` `'buttons' | 'dropdown' | 'none'` — global token selector behavior
+// Multichain filters:
+- `chainName?` (string), `chainId?` (number)
+- `chainTypes?: Array<'ic' | 'evm'>`
+- `chainShortcodes?: string[]`
+- `tokenShortcodes?: string[]`
 {/* onramp-start */}
 - `onrampDisabled?` (boolean) — global kill switch to hide Transak card option (default: true)
-- `onramp?` `{ environment?: 'STAGING' | 'PRODUCTION'; apiKey?: string | null; width?: number|string; height?: number|string; autoOpen?: boolean; creditCardLabel?: string; enabled?: boolean }` Currently disabled
+- `onramp?` `{ environment?: 'STAGING' | 'PRODUCTION'; apiKey?: string | null; width?: number|string; height?: number|string; autoOpen?: boolean; creditCardLabel?: string; enabled?: boolean }`
 {/* onramp-end */}
 
 Component-specific (highlights):
-  - premium-content: `priceUsd`, `imageUrl?`, `cryptoOptions?`, `defaultSymbol?`, `buttonLabel?`, `onSuccess(tx)`
-  - tip-jar: `amountsUsd?`, `defaultAmountUsd?`, `cryptoOptions?`, `defaultSymbol?`, `buttonLabel?`, `onSuccess(tx)`
-  - article-paywall: `priceUsd`, `title?`, `preview?`, `lockedContent?`, `cryptoOptions?`, `defaultSymbol?`, `buttonLabel?`, `onSuccess(tx)`
-  - coffee-shop: `items[{ name, priceUsd }]`, `defaultItemIndex?`, `cryptoOptions?`, `defaultSymbol?`, `buttonLabel?`, `onSuccess(tx)`
-  - donation-thermometer: `goalUsd`, `defaultAmountUsd?`, `amountsUsd?`, `cryptoOptions?`, `defaultSymbol?`, `buttonLabel?`, `onSuccess(tx)`
+  - premium-content: `priceUsd`, `imageUrl?`, `buttonLabel?`, `onSuccess(tx)`
+  - tip-jar: `amountsUsd?`, `defaultAmountUsd?`, `buttonLabel?`, `onSuccess(tx)`
+  - article-paywall: `priceUsd`, `title?`, `preview?`, `lockedContent?`, `buttonLabel?`, `onSuccess(tx)`
+  - coffee-shop: `items[{ name, priceUsd }]`, `defaultItemIndex?`, `buttonLabel?`, `onSuccess(tx)`
+  - donation-thermometer: `goalUsd`, `defaultAmountUsd?`, `amountsUsd?`, `buttonLabel?`, `onSuccess(tx)`
 
 Link SDK options that also apply: [SDK configuration](/sdk#configuration).
 
@@ -548,7 +562,7 @@ All widgets expose a “Pay with credit card” action when `config.onramp` is s
 2) Opens Transak and listens for `TRANSAK_ORDER_SUCCESSFUL` from the iframe.
 3) Closes the Transak modal on success and begins notifying ICPay until completion.
 
-The progress bar updates the first step label to “Transak Started” with tooltip “Awaiting Transak information” during onramp.
+The progress bar updates its first step to reflect “Transak Started – Awaiting Transak information” during onramp.
 
 <div className="not-prose">
   <Button href="/ledgers" arrow="right" variant="text">
