@@ -13,11 +13,11 @@ export const sections = [
 
 # Ledgers
 
-ICPay supports verified ICRC ledgers (including ICP). You can fetch the list, get prices, and resolve canister IDs by symbol. {{ className: 'lead' }}
+ICPay supports verified ledgers across chains (IC ICRC and EVM). You can fetch lists (with or without price data), resolve canister IDs by symbol, and read detailed metadata. {{ className: 'lead' }}
 
 ## Overview
 
-- Each ledger provides `id`, `name`, `symbol`, `family`, `canisterId`, `decimals`, `fee`, `verified`, and optional price data.
+- Each ledger provides `id`, `name`, `symbol`, `shortcode?`, `canisterId`, `decimals`, `fee`, `verified`, and optional price data.
 - Prices are available when configured; USD conversions are supported via SDK helpers.
 
 ## Data model
@@ -29,8 +29,9 @@ type LedgerPublic = {
   id: string
   name: string
   symbol: string
-  family: string
+  shortcode?: string | null
   canisterId: string
+  chainId?: string           // backend chain UUID or chain id (as string)
   decimals: number
   logoUrl: string | null
   verified: boolean
@@ -47,9 +48,11 @@ type SdkLedger = {
   id: string
   name: string
   symbol: string
-  family: string
+  chainId?: string           // backend chain UUID or chain id (as string)
+  shortcode?: string | null
   canisterId: string
   decimals: number
+  logoUrl: string | null
   verified: boolean
   fee: string | null
   network: 'mainnet' | 'testnet'
@@ -58,12 +61,14 @@ type SdkLedger = {
   coingeckoId: string | null
   currentPrice: number | null
   lastPriceUpdate: string | null
+  createdAt: string
+  updatedAt: string
 }
 ```
 
-### Family grouping
-
-The `family` field groups the same token across chains and standards (for example, USDC on EVM, ICP, or Solana). Use it to present a single token choice to users and then offer only the networks where that family has a variant. If only one family is configured, you can skip token selection and show network options directly.
+Notes:
+- `shortcode` is a human-friendly token identifier (e.g., `ic_icp`, `ic_ckusdc`) that can be used in UX and filtering.
+- `chainId` refers to the underlying chain (ICPay backend UUID) associated to the ledger.
 
 ## Using with SDK
 
@@ -82,7 +87,10 @@ const calc = await icpay.calculateTokenAmountFromUSD({ usdAmount: 10, ledgerSymb
 
 ## Using with Widget
 
-You can let the widget fetch verified ledgers automatically or supply `cryptoOptions` yourself.
+Widgets fetch verified ledgers automatically. You can constrain choices via multichain filters in the widget config:
+- `chainTypes?: Array<'ic' | 'evm'>`
+- `chainShortcodes?: string[]` (e.g., `['ic','base']`)
+- `tokenShortcodes?: string[]` (e.g., `['ic_icp','ic_ckusdc']`)
 
 <CodeGroup title="Widget examples">
 
@@ -97,10 +105,10 @@ export default function Page() {
     ref.current.config = {
       publishableKey: process.env.NEXT_PUBLIC_ICPAY_PK,
       amountsUsd: [1,5,10],
-      cryptoOptions: [
-        { symbol: 'ICP', label: 'ICP', canisterId: 'ryjl3-tyaaa-aaaaa-aaaba-cai' },
-        { symbol: 'ckUSDC', label: 'ckUSDC', canisterId: 'xevnm-gaaaa-aaaar-qafnq-cai' },
-      ],
+      // Optional filters to limit networks/tokens:
+      // chainTypes: ['ic','evm'],
+      // chainShortcodes: ['ic','base'],
+      // tokenShortcodes: ['ic_icp','ic_ckusdc'],
     }
   }, [])
   return <icpay-tip-jar ref={ref as any} />
@@ -117,10 +125,8 @@ onMounted(() => {
   el.value.config = {
     publishableKey: import.meta.env.VITE_ICPAY_PK,
     amountsUsd: [1,5,10],
-    cryptoOptions: [
-      { symbol: 'ICP', label: 'ICP', canisterId: 'ryjl3-tyaaa-aaaaa-aaaba-cai' },
-      { symbol: 'ckUSDC', label: 'ckUSDC', canisterId: 'xevnm-gaaaa-aaaar-qafnq-cai' },
-    ],
+    // chainTypes: ['ic'],
+    // tokenShortcodes: ['ic_icp'],
   }
 })
 </script>
@@ -139,10 +145,7 @@ export class AppComponent implements AfterViewInit {
     this.el.nativeElement.config = {
       publishableKey: (window as any).env?.ICPAY_PK || 'pk_test_xxx',
       amountsUsd: [1,5,10],
-      cryptoOptions: [
-        { symbol: 'ICP', label: 'ICP', canisterId: 'ryjl3-tyaaa-aaaaa-aaaba-cai' },
-        { symbol: 'ckUSDC', label: 'ckUSDC', canisterId: 'xevnm-gaaaa-aaaar-qafnq-cai' },
-      ],
+      // tokenShortcodes: ['ic_icp','ic_ckusdc'],
     }
   }
 }
@@ -155,10 +158,8 @@ export class AppComponent implements AfterViewInit {
   el.config = {
     publishableKey: 'pk_test_xxx',
     amountsUsd: [1,5,10],
-    cryptoOptions: [
-      { symbol: 'ICP', label: 'ICP', canisterId: 'ryjl3-tyaaa-aaaaa-aaaba-cai' },
-      { symbol: 'ckUSDC', label: 'ckUSDC', canisterId: 'xevnm-gaaaa-aaaar-qafnq-cai' },
-    ],
+    // chainTypes: ['ic'],
+    // tokenShortcodes: ['ic_icp'],
   }
 </script>
 ```
