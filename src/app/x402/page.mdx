@@ -136,7 +136,7 @@ const icpay = new Icpay({
   // evmProvider: window.ethereum,
 })
 
-// Prefer tokenShortcode; server derives ledger/chain from shortcode
+// Prefer tokenShortcode; server derives token/chain from shortcode
 const result = await icpay.createPaymentX402Usd({
   usdAmount: 10,
   tokenShortcode: 'ic_icp',

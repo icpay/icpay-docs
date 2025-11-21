@@ -1,6 +1,6 @@
 export const metadata = {
   title: 'Amount Input',
-  description: 'Let users enter a USD amount to pay with optional ledger selection.',
+  description: 'Let users enter a USD amount to pay with optional token selection.',
 }
 
 export const sections = [
@@ -11,7 +11,7 @@ export const sections = [
 
 # Amount Input
 
-The Amount Input component lets users enter a custom USD amount and pay, optionally choosing a ledger from a dropdown. {{ className: 'lead' }}
+The Amount Input component lets users enter a custom USD amount and pay, optionally choosing a token from a dropdown. {{ className: 'lead' }}
 
 ## Usage
 
@@ -159,7 +159,7 @@ export class AppComponent implements AfterViewInit {
 
 Notes:
 - With the global `showLedgerDropdown` string:
-  - `'buttons'` shows selector chips when multiple ledgers are available; hides selector if only one.
+  - `'buttons'` shows selector chips when multiple tokens are available; hides selector if only one.
   - `'dropdown'` always shows a dropdown.
   - `'none'` hides the selector and uses `defaultSymbol`.
 - For non-modal progress modes, the bar appears only during processing.

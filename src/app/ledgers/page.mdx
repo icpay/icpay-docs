@@ -1,7 +1,7 @@
 export const metadata = {
-  title: 'Ledgers',
+  title: 'Tokens',
   description:
-    'Supported ledgers, canister IDs, symbols, price data, and how to use them via SDK and Widget.',
+    'Supported tokens, canister IDs, symbols, price data, and how to use them via SDK and Widget.',
 }
 
 export const sections = [
@@ -11,13 +11,13 @@ export const sections = [
   { title: 'Using with Widget', id: 'using-with-widget' },
 ]
 
-# Ledgers
+# Tokens
 
-ICPay supports verified ledgers across chains (IC ICRC and EVM). You can fetch lists (with or without price data), resolve canister IDs by symbol, and read detailed metadata. {{ className: 'lead' }}
+ICPay supports verified tokens across chains (IC ICRC and EVM). You can fetch lists (with or without price data), resolve canister IDs by symbol, and read detailed metadata. {{ className: 'lead' }}
 
 ## Overview
 
-- Each ledger provides `id`, `name`, `symbol`, `shortcode?`, `canisterId`, `decimals`, `fee`, `verified`, and optional price data.
+- Each token provides `id`, `name`, `symbol`, `shortcode?`, `canisterId`, `decimals`, `fee`, `verified`, and optional price data.
 - Prices are available when configured; USD conversions are supported via SDK helpers.
 
 ## Data model
@@ -68,7 +68,7 @@ type SdkLedger = {
 
 Notes:
 - `shortcode` is a human-friendly token identifier (e.g., `ic_icp`, `ic_ckusdc`) that can be used in UX and filtering.
-- `chainId` refers to the underlying chain (ICPay backend UUID) associated to the ledger.
+- `chainId` refers to the underlying chain (ICPay backend UUID) associated to the token.
 
 ## Using with SDK
 
@@ -81,13 +81,13 @@ const idBySymbol = await icpay.getLedgerCanisterIdBySymbol('ICP')
 const info = await icpay.getLedgerInfo(idBySymbol)
 const withPrices = await icpay.getAllLedgersWithPrices()
 
-// Convert 10 USD to token amount for a ledger
+// Convert 10 USD to token amount for a token
 const calc = await icpay.calculateTokenAmountFromUSD({ usdAmount: 10, ledgerSymbol: 'ICP' })
 ```
 
 ## Using with Widget
 
-Widgets fetch verified ledgers automatically. You can constrain choices via multichain filters in the widget config:
+Widgets fetch verified tokens automatically. You can constrain choices via multichain filters in the widget config:
 - `chainTypes?: Array<'ic' | 'evm'>`
 - `chainShortcodes?: string[]` (e.g., `['ic','base']`)
 - `tokenShortcodes?: string[]` (e.g., `['ic_icp','ic_ckusdc']`)
@@ -168,7 +168,7 @@ export class AppComponent implements AfterViewInit {
 
 <div className="not-prose">
   <Button href="/sdk" variant="text" arrow="right">
-    <>Use ledgers in the SDK</>
+    <>Use tokens in the SDK</>
   </Button>
 </div>
 
