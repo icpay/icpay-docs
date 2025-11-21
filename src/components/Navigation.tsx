@@ -272,9 +272,9 @@ export const navigation: Array<NavGroup> = [
     ],
   },
   {
-    title: 'Ledgers',
+    title: 'Tokens',
     links: [
-      { title: 'Ledgers', href: '/ledgers' },
+      { title: 'Tokens', href: '/ledgers' },
     ],
   },
   {

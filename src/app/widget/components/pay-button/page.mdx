@@ -11,7 +11,7 @@ export const sections = [
 
 # Pay Button
 
-The Pay Button component renders a compact, single-action checkout button for a fixed USD amount. Optionally show a ledger dropdown; if hidden, it uses `defaultSymbol`. {{ className: 'lead' }}
+The Pay Button component renders a compact, single-action checkout button for a fixed USD amount. Optionally show a token dropdown; if hidden, it uses `defaultSymbol`. {{ className: 'lead' }}
 
 ## Usage
 
@@ -123,7 +123,7 @@ export class AppComponent implements AfterViewInit {
 
 Notes:
 - With the global `showLedgerDropdown` string:
-  - `'buttons'` shows selector chips when multiple ledgers are available; hides selector if only one.
+  - `'buttons'` shows selector chips when multiple tokens are available; hides selector if only one.
   - `'dropdown'` always shows a dropdown.
   - `'none'` hides the selector and uses `defaultSymbol`.
 - For non-modal progress modes, the bar appears only during processing.

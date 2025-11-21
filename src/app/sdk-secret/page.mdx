@@ -85,21 +85,21 @@ for (const p of byMetadata.payments) {
 ```
 
 ### getVerifiedLedgersPrivate
-Returns verified ledgers available to the account.
+Returns verified tokens available to the account.
 
 ```ts
 const ledgers = await icpay.protected.getVerifiedLedgersPrivate()
 ```
 
 ### getAllLedgersWithPricesPrivate
-Returns ledgers including current price information.
+Returns tokens including current price information.
 
 ```ts
 const pricedLedgers = await icpay.protected.getAllLedgersWithPricesPrivate()
 ```
 
 ### getLedgerInfoPrivate
-Returns detailed information about a specific ledger by ID or canister ID.
+Returns detailed information about a specific token by ID or canister ID.
 
 ```ts
 const ledger = await icpay.protected.getLedgerInfoPrivate('ryjl3-tyaaa-aaaaa-aaaba-cai')
@@ -155,7 +155,7 @@ const event = await icpay.protected.getWebhookEventById('evt_123')
 ```
 
 ### getAccountWalletBalances
-Fetch account wallet balances across verified ledgers, with optional total USD if prices are available.
+Fetch account wallet balances across verified tokens, with optional total USD if prices are available.
 
 ```ts
 const balances = await icpay.protected.getAccountWalletBalances()
