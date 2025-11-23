@@ -11,7 +11,7 @@ export const sections = [
 
 # Pay Button
 
-The Pay Button component renders a compact, single-action checkout button for a fixed USD amount. Optionally show a token dropdown; if hidden, it uses `defaultSymbol`. {{ className: 'lead' }}
+The Pay Button component renders a compact, single-action checkout button for a fixed USD amount. Optionally filter available tokens via `tokenShortcodes`. {{ className: 'lead' }}
 
 ## Usage
 
@@ -28,7 +28,7 @@ export default function Page() {
     // Optional: constrain wallets/tokens shown
     // chainTypes: ['ic','evm'],
     // chainShortcodes: ['ic','base'],
-    // tokenShortcodes: ['icp','ckusdc'],
+    // tokenShortcodes: ['ic_icp','ic_ckusdc','base_eth'],
     // progressBar: { enabled: true },
   }
   return (
@@ -113,20 +113,9 @@ export class AppComponent implements AfterViewInit {
 ## Configuration
 
 - `amountUsd?: number`
-- `cryptoOptions?: { symbol: string; label: string; canisterId?: string }[]`
-- Token selector:
-  - Per-component legacy: `showLedgerDropdown?: boolean` (default: false)
-  - Global (recommended): `showLedgerDropdown?: 'buttons' | 'dropdown' | 'none'`
-- `defaultSymbol?: string` (e.g., `'ICP'`)
 - `buttonLabel?: string` (used if `amountUsd` not set)
-- `progressBar?: { enabled?: boolean; mode?: 'modal' | 'horizontal' | 'vertical' | 'inline' }`
-
-Notes:
-- With the global `showLedgerDropdown` string:
-  - `'buttons'` shows selector chips when multiple tokens are available; hides selector if only one.
-  - `'dropdown'` always shows a dropdown.
-  - `'none'` hides the selector and uses `defaultSymbol`.
-- For non-modal progress modes, the bar appears only during processing.
+- `progressBar?: { enabled?: boolean }`
+- Common options: `tokenShortcodes?: string[]`, `chainShortcodes?: string[]`, `chainTypes?: Array<'ic' | 'evm'>`, `theme?`, `useOwnWallet?`, `plugNPlay?`, `debug?`, `disablePaymentButton?`, `disableAfterSuccess?`
 
 {/* onramp-start */}
 ## Onramp (Transak)
@@ -155,7 +144,7 @@ export default function Page() {
         creditCardLabel: 'Pay with credit card',
         enabled: true,
       },
-      progressBar: { enabled: true, mode: 'modal' },
+      progressBar: { enabled: true },
     }
   }, [])
   return <icpay-pay-button ref={ref as any} />

@@ -45,7 +45,7 @@ export default function Page() {
     // Optional filters for multichain UX:
     // chainTypes: ['ic','evm'],
     // chainShortcodes: ['ic','base'],
-    // tokenShortcodes: ['icp','ckusdc'],
+    // tokenShortcodes: ['ic_icp','ic_ckusdc','base_eth'],
   }
   return (
     <IcpayTipJar
@@ -351,7 +351,7 @@ export class AppComponent implements AfterViewInit {
   - `chainName?` (string), `chainId?` (number)
   - `chainTypes?: Array<'ic' | 'evm'>`
   - `chainShortcodes?: string[]` (e.g., `['ic','base']`)
-  - `tokenShortcodes?: string[]` (e.g., `['icp','ckusdc']`)
+  - `tokenShortcodes?: string[]` (e.g., `['ic_icp','ic_ckusdc','base_eth']`)
 
 <CodeGroup title="Advanced configuration examples">
 
@@ -372,7 +372,7 @@ export default function Page() {
       // const walletSelect = createWalletSelect()
       // actorProvider: (canisterId, idl) => walletSelect.getActor({ canisterId, idl, requiresSigning: true, anon: false }),
       plugNPlay: { enabled: false },
-      progressBar: { enabled: true, mode: 'modal' },
+      progressBar: { enabled: true },
       theme: { primaryColor: '#0ea5e9' },
       // Optional: override derivation origin used by Internet Identity
       // By default, the widget will derive and use the apex of the current domain
@@ -380,7 +380,7 @@ export default function Page() {
       // Optional multichain filters to constrain balances/choices shown
       chainTypes: ['ic','evm'],
       chainShortcodes: ['ic','base'],
-      tokenShortcodes: ['icp','ckusdc'],
+      tokenShortcodes: ['ic_icp','ic_ckusdc','base_eth'],
     }
   }, [])
   return <icpay-tip-jar ref={ref as any} />
@@ -402,7 +402,7 @@ onMounted(() => {
     connectedWallet: { owner: '<principal>' },
     // actorProvider: (canisterId, idl) => walletSelect.getActor({ canisterId, idl, requiresSigning: true, anon: false }),
     plugNPlay: { enabled: false },
-    progressBar: { enabled: true, mode: 'modal' },
+    progressBar: { enabled: true },
     theme: { primaryColor: '#0ea5e9' },
   }
 })
@@ -427,7 +427,7 @@ export class AppComponent implements AfterViewInit {
       connectedWallet: { owner: '<principal>' },
       // actorProvider: (canisterId, idl) => walletSelect.getActor({ canisterId, idl, requiresSigning: true, anon: false }),
       plugNPlay: { enabled: false },
-      progressBar: { enabled: true, mode: 'modal' },
+      progressBar: { enabled: true },
       theme: { primaryColor: '#0ea5e9' },
     }
   }
@@ -448,7 +448,7 @@ export class AppComponent implements AfterViewInit {
     connectedWallet: { owner: '<principal>' },
     // actorProvider: (canisterId, idl) => walletSelect.getActor({ canisterId, idl, requiresSigning: true, anon: false }),
     plugNPlay: { enabled: false },
-    progressBar: { enabled: true, mode: 'modal' },
+    progressBar: { enabled: true },
     theme: { primaryColor: '#0ea5e9' },
   }
   // Optionally listen for SDK events on window
@@ -479,8 +479,17 @@ Common widget config (full):
 - `actorProvider?`, `connectedWallet?`, `useOwnWallet?`, `debug?`
 - `plugNPlay?`
   - `enabled?`
-  - `providers?` `{ internetIdentity?: boolean; oisy?: boolean; plug?: boolean }`
   - `theme?` `{ modalBackground?, modalBorderRadius?, buttonBackground?, buttonHoverBackground?, textColor?, primaryColor? }`
+  - `adapters?`
+    - Enable/disable specific wallets and pass adapter-specific config.
+    - Structure:
+      - `{ <adapterId>: { enabled?: boolean; config?: Record<string, any> } }`
+    - Supported adapter ids (EVM): `metamask`, `coinbase`, `brave`, `rabby`, `phantom`, `okx`, `walletconnect`
+    - Supported adapter ids (IC): `plug`, `oisy`, `ii`, `nfid`
+    - Notes:
+      - `walletconnect` requires `config.projectId` (get one at `cloud.walletconnect.com`).
+      - `walletconnect` optional config: `umdUrls?: string | string[]`, `globalVar?: string`.
+      - Other adapters typically don’t need config; set `{ enabled: false }` to hide.
 - `openOisyInNewTab?` (boolean) — If `true`, Oisy opens in a new tab for connect/transfer. Default: `false` (popup).
 - `theme?`
   - `{ primaryColor?, secondaryColor?, accentColor?, textColor?, mutedTextColor?, surfaceColor?, surfaceAltColor?, borderColor?, fontFamily? }`
@@ -489,7 +498,6 @@ Common widget config (full):
 - `disablePaymentButton?` (boolean)
 - `disableAfterSuccess?` (boolean)
 // Multichain filters:
-- `chainName?` (string), `chainId?` (number)
 - `chainTypes?: Array<'ic' | 'evm'>`
 - `chainShortcodes?: string[]`
 - `tokenShortcodes?: string[]`

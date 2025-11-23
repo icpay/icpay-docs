@@ -27,13 +27,9 @@ export default function Page() {
     defaultAmountUsd: 20,
     minUsd: 1,
     stepUsd: 1,
-    defaultSymbol: 'ICP',
-    showLedgerDropdown: 'dropdown',
-    cryptoOptions: [
-      { symbol: 'ICP', label: 'ICP' },
-      { symbol: 'ckUSDC', label: 'USDC' },
-    ],
-    progressBar: { enabled: true, mode: 'modal' },
+    // Optional: filter which tokens appear in the balances modal
+    tokenShortcodes: ['ic_icp', 'ic_ckusdc', 'base_eth'],
+    progressBar: { enabled: true },
   }
   return (
     <IcpayAmountInput
@@ -58,15 +54,9 @@ export default function Page() {
       defaultAmountUsd: 20,
       minUsd: 1,
       stepUsd: 1,
-      defaultSymbol: 'ICP',
-      // Show dropdown to let users pick ICP or USDC
-      showLedgerDropdown: true,
-      cryptoOptions: [
-        { symbol: 'ICP', label: 'ICP', canisterId: 'ryjl3-tyaaa-aaaaa-aaaba-cai' },
-        { symbol: 'ckUSDC', label: 'USDC', canisterId: 'xevnm-gaaaa-aaaar-qafnq-cai' },
-      ],
-      // Modal progress bar matches other components
-      progressBar: { enabled: true, mode: 'modal' },
+      // Optional: filter which tokens appear in the balances modal
+      tokenShortcodes: ['ic_icp', 'ic_ckusdc', 'base_eth'],
+      progressBar: { enabled: true },
     }
   }, [])
   return <icpay-amount-input ref={ref as any} />
@@ -84,13 +74,8 @@ onMounted(() => {
     defaultAmountUsd: 20,
     minUsd: 1,
     stepUsd: 1,
-    defaultSymbol: 'ICP',
-    showLedgerDropdown: true,
-    cryptoOptions: [
-      { symbol: 'ICP', label: 'ICP', canisterId: 'ryjl3-tyaaa-aaaaa-aaaba-cai' },
-      { symbol: 'ckUSDC', label: 'USDC', canisterId: 'xevnm-gaaaa-aaaar-qafnq-cai' },
-    ],
-    progressBar: { enabled: true, mode: 'modal' },
+    tokenShortcodes: ['ic_icp', 'ic_ckusdc', 'base_eth'],
+    progressBar: { enabled: true },
   }
 })
 </script>
@@ -110,13 +95,8 @@ export class AppComponent implements AfterViewInit {
       defaultAmountUsd: 20,
       minUsd: 1,
       stepUsd: 1,
-      defaultSymbol: 'ICP',
-      showLedgerDropdown: true,
-      cryptoOptions: [
-        { symbol: 'ICP', label: 'ICP', canisterId: 'ryjl3-tyaaa-aaaaa-aaaba-cai' },
-        { symbol: 'ckUSDC', label: 'USDC', canisterId: 'xevnm-gaaaa-aaaar-qafnq-cai' },
-      ],
-      progressBar: { enabled: true, mode: 'modal' },
+      tokenShortcodes: ['ic_icp', 'ic_ckusdc', 'base_eth'],
+      progressBar: { enabled: true },
     }
   }
 }
@@ -130,13 +110,8 @@ export class AppComponent implements AfterViewInit {
     defaultAmountUsd: 20,
     minUsd: 1,
     stepUsd: 1,
-    defaultSymbol: 'ICP',
-    showLedgerDropdown: true,
-    cryptoOptions: [
-      { symbol: 'ICP', label: 'ICP', canisterId: 'ryjl3-tyaaa-aaaaa-aaaba-cai' },
-      { symbol: 'ckUSDC', label: 'USDC', canisterId: 'xevnm-gaaaa-aaaar-qafnq-cai' },
-    ],
-    progressBar: { enabled: true, mode: 'modal' },
+    tokenShortcodes: ['ic_icp', 'ic_ckusdc', 'base_eth'],
+    progressBar: { enabled: true },
   }
 </script>
 
@@ -149,20 +124,9 @@ export class AppComponent implements AfterViewInit {
 - `defaultAmountUsd?: number`
 - `placeholder?: string`
 - `minUsd?: number`, `maxUsd?: number`, `stepUsd?: number`
-- `cryptoOptions?: { symbol: string; label: string; canisterId?: string }[]`
-- Token selector:
-  - Per-component legacy: `showLedgerDropdown?: boolean` (default: false)
-  - Global (recommended): `showLedgerDropdown?: 'buttons' | 'dropdown' | 'none'`
-- `defaultSymbol?: string` (e.g., `'ICP'`)
 - `buttonLabel?: string`
-- `progressBar?: { enabled?: boolean; mode?: 'modal' | 'horizontal' | 'vertical' | 'inline' }`
-
-Notes:
-- With the global `showLedgerDropdown` string:
-  - `'buttons'` shows selector chips when multiple tokens are available; hides selector if only one.
-  - `'dropdown'` always shows a dropdown.
-  - `'none'` hides the selector and uses `defaultSymbol`.
-- For non-modal progress modes, the bar appears only during processing.
+- `progressBar?: { enabled?: boolean }`
+- Common options: `tokenShortcodes?: string[]`, `chainShortcodes?: string[]`, `chainTypes?: Array<'ic' | 'evm'>`, `theme?`, `useOwnWallet?`, `plugNPlay?`, `debug?`, `disablePaymentButton?`, `disableAfterSuccess?`
 
 {/*
 ## Onramp (Transak)
@@ -183,14 +147,13 @@ export default function Page() {
     ref.current.config = {
       publishableKey: process.env.NEXT_PUBLIC_ICPAY_PK,
       defaultAmountUsd: 20,
-      showLedgerDropdown: true,
       onramp: {
         environment: 'STAGING',
         apiKey: process.env.NEXT_PUBLIC_TRANSAK_PK,
         creditCardLabel: 'Pay with credit card',
         enabled: true,
       },
-      progressBar: { enabled: true, mode: 'modal' },
+      progressBar: { enabled: true },
     }
   }, [])
   return <icpay-amount-input ref={ref as any} />
