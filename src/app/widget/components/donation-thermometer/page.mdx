@@ -25,7 +25,7 @@ export default function Page() {
     goalUsd: 100,
     defaultAmountUsd: 10,
     amountsUsd: [5,10,25,50],
-    progressBar: { enabled: true, mode: 'modal' },
+    progressBar: { enabled: true },
   }
   return (
     <IcpayDonationThermometer
@@ -52,7 +52,7 @@ export default function Page() {
       amountsUsd: [5,10,25,50],
       onSuccess: (tx: any) => console.log('Donated', tx),
       theme: { primaryColor: '#0ea5e9' },
-      progressBar: { enabled: true, mode: 'modal' },
+      progressBar: { enabled: true },
     }
   }, [])
   return <icpay-donation-thermometer ref={ref as any} />
@@ -72,7 +72,7 @@ onMounted(() => {
     amountsUsd: [5,10,25,50],
     onSuccess: (tx: any) => console.log('Donated', tx),
     theme: { primaryColor: '#0ea5e9' },
-    progressBar: { enabled: true, mode: 'modal' },
+    progressBar: { enabled: true },
   }
 })
 </script>
@@ -94,7 +94,7 @@ export class AppComponent implements AfterViewInit {
       amountsUsd: [5,10,25,50],
       onSuccess: (tx: any) => console.log('Donated', tx),
       theme: { primaryColor: '#0ea5e9' },
-      progressBar: { enabled: true, mode: 'modal' },
+      progressBar: { enabled: true },
     }
   }
 }
@@ -110,7 +110,7 @@ export class AppComponent implements AfterViewInit {
     amountsUsd: [5,10,25,50],
     onSuccess: (tx) => console.log('Donated', tx),
     theme: { primaryColor: '#0ea5e9' },
-    progressBar: { enabled: true, mode: 'modal' },
+    progressBar: { enabled: true },
   }
 </script>
 
@@ -123,12 +123,9 @@ export class AppComponent implements AfterViewInit {
 - `goalUsd: number`
 - `defaultAmountUsd?: number`
 - `amountsUsd?: number[]`
-- `cryptoOptions?: { symbol: string; label: string; canisterId?: string }[]`
-- `defaultSymbol?: string`
 - `buttonLabel?: string` (supports `{amount}` and `{symbol}` placeholders)
 - `onSuccess?: (tx) => void`
-- Token selector: use global `showLedgerDropdown?: 'buttons' | 'dropdown' | 'none'`
-- Common options: `progressBar?`, `theme?`, `useOwnWallet?`, `plugNPlay?`, `debug?`, `disablePaymentButton?`, `disableAfterSuccess?`
+- Common options: `tokenShortcodes?: string[]`, `chainShortcodes?: string[]`, `chainTypes?: Array<'ic' | 'evm'>`, `progressBar?`, `theme?`, `useOwnWallet?`, `plugNPlay?`, `debug?`, `disablePaymentButton?`, `disableAfterSuccess?`
 
 {/* onramp-start */}
 ## Onramp (Transak)
@@ -154,7 +151,7 @@ export default function Page() {
         creditCardLabel: 'Pay with credit card',
         enabled: true,
       },
-      progressBar: { enabled: true, mode: 'modal' },
+      progressBar: { enabled: true },
     }
   }, [])
   return <icpay-donation-thermometer ref={ref as any} />

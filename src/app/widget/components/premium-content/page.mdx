@@ -30,7 +30,7 @@ export default function Page() {
       imageUrl: '/cover.jpg',
       onSuccess: (tx: any) => console.log('Unlocked', tx),
       theme: { primaryColor: '#0ea5e9' },
-      progressBar: { enabled: true, mode: 'modal' },
+      progressBar: { enabled: true },
     }
   }, [])
   return <icpay-premium-content ref={ref as any} />
@@ -50,7 +50,7 @@ onMounted(() => {
     imageUrl: '/cover.jpg',
     onSuccess: (tx: any) => console.log('Unlocked', tx),
     theme: { primaryColor: '#0ea5e9' },
-    progressBar: { enabled: true, mode: 'modal' },
+    progressBar: { enabled: true },
   }
 })
 </script>
@@ -72,7 +72,7 @@ export class AppComponent implements AfterViewInit {
       imageUrl: '/cover.jpg',
       onSuccess: (tx: any) => console.log('Unlocked', tx),
       theme: { primaryColor: '#0ea5e9' },
-      progressBar: { enabled: true, mode: 'modal' },
+      progressBar: { enabled: true },
     }
   }
 }
@@ -88,7 +88,7 @@ export class AppComponent implements AfterViewInit {
     imageUrl: '/cover.jpg',
     onSuccess: (tx) => console.log('Unlocked', tx),
     theme: { primaryColor: '#0ea5e9' },
-    progressBar: { enabled: true, mode: 'modal' },
+    progressBar: { enabled: true },
   }
 </script>
 ```
@@ -98,14 +98,10 @@ export class AppComponent implements AfterViewInit {
 ## Configuration
 
 - `priceUsd: number`
-- `cryptoOptions?: { symbol: string; label: string; canisterId?: string }[]`
 - `imageUrl?: string`
-- `defaultSymbol?: string`
 - `buttonLabel?: string` (supports `{amount}` and `{symbol}` placeholders)
 - `onSuccess?: (tx) => void`
-- Token selector:
-  - Global `showLedgerDropdown?: 'buttons' | 'dropdown' | 'none'` controls selector UI
-- Common options: `progressBar?`, `theme?`, `useOwnWallet?`, `plugNPlay?`, `debug?`, `disablePaymentButton?`, `disableAfterSuccess?`
+- Common options: `tokenShortcodes?: string[]`, `chainShortcodes?: string[]`, `chainTypes?: Array<'ic' | 'evm'>`, `progressBar?`, `theme?`, `useOwnWallet?`, `plugNPlay?`, `debug?`, `disablePaymentButton?`, `disableAfterSuccess?`
 
 {/* onramp-start */}
 ## Onramp (Transak)
@@ -130,7 +126,7 @@ export default function Page() {
         creditCardLabel: 'Pay with credit card',
         enabled: true,
       },
-      progressBar: { enabled: true, mode: 'modal' },
+      progressBar: { enabled: true },
     }
   }, [])
   return <icpay-premium-content ref={ref as any} />

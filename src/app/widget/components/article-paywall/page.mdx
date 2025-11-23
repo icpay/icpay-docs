@@ -26,7 +26,7 @@ export default function Page() {
     title: 'Premium Article',
     preview: 'This is a short preview...',
     lockedContent: 'Full content goes here...',
-    progressBar: { enabled: true, mode: 'modal' },
+    progressBar: { enabled: true },
   }
   return (
     <IcpayArticlePaywall
@@ -53,7 +53,7 @@ export default function Page() {
       preview: 'This is a short preview...',
       lockedContent: 'Full content goes here...',
       theme: { primaryColor: '#0ea5e9' },
-      progressBar: { enabled: true, mode: 'modal' },
+      progressBar: { enabled: true },
     }
   }, [])
   return <icpay-article-paywall ref={ref as any} />
@@ -74,7 +74,7 @@ onMounted(() => {
     preview: 'This is a short preview...',
     lockedContent: 'Full content goes here...',
     theme: { primaryColor: '#0ea5e9' },
-    progressBar: { enabled: true, mode: 'modal' },
+    progressBar: { enabled: true },
   }
 })
 </script>
@@ -97,7 +97,7 @@ export class AppComponent implements AfterViewInit {
       preview: 'This is a short preview...',
       lockedContent: 'Full content goes here...',
       theme: { primaryColor: '#0ea5e9' },
-      progressBar: { enabled: true, mode: 'modal' },
+      progressBar: { enabled: true },
     }
   }
 }
@@ -114,7 +114,7 @@ export class AppComponent implements AfterViewInit {
     preview: 'This is a short preview...',
     lockedContent: 'Full content goes here...',
     theme: { primaryColor: '#0ea5e9' },
-    progressBar: { enabled: true, mode: 'modal' },
+    progressBar: { enabled: true },
   }
 </script>
 ```
@@ -127,12 +127,9 @@ export class AppComponent implements AfterViewInit {
 - `title?: string`
 - `preview?: string`
 - `lockedContent?: string`
-- `cryptoOptions?: { symbol: string; label: string; canisterId?: string }[]`
-- `defaultSymbol?: string`
 - `buttonLabel?: string` (supports `{amount}` and `{symbol}` placeholders)
 - `onSuccess?: (tx) => void`
-- Token selector: use global `showLedgerDropdown?: 'buttons' | 'dropdown' | 'none'`
-- Common options: `progressBar?`, `theme?`, `useOwnWallet?`, `plugNPlay?`, `debug?`, `disablePaymentButton?`, `disableAfterSuccess?`
+- Common options: `tokenShortcodes?: string[]`, `chainShortcodes?: string[]`, `chainTypes?: Array<'ic' | 'evm'>`, `progressBar?`, `theme?`, `useOwnWallet?`, `plugNPlay?`, `debug?`, `disablePaymentButton?`, `disableAfterSuccess?`
 
 {/*
 ## Onramp (Transak)
@@ -158,7 +155,7 @@ export default function Page() {
         creditCardLabel: 'Pay with credit card',
         enabled: true,
       },
-      progressBar: { enabled: true, mode: 'modal' },
+      progressBar: { enabled: true },
     }
   }, [])
   return <icpay-article-paywall ref={ref as any} />
