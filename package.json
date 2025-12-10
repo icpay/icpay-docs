@@ -1,6 +1,6 @@
 {
   "name": "tailwind-plus-icpay",
-  "version": "1.2.12",
+  "version": "1.2.13",
   "private": true,
   "packageManager": "pnpm@9.12.3",
   "scripts": {
