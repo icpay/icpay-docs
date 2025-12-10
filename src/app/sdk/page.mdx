@@ -19,7 +19,7 @@ export const sections = [
 
 # SDK
 
-The ICPay SDK provides a typed API for payments on the Internet Computer. It supports public client-side operations with a publishable key and private server-side operations with a secret key. {{ className: 'lead' }}
+The ICPay SDK provides a typed API for payments on the Base blockchain and Internet Computer. It supports public client-side operations with a publishable key and private server-side operations with a secret key. {{ className: 'lead' }}
 
 ## Intro
 
@@ -63,7 +63,7 @@ Primary input going forward is the token shortcode. Each verified token ledger e
 
 Note on chains:
 
-- `chainId` (optional, UUID): Target chain for the payment intent. If omitted, the intent defaults to the Internet Computer chain. Use this when directing payments to another supported chain.
+- `chainId` (optional, UUID): Target chain for the payment intent. Use this when directing payments to another supported chain.
 
 ```ts {{ title: 'Send fixed token amount (preferred: tokenShortcode)' }}
 import { Icpay } from '@ic-pay/icpay-sdk'
