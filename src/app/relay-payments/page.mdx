@@ -1,0 +1,106 @@
+export const metadata = {
+  title: 'Relay Payments',
+  description: 'Accept payments and relay funds to per-chain recipient addresses, optionally charging a relay fee.',
+}
+
+export const sections = [
+  { title: 'What are Relay Payments?', id: 'what-are-relay-payments' },
+  { title: 'Configuring Recipient Addresses', id: 'configuring-recipient-addresses' },
+  { title: 'Relay Fee (bps)', id: 'relay-fee' },
+  { title: 'Examples', id: 'examples' },
+]
+
+# Relay Payments
+
+Relay payments allow your account to accept a user’s payment and forward it directly to a recipient that you specify per chain (Ethereum/EVM, Internet Computer, Solana). {{ className: 'lead' }}
+
+With relay payments:
+- You configure `recipientAddresses` (per-chain) in the Widget/SDK.
+- ICPay’s contracts/process route the payment to that recipient.
+- You can optionally charge a per-transaction relay fee in your Account settings. If the relay fee is 0 bps (the default), no extra fee is taken by your account — the feature behaves like a pure pass-through to your specified recipient.
+
+## What are Relay Payments?
+
+- **Goal**: Let site owners accept payments while sending funds to an external address they control per chain (e.g., EVM contract, IC principal/canister, Solana address).
+- **How it works**: The SDK always sends a `recipientAddress` to the backend/contract layer. When you do not set any address, a zero-address is used and no relay occurs. When you set a valid recipient per chain, the payment is relayed to that address.
+- **Wallet filtering**: If you provide `recipientAddresses`, the Widget will only show wallets/chains that match the networks you configured.
+
+## Configuring Recipient Addresses
+
+You can define per-chain recipients with the `recipientAddresses` object:
+
+- `evm` — Ethereum/EVM address (`0x...40 hex chars`)
+- `ic` — Internet Computer principal/canister id
+- `sol` — Solana base58 address
+
+If a chain’s address is omitted, that chain is not eligible for relay for this payment.
+
+## Relay Fee (bps)
+
+The relay fee is configured per account in the ICPay dashboard (Settings → ICPay Fees → “Relay Fee (bps)”).
+
+- Unit: basis points (bps). For example, `150 bps = 1.50%`.
+- Default: `0 bps` (no fee). In this case, your account does not charge anything extra for relays — payments act like a straight pass-through to the recipient.
+- Permissions: Editable by account Owner and Admin roles. Viewers cannot modify fees.
+- Chain sync: Changes to the relay fee are propagated to supported chains automatically by the platform.
+
+Note: In the web dashboard the relay fee is entered as a percentage for ease of use (e.g., “1.50”), and ICPay converts it to basis points internally (e.g., `150`). This mirrors the same percentage input behavior used for Split Rules.
+
+## Examples
+
+### Widget (HTML)
+
+```html
+<!-- Include the widget bundle as usual; then configure recipientAddresses -->
+<icpay-pay-button
+  id="pay"
+  config='{
+    "publishableKey": "pk_live_xxx",
+    "buttonLabel": "Pay ${amount} with crypto",
+    "amountUsd": 25,
+    "recipientAddresses": {
+      "evm": "0xD8B586138213726910101b17a7DB14F58A16EDc8",
+      "ic":  "levk2-bctun-6kvhs-piqjf-kqx65-5wd4l-z5bqx-qvdol-rl4j4-dzuhw-lae"
+    }
+  }'>
+</icpay-pay-button>
+```
+
+- Only EVM and Internet Computer wallets will be shown in this example as sol address was not set.
+- Funds are relayed to the provided addresses. If you later set your account’s relay fee to a non-zero value, that fee will apply to the future payments.
+
+### SDK (JavaScript/TypeScript)
+
+```ts
+import Icpay from '@ic-pay/icpay-sdk';
+
+const client = new Icpay({
+  publishableKey: 'pk_live_xxx',
+});
+
+// USD-denominated payment (ERC20/native depends on user wallet selection)
+await client.createPaymentUsd({
+  usdAmount: 42,
+  tokenShortcode: 'base_usdc', // user can also choose via widget modal
+  metadata: { context: 'checkout:order-123' },
+  // Per-chain destination(s) for relay
+  recipientAddresses: {
+    evm: '0xD8B586138213726910101b17a7DB14F58A16EDc8',
+  },
+});
+```
+
+### Choosing to charge a Relay Fee
+
+1. Go to ICPay Web → Settings → ICPay Fees.
+2. Set “Relay Fee (bps)” to your desired value, e.g., `150` for 1.50%.
+3. Save. Owner/Admin can adjust; Viewer cannot.
+
+If you keep it at `0`, no additional fee is charged on relay payments made through your account. This is the default.
+
+---
+
+For a full list of SDK fields and widget configuration options, see:
+- [SDK Overview](/sdk-overview)
+- [Widget Overview](/widget-overview)
+

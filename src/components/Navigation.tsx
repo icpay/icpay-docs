@@ -272,6 +272,12 @@ export const navigation: Array<NavGroup> = [
     ],
   },
   {
+    title: 'Relay payments',
+    links: [
+      { title: 'Relay payments', href: '/relay-payments' },
+    ],
+  },
+  {
     title: 'Tokens',
     links: [
       { title: 'Tokens', href: '/ledgers' },
