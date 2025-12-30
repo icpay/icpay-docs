@@ -6,7 +6,7 @@ export const metadata = {
 export const sections = [
   { title: 'What are Relay Payments?', id: 'what-are-relay-payments' },
   { title: 'Configuring Recipient Addresses', id: 'configuring-recipient-addresses' },
-  { title: 'Relay Fee (bps)', id: 'relay-fee' },
+  { title: 'Relay Fee', id: 'relay-fee' },
   { title: 'Examples', id: 'examples' },
 ]
 
@@ -17,7 +17,7 @@ Relay payments allow your account to accept a user’s payment and forward it di
 With relay payments:
 - You configure `recipientAddresses` (per-chain) in the Widget/SDK.
 - ICPay’s contracts/process route the payment to that recipient.
-- You can optionally charge a per-transaction relay fee in your Account settings. If the relay fee is 0 bps (the default), no extra fee is taken by your account — the feature behaves like a pure pass-through to your specified recipient.
+- You can optionally charge a per-transaction relay fee in your Account settings. If the relay fee is 0 % (the default), no extra fee is taken by your account — the feature behaves like a pure pass-through to your specified recipient.
 
 ## What are Relay Payments?
 
@@ -35,16 +35,16 @@ You can define per-chain recipients with the `recipientAddresses` object:
 
 If a chain’s address is omitted, that chain is not eligible for relay for this payment.
 
-## Relay Fee (bps)
+## Relay Fee
 
-The relay fee is configured per account in the ICPay dashboard (Settings → ICPay Fees → “Relay Fee (bps)”).
+The relay fee is configured per account in the ICPay dashboard (Settings → ICPay Fees → “Relay Fee”).
 
-- Unit: basis points (bps). For example, `150 bps = 1.50%`.
-- Default: `0 bps` (no fee). In this case, your account does not charge anything extra for relays — payments act like a straight pass-through to the recipient.
+- Unit: percentage points. For example, `1.50%`.
+- Default: `0 %` (no fee). In this case, your account does not charge anything extra for relays — payments act like a straight pass-through to the recipient.
 - Permissions: Editable by account Owner and Admin roles. Viewers cannot modify fees.
 - Chain sync: Changes to the relay fee are propagated to supported chains automatically by the platform.
 
-Note: In the web dashboard the relay fee is entered as a percentage for ease of use (e.g., “1.50”), and ICPay converts it to basis points internally (e.g., `150`). This mirrors the same percentage input behavior used for Split Rules.
+Note: In the web dashboard the relay fee is entered as a percentage (e.g., “1.50”).
 
 ## Examples
 
@@ -93,7 +93,7 @@ await client.createPaymentUsd({
 ### Choosing to charge a Relay Fee
 
 1. Go to ICPay Web → Settings → ICPay Fees.
-2. Set “Relay Fee (bps)” to your desired value, e.g., `150` for 1.50%.
+2. Set “Relay Fee” to your desired value, e.g., 1.50%.
 3. Save. Owner/Admin can adjust; Viewer cannot.
 
 If you keep it at `0`, no additional fee is charged on relay payments made through your account. This is the default.
