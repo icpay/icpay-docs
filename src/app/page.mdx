@@ -17,7 +17,7 @@ export const sections = [
 
 # Welcome to ICPay Docs
 
-Use the ICPay SDK to accept payments from users' wallets and manage your account operations. Choose between our Public SDK for frontend payment flows, Private SDK for server-side account management, or Widget Components for quick payment UI integration. {{ className: 'lead' }}
+Use the ICPay SDK to accept payments from users' wallets and manage your account operations. Choose between our Public SDK for frontend payment flows, Private SDK for server-side account management, or Widget Components for quick payment UI integration. ICPay is multichain: Internet Computer, EVM, and Solana. {{ className: 'lead' }}
 
 <div className="not-prose mt-6 mb-16 flex gap-3">
   <Button href="/sdk" arrow="right">
@@ -48,7 +48,15 @@ The ICPay SDK ships as a single package that supports two usage modes. Use the p
   <Button href="/widget" variant="text" arrow="right" className="ml-2">
     <>Widget Components</>
   </Button>
+  <Button href="/ledgers" variant="text" arrow="right" className="ml-2">
+    <>Supported tokens (IC/EVM/Solana)</>
+  </Button>
 </div>
+
+### What’s new
+- Solana chain and tokens are now supported across SDK and Widget.
+- Relay payments: accept and forward funds directly to your per‑chain recipient addresses. See [Relay payments](/relay-payments).
+- X402 v2: ICPay includes its own facilitator for X402 flows (IC and EVM). See [X402 payments](/x402).
 
 <Guides />
 

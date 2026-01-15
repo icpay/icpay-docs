@@ -26,9 +26,9 @@ export default function Page() {
     publishableKey: process.env.NEXT_PUBLIC_ICPAY_PK,
     amountUsd: 49.99,
     // Optional: constrain wallets/tokens shown
-    // chainTypes: ['ic','evm'],
-    // chainShortcodes: ['ic','base'],
-    // tokenShortcodes: ['ic_icp','ic_ckusdc','base_eth'],
+    // chainTypes: ['ic','evm','sol'],
+    // chainShortcodes: ['ic','base','sol'],
+    // tokenShortcodes: ['ic_icp','ic_ckusdc','base_eth','sol_usdc'],
     // progressBar: { enabled: true },
   }
   return (
@@ -115,7 +115,7 @@ export class AppComponent implements AfterViewInit {
 - `amountUsd?: number`
 - `buttonLabel?: string` (used if `amountUsd` not set)
 - `progressBar?: { enabled?: boolean }`
-- Common options: `tokenShortcodes?: string[]`, `chainShortcodes?: string[]`, `chainTypes?: Array<'ic' | 'evm'>`, `theme?`, `useOwnWallet?`, `plugNPlay?`, `debug?`, `disablePaymentButton?`, `disableAfterSuccess?`
+- Common options: `tokenShortcodes?: string[]`, `chainShortcodes?: string[]`, `chainTypes?: Array<'ic' | 'evm' | 'sol'>`, `theme?`, `useOwnWallet?`, `plugNPlay?`, `debug?`, `disablePaymentButton?`, `disableAfterSuccess?`
 
 {/* onramp-start */}
 ## Onramp (Transak)
