@@ -90,6 +90,19 @@ await client.createPaymentUsd({
 });
 ```
 
+### Solana example
+
+```ts
+await client.createPaymentUsd({
+  usdAmount: 10,
+  tokenShortcode: 'sol_usdc',
+  metadata: { context: 'donation' },
+  recipientAddresses: {
+    sol: '7sQ8Yt7o3Qd3...YourSolanaAddressBase58',
+  },
+})
+```
+
 ### Choosing to charge a Relay Fee
 
 1. Go to ICPay Web → Settings → ICPay Fees.

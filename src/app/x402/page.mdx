@@ -1,7 +1,7 @@
 export const metadata = {
-  title: 'X402 payments',
+  title: 'X402 v2 payments',
   description:
-    'How ICPay uses X402: building the authorization header with EIP-712, requesting a wallet signature, and settling the 402 payment via the SDK.',
+    'How ICPay implements X402 v2 with its own facilitator: acceptance objects, EIP-712 (EVM), Solana signing, header format, and settlement via the SDK.',
 }
 
 export const sections = [
@@ -16,15 +16,18 @@ export const sections = [
   { title: 'Troubleshooting', id: 'troubleshooting' },
 ]
 
-# X402 payments
+# X402 v2 payments
 
-ICPay supports X402, a “Payment Required” pattern for card/onramp-friendly flows. Instead of sending tokens directly from the user’s wallet to a contract, the wallet signs an authorization payload which is sent to ICPay’s settlement endpoint. ICPay verifies and settles the payment, then returns the intent/payment status. {{ className: 'lead' }}
+ICPay supports X402 v2, a “Payment Required” pattern for card/onramp-friendly flows. Instead of sending tokens directly from the user’s wallet to a contract, the wallet signs an authorization payload which is sent to ICPay’s facilitator and settlement endpoints. ICPay verifies and settles the payment, then returns the intent/payment status. {{ className: 'lead' }}
 
-## Summary of X402 in icpay
+## Summary of X402 v2 in ICPay
 
-- **Server produces Accepts:** The API returns one or more payment “acceptance” records describing what to sign (scheme/network/amount/recipient).
-- **Client signs authorization:** The SDK builds EIP-712 typed data (EIP-3009 Permit or TransferWithAuthorization), requests a wallet signature, and packages this into an X402 header.
-- **Settlement:** The SDK sends a settle request with the X402 header; ICPay validates and processes payment, then your app waits until a terminal status.
+- **Server produces Accepts:** The API returns one or more payment “acceptance” records describing what to sign (scheme/network/amount/recipient). EVM acceptances carry EIP‑3009 metadata; Solana acceptances carry message/transaction hints.
+- **Client signs authorization:** The SDK builds the correct authorization for the network:
+  - EVM: EIP‑712 typed data (EIP‑3009 Permit or TransferWithAuthorization).
+  - Solana: Signs an X402 v2 message or a prebuilt transaction (as required).
+- **Settlement:** The SDK sends a settle request with the X402 header to ICPay’s facilitator; ICPay validates and processes payment, then your app waits until a terminal status.
+- **Facilitator:** ICPay operates its own X402 facilitator endpoints for EVM and Solana so you don’t need to run custom infra.
 
 ## High-level flow
 
@@ -43,19 +46,19 @@ An X402 acceptance describes the exact authorization you must sign:
 ```ts
 type X402Acceptance = {
   scheme: string            // usually 'exact'
-  network: string           // EVM chain ID (decimal string), e.g. '84532'
+  network: string           // EVM: chain ID (decimal string: '84532'); Solana: 'solana:mainnet' | 'solana:devnet'
   maxAmountRequired: string // amount in smallest unit (wei-like)
   resource?: string | null  // optional
   description?: string | null
   mimeType?: string | null
-  payTo: string             // EVM address (recipient / verifying contract)
+  payTo: string             // EVM: recipient/verifying contract; Solana: program address or destination
   maxTimeoutSeconds?: number
   asset?: string            // token address (may match payTo)
   extra?: {
     intentId?: string
     provider?: string
     ledgerId?: string
-    facilitatorUrl?: string | null
+    facilitatorUrl?: string | null // ICPay facilitator URL used by the SDK
     name?: string                // token name for domain
     eip3009Version?: string      // e.g. '1'
     primaryType?: 'Permit' | 'TransferWithAuthorization' // optional hint
@@ -63,7 +66,9 @@ type X402Acceptance = {
 }
 ```
 
-## Typed data and signature (EIP-712)
+## Signing (EVM EIP-712 and Solana)
+
+EVM:
 
 The SDK constructs an EIP-712 domain and message from the acceptance, then asks the wallet to sign:
 - Domain:
@@ -82,6 +87,14 @@ The SDK constructs an EIP-712 domain and message from the acceptance, then asks 
   - `validAfter`: now - 86400s; `validBefore`/`deadline`: now + `maxTimeoutSeconds` (default ~300s).
 
 The signature is collected using `eth_signTypedData_v4`.
+
+Solana:
+
+- The SDK includes the payer’s `publicKey` when initiating the X402 intent so the server can build a signable payload.
+- Depending on the acceptance, the SDK either:
+  - Requests a `signMessage` signature over the X402 v2 message with domain prefix `ICPAY_X402_V2:`; or
+  - Requests a transaction signature over a prebuilt base64 transaction that includes the necessary program instructions.
+- The SDK then settles via ICPay’s Solana facilitator, which can relay the transaction on your behalf when required.
 
 ## X402 header format
 
@@ -121,6 +134,15 @@ await publicApiClient.post('/sdk/public/payments/x402/settle', {
 ```
 
 ICPay verifies the signature and authorizes the payment. The response contains status info (e.g., `succeeded` / `failed`) and may include a `txHash`. The SDK then proceeds to await a terminal status via notify/long-polling if needed.
+
+## Facilitator
+
+ICPay operates its own X402 facilitator for EVM and Solana:
+
+- EVM: Verifies EIP‑712 authorization and performs settlement against the configured contracts.
+- Solana: Verifies the X402 v2 message or relays the signed transaction to the network using a platform relayer when necessary.
+
+These endpoints are used automatically by the SDK; no additional configuration is required beyond having an EVM/Solana wallet provider available.
 
 ## SDK usage example
 
@@ -164,8 +186,8 @@ You can still pass `symbol`, `ledgerCanisterId`, or `chainId`, but `tokenShortco
 
 
 ### Scope and networks
-- X402 is currently an EVM-based flow in the SDK (signing via `eth_signTypedData_v4`).
-- For the Internet Computer (IC) network, the SDK uses native ICRC-1 transfers (see `createPayment` / `createPaymentUsd`) and then notifies/awaits terminal status. X402 is not used on IC at this time.
+- EVM and Solana are supported in X402 v2 flows (EIP‑712 on EVM; message/transaction signing on Solana).
+- For the Internet Computer (IC) network, the SDK uses native ICRC‑1 transfers (see `createPayment` / `createPaymentUsd`) and then notifies/awaits terminal status. X402 is not used on IC at this time.
 
 
 ## Events and statuses

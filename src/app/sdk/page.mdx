@@ -19,7 +19,7 @@ export const sections = [
 
 # SDK
 
-The ICPay SDK provides a typed API for payments on the Base blockchain and Internet Computer. It supports public client-side operations with a publishable key and private server-side operations with a secret key. {{ className: 'lead' }}
+The ICPay SDK provides a typed API for payments across Internet Computer, EVM chains, and Solana. It supports public client-side operations with a publishable key and private server-side operations with a secret key. {{ className: 'lead' }}
 
 ## Intro
 
@@ -108,6 +108,27 @@ const out = await icpay.createPaymentX402Usd({
 
 Events are emitted throughout the flow when `enableEvents` is true. See Events section below.
 
+### Solana support
+- The SDK can initiate Solana payments (SPL tokens and native SOL) when a Solana provider is available (`window.solana`, Phantom/Backpack, or pass `solanaProvider` in config).
+- Prefer `tokenShortcode` (e.g., `'sol_usdc'`) — the backend resolves mint/program details.
+
+```ts
+import { Icpay } from '@ic-pay/icpay-sdk'
+
+const icpay = new Icpay({
+  publishableKey: process.env.NEXT_PUBLIC_ICPAY_PK!,
+  // Prefer an explicit provider if you manage wallets:
+  // solanaProvider: window.phantom?.solana || window.solana,
+})
+
+const res = await icpay.createPaymentUsd({
+  usdAmount: 5,
+  tokenShortcode: 'sol_usdc',
+  // Optionally relay directly to your Solana address:
+  recipientAddresses: { sol: '<your_solana_address_base58>' },
+})
+```
+
 {/*
 ### Onramp (Transak)
 
@@ -154,6 +175,8 @@ const controller = icpay.notifyPaymentIntentOnRamp({ paymentIntentId, intervalMs
 - `connectedWallet` (object): Connected wallet/principal for signing.
 - `icHost` (string): IC network host for agent-js. Default `https://icp-api.io`.
 - `actorProvider` (fn): `(canisterId, idl) => Actor` used to sign ICRC transfers.
+- `evmProvider` (any): Preferred EVM provider for EVM flows (defaults to `window.ethereum`).
+- `solanaProvider` (any): Preferred Solana provider for Solana flows (defaults to `window.solana` / `window.phantom.solana`).
 - `debug` (boolean): Verbose logging in SDK internals.
 - `enableEvents` (boolean): Emit SDK lifecycle events.
 
@@ -223,7 +246,7 @@ const principal = icpay.getAccountAddress()
 - Account and chains:
   - `getAccountInfo()` → Public account info: id/live/canister/branding.
   - `getVerifiedLedgers()` → Verified ledgers with price metadata.
-  - `getChains()` → Enabled chains (IC/EVM) with RPC/explorer data.
+  - `getChains()` → Enabled chains (IC/EVM/Solana) with RPC/explorer data.
   - `getLedgerCanisterIdBySymbol(symbol)` → Resolve ICPay-verified symbol to canister id.
 - Ledger info and prices:
   - `getLedgerInfo(ledgerCanisterId)` → Detailed ledger metadata, price, decimals.

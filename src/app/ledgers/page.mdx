@@ -13,7 +13,7 @@ export const sections = [
 
 # Tokens
 
-ICPay supports verified tokens across chains (IC ICRC and EVM). You can fetch lists (with or without price data), resolve canister IDs by symbol, and read detailed metadata. {{ className: 'lead' }}
+ICPay supports verified tokens across chains (IC ICRC, EVM, and Solana). You can fetch lists (with or without price data), resolve IDs by symbol/shortcode, and read detailed metadata. {{ className: 'lead' }}
 
 ## Overview
 
@@ -69,6 +69,7 @@ type SdkLedger = {
 Notes:
 - `shortcode` is a human-friendly token identifier (e.g., `ic_icp`, `ic_ckusdc`) that can be used in UX and filtering.
 - `chainId` refers to the underlying chain (ICPay backend UUID) associated to the token.
+- On non‑IC chains, `canisterId` represents the on‑chain token address (e.g., ERC‑20 address on EVM, SPL mint address on Solana). For native SOL, the mint can be empty and is handled internally.
 
 ## Using with SDK
 
@@ -88,9 +89,9 @@ const calc = await icpay.calculateTokenAmountFromUSD({ usdAmount: 10, ledgerSymb
 ## Using with Widget
 
 Widgets fetch verified tokens automatically. You can constrain choices via multichain filters in the widget config:
-- `chainTypes?: Array<'ic' | 'evm'>`
-- `chainShortcodes?: string[]` (e.g., `['ic','base']`)
-- `tokenShortcodes?: string[]` (e.g., `['ic_icp','ic_ckusdc']`)
+- `chainTypes?: Array<'ic' | 'evm' | 'sol'>`
+- `chainShortcodes?: string[]` (e.g., `['ic','base','sol']`)
+- `tokenShortcodes?: string[]` (e.g., `['ic_icp','ic_ckusdc','sol_usdc']`)
 
 <CodeGroup title="Widget examples">
 
@@ -106,9 +107,9 @@ export default function Page() {
       publishableKey: process.env.NEXT_PUBLIC_ICPAY_PK,
       amountsUsd: [1,5,10],
       // Optional filters to limit networks/tokens:
-      // chainTypes: ['ic','evm'],
-      // chainShortcodes: ['ic','base'],
-      // tokenShortcodes: ['ic_icp','ic_ckusdc'],
+      // chainTypes: ['ic','evm','sol'],
+      // chainShortcodes: ['ic','base','sol'],
+      // tokenShortcodes: ['ic_icp','ic_ckusdc','sol_usdc'],
     }
   }, [])
   return <icpay-tip-jar ref={ref as any} />
@@ -125,8 +126,8 @@ onMounted(() => {
   el.value.config = {
     publishableKey: import.meta.env.VITE_ICPAY_PK,
     amountsUsd: [1,5,10],
-    // chainTypes: ['ic'],
-    // tokenShortcodes: ['ic_icp'],
+    // chainTypes: ['ic','sol'],
+    // tokenShortcodes: ['ic_icp','sol_usdc'],
   }
 })
 </script>
@@ -145,7 +146,7 @@ export class AppComponent implements AfterViewInit {
     this.el.nativeElement.config = {
       publishableKey: (window as any).env?.ICPAY_PK || 'pk_test_xxx',
       amountsUsd: [1,5,10],
-      // tokenShortcodes: ['ic_icp','ic_ckusdc'],
+      // tokenShortcodes: ['ic_icp','ic_ckusdc','sol_usdc'],
     }
   }
 }
@@ -158,8 +159,8 @@ export class AppComponent implements AfterViewInit {
   el.config = {
     publishableKey: 'pk_test_xxx',
     amountsUsd: [1,5,10],
-    // chainTypes: ['ic'],
-    // tokenShortcodes: ['ic_icp'],
+    // chainTypes: ['ic','sol'],
+    // tokenShortcodes: ['ic_icp','sol_usdc'],
   }
 </script>
 ```
