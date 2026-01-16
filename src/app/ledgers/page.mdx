@@ -1,3 +1,34 @@
+import LedgersTable from '@/components/LedgersTable'
+
+export const metadata = {
+  title: 'Tokens (Shortcodes)',
+  description:
+    'Browse supported tokens by chain, with their shortcode and contract/canister address. Prefer token shortcodes (e.g., ic_icp, base_usdcoin) when creating payments.',
+}
+
+export const sections = [
+  { title: 'Overview', id: 'overview' },
+  { title: 'Token list', id: 'token-list' },
+]
+
+# Tokens (Shortcodes)
+
+Shortcodes are the primary way to reference tokens in ICPay. Each verified token ledger exposes a unique, human‑readable `shortcode` (for example, `ic_icp`, `base_usdc`). Use these in SDK and Widget calls instead of raw symbols, canister IDs, or contract addresses where possible. {{ className: 'lead' }}
+
+> Tip: You can also explore token availability via the Widget Builder, but this page provides a quick, scannable reference.
+
+## Overview
+
+- **Shortcode**: Canonical identifier used across ICPay SDK and Widgets.
+- **Contract / Canister**: Token contract (EVM/Solana) or canister (IC).
+- **Verified**: Indicates whether the token is verified in ICPay.
+
+This list updates periodically and is grouped by chain. If you don’t see a token you expect, check back later or use the Widget Builder to search interactively.
+
+## Token list
+
+<LedgersTable />
+
 export const metadata = {
   title: 'Tokens',
   description:
