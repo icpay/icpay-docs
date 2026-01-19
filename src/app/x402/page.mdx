@@ -11,7 +11,10 @@ export const sections = [
   { title: 'Typed data and signature (EIP-712)', id: 'typed-data' },
   { title: 'X402 header format', id: 'x402-header' },
   { title: 'Settlement request', id: 'settlement-request' },
+  { title: 'Facilitator endpoints (ICPay)', id: 'facilitator-endpoints' },
+  { title: 'HTTP 402 response shape (ICPay)', id: 'http-402' },
   { title: 'SDK usage example', id: 'sdk-usage' },
+  { title: 'USDC example (Base)', id: 'usdc-example' },
   { title: 'Events and statuses', id: 'events' },
   { title: 'Troubleshooting', id: 'troubleshooting' },
 ]
@@ -135,6 +138,82 @@ await publicApiClient.post('/sdk/public/payments/x402/settle', {
 
 ICPay verifies the signature and authorizes the payment. The response contains status info (e.g., `succeeded` / `failed`) and may include a `txHash`. The SDK then proceeds to await a terminal status via notify/long-polling if needed.
 
+## Facilitator endpoints (ICPay)
+
+Merchants integrate via the ICPay SDK, which calls ICPay’s facilitator behind the scenes. For completeness, the relevant HTTPS endpoints are:
+
+- Verify (performed within settle; no separate public endpoint required)
+  - Verification runs server-side as part of settlement. The request is rejected with a failure status if verification fails (e.g., signature invalid, deadlines invalid, recipient/asset mismatch, insufficient funds).
+- Settle (public; merchant-authenticated via publishable key)
+  - `POST https://api.icpay.org/sdk/public/payments/x402/settle`
+  - Body:
+    ```json
+    {
+      "paymentIntentId": "pi_123",
+      "paymentHeader": "<base64-encoded x402 header JSON>",
+      "paymentRequirements": { /* echo of the acceptance object used for signing */ }
+    }
+    ```
+  - Returns (simplified):
+    ```json
+    {
+      "status": "succeeded | failed | processing | completed | mismatched",
+      "paymentIntent": { /* intent DTO */ },
+      "payment": { /* latest payment DTO or null */ },
+      "transactionId": "0x... | <baseSignature> | null",
+      "canisterTxId": 1234,
+      "externalCostAmount": "0"
+    }
+    ```
+- Optional helper endpoints (used by the SDK on certain tokens)
+  - `POST https://api.icpay.org/sdk/public/payments/x402/prepare` (prebuild Solana transactions)
+  - `POST https://api.icpay.org/sdk/public/payments/x402/signable` (prebuild Solana signable message)
+  - `POST https://api.icpay.org/sdk/public/payments/x402/relay` (relay signed Solana transactions)
+
+How merchants use it:
+- Your backend issues an intent via the SDK.
+- If the API responds with HTTP 402 and `accepts[]`, the SDK guides the wallet to sign and then calls ICPay settle. No additional merchant infra is required.
+
+## HTTP 402 response shape (ICPay)
+
+When X402 is available for the selected token/chain, ICPay responds with HTTP 402 and a JSON body like:
+
+```json
+{
+  "x402Version": 2,
+  "paymentIntentId": "pi_123",
+  "rpcChainId": "8453",
+  "accepts": [
+    {
+      "scheme": "exact",
+      "network": "eip155:8453",
+      "maxAmountRequired": "1000000",
+      "resource": "/sdk/public/payments/intents/pi_123",
+      "description": "ICPay payment",
+      "mimeType": "application/json",
+      "payTo": "0x6c6551d0CC6315D0Be562c5b855B667eE32a5298",
+      "maxTimeoutSeconds": 300,
+      "asset": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+      "extra": {
+        "intentId": "pi_123",
+        "provider": "icpay",
+        "ledgerId": "token_abc",
+        "facilitatorUrl": "https://api.icpay.org",
+        "name": "USD Coin",
+        "eip3009Version": "2",
+        "rpcChainId": "8453",
+        "rpcUrlPublic": "https://mainnet.base.org"
+      }
+    }
+  ],
+  "error": ""
+}
+```
+
+Notes:
+- `accepts[]` entries map one-to-one to a specific token/chain configuration. The SDK uses this to build the EIP‑712 message (EVM) or signable bytes/transaction (Solana).
+- `maxAmountRequired` is in the token’s smallest unit.
+
 ## Facilitator
 
 ICPay operates its own X402 facilitator for EVM and Solana:
@@ -188,6 +267,30 @@ You can still pass `symbol`, `ledgerCanisterId`, or `chainId`, but `tokenShortco
 ### Scope and networks
 - EVM and Solana are supported in X402 v2 flows (EIP‑712 on EVM; message/transaction signing on Solana).
 - For the Internet Computer (IC) network, the SDK uses native ICRC‑1 transfers (see `createPayment` / `createPaymentUsd`) and then notifies/awaits terminal status. X402 is not used on IC at this time.
+
+## USDC example (Base)
+
+Use USD Coin on Base mainnet via `tokenShortcode: 'base_usdc'`:
+
+```ts
+import { Icpay } from '@ic-pay/icpay-sdk'
+
+const icpay = new Icpay({
+  publishableKey: process.env.NEXT_PUBLIC_ICPAY_PK!
+})
+
+const res = await icpay.createPaymentX402Usd({
+  usdAmount: 12.5,
+  tokenShortcode: 'base_usdc',
+  metadata: { orderId: 'ORDER-1002' },
+})
+
+if (res.status === 'completed' || res.status === 'succeeded') {
+  // payment completed
+} else if (res.status === 'failed') {
+  // handle failure or fallback
+}
+```
 
 
 ## Events and statuses
