@@ -1,0 +1,125 @@
+export const metadata = {
+  title: 'Sandbox Server',
+  description:
+    'Information about the ICPay sandbox server for testing and development. Access the sandbox at betterstripe.com to test new features with free faucet tokens on Base Sepolia and Solana Devnet.',
+}
+
+export const sections = [
+  { title: 'Overview', id: 'overview' },
+  { title: 'Test Networks', id: 'test-networks' },
+  { title: 'Using with Widget', id: 'using-with-widget' },
+]
+
+# Sandbox Server
+
+The ICPay sandbox server provides a testing environment where new features are introduced first, allowing developers to test integrations before they're available in production. {{ className: 'lead' }}
+
+## Overview
+
+The sandbox server is available at:
+
+- **Website**: [https://betterstripe.com](https://betterstripe.com)
+- **API**: [https://api.betterstripe.com](https://api.betterstripe.com)
+
+### Important Notes
+
+- **Sandbox Environment**: This is a testing environment and may be unavailable at times due to feature rollouts, updates, or maintenance.
+- **New Features First**: New features and updates are typically deployed to the sandbox before production, making it ideal for early testing and integration.
+- **Test Networks**: The sandbox includes mainnets but also testnet and devnet networks (Base Sepolia and Solana Devnet) so you can test with free faucet tokens without spending real funds.
+
+## Test Networks
+
+The sandbox server supports the following test networks for development and testing:
+
+| Chain Name | Chain ID | RPC URL | Faucet Link |
+|------------|----------|---------|-------------|
+| Base Sepolia | 84532 | `https://sepolia.base.org` | [Chainlink Faucet](https://faucets.chain.link/base-sepolia) / [ETHGlobal Faucet](https://ethglobal.com/faucet/base-sepolia-84532) |
+| Solana Devnet | - | `https://api.devnet.solana.com` | [Solana Faucet](https://faucet.solana.com) / [QuickNode Faucet](https://faucet.quicknode.com/solana/devnet) |
+
+### Getting Test Tokens
+
+Both networks provide free test tokens through their respective faucets:
+
+- **Base Sepolia**: Request test ETH from the Chainlink or ETHGlobal faucets to pay for gas fees and test transactions.
+- **Solana Devnet**: Request test SOL from the Solana faucet to pay for transaction fees and test Solana-based payments.
+
+These test tokens have no real-world value and are intended solely for development and testing purposes.
+
+## Using with Widget
+
+To use the ICPay Widget with the sandbox server, configure the `apiUrl` option in your widget config to point to the sandbox API endpoint.
+
+<CodeGroup title="Widget examples with sandbox">
+
+```tsx {{ title: 'Next.js' }}
+'use client'
+import { useEffect, useRef } from 'react'
+import '@ic-pay/icpay-widget'
+
+export default function Page() {
+  const ref = useRef<any>(null)
+  useEffect(() => {
+    if (!ref.current) return
+    ref.current.config = {
+      publishableKey: process.env.NEXT_PUBLIC_ICPAY_PK,
+      apiUrl: 'https://api.betterstripe.com', // Sandbox API endpoint
+      amountsUsd: [1, 5, 10],
+      defaultAmountUsd: 5,
+    }
+    const onDone = (e: any) => console.log('Tip completed', e.detail)
+    window.addEventListener('icpay-sdk-transaction-completed', onDone)
+    return () => window.removeEventListener('icpay-sdk-transaction-completed', onDone)
+  }, [])
+  return <icpay-tip-jar ref={ref as any} />
+}
+```
+
+```vue {{ title: 'Vue.js' }}
+<script setup lang="ts">
+import { onMounted, ref, onBeforeUnmount } from 'vue'
+import '@ic-pay/icpay-widget'
+
+const tip = ref<any>(null)
+
+onMounted(() => {
+  if (!tip.value) return
+  tip.value.config = {
+    publishableKey: import.meta.env.VITE_ICPAY_PK,
+    apiUrl: 'https://api.betterstripe.com', // Sandbox API endpoint
+    amountsUsd: [1, 5, 10],
+    defaultAmountUsd: 5,
+  }
+  const onDone = (e: any) => console.log('Tip completed', e.detail)
+  window.addEventListener('icpay-sdk-transaction-completed', onDone)
+  onBeforeUnmount(() => window.removeEventListener('icpay-sdk-transaction-completed', onDone))
+})
+</script>
+
+<template>
+  <icpay-tip-jar ref="tip" />
+</template>
+```
+
+```html {{ title: 'No framework' }}
+<script type="module">
+  import '@ic-pay/icpay-widget'
+</script>
+
+<icpay-tip-jar id="tip"></icpay-tip-jar>
+<script>
+  const el = document.getElementById('tip')
+  el.config = {
+    publishableKey: 'pk_test_xxx',
+    apiUrl: 'https://api.betterstripe.com', // Sandbox API endpoint
+    amountsUsd: [1, 5, 10],
+    defaultAmountUsd: 5,
+  }
+  window.addEventListener('icpay-sdk-transaction-completed', (e) => {
+    console.log('Tip completed', e.detail)
+  })
+</script>
+```
+
+</CodeGroup>
+
+> **Note**: Make sure you're using a publishable key from your sandbox account at [betterstripe.com](https://betterstripe.com). The sandbox uses test networks (Base Sepolia and Solana Devnet), so you'll need test tokens from the faucets listed above to complete transactions.
