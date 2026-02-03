@@ -59,7 +59,7 @@ try {
 
 There are two common ways to pay: fixed token amount or USD amount automatically converted to tokens.
 
-Primary input going forward is the token shortcode. Each verified token ledger exposes a unique, human‑readable `shortcode` (e.g. `ic_icp`, `base_usdcoin`). Prefer sending `tokenShortcode` instead of `symbol`/`ledgerCanisterId`/`chainId`. Legacy fields still work for backward compatibility but are deprecated.
+Primary input going forward is the token shortcode. Each verified token ledger exposes a unique, human‑readable `shortcode` (e.g. `ic_icp`, `base_usdc`). Prefer sending `tokenShortcode` instead of `symbol`/`ledgerCanisterId`/`chainId`. Legacy fields still work for backward compatibility but are deprecated.
 
 Note on chains:
 
@@ -267,8 +267,8 @@ const all = await icpay.getExternalWalletBalances({
   network: 'evm',               // 'evm' | 'ic'
   address: '0xabc...',          // or principal: 'aaaa-bbbb...'
   amountUsd: 10,                // optional: compute requiredAmount per ledger
-  chainShortcodes: ['base-sep'],// optional filter
-  tokenShortcodes: ['base_usdcoin'], // optional filter by token shortcode
+  chainShortcodes: ['base'],// optional filter
+  tokenShortcodes: ['base_usdc'], // optional filter by token shortcode
 })
 for (const b of all.balances) {
   console.log(b.ledgerSymbol, b.formattedBalance, b.hasSufficientBalance)
