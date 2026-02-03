@@ -1,0 +1,87 @@
+export const metadata = {
+  title: 'ICPay Skills',
+  description:
+    'Install and use the ICPay skill so AI coding agents (Cursor, Claude Code, and others) follow SDK, widget, payment links, and integration conventions when working with ICPay.',
+}
+
+export const sections = [
+  { title: 'What are Skills?', id: 'what-are-skills' },
+  { title: 'Where to find the ICPay skill', id: 'where-to-find' },
+  { title: 'Install with npx', id: 'install-with-npx' },
+  { title: 'Manual install (clone or node_modules)', id: 'manual-install' },
+  { title: 'How Skills are used', id: 'how-used' },
+  { title: 'Example', id: 'example' },
+]
+
+# ICPay Skills
+
+ICPay provides **Skills**—instruction manuals for AI coding agents—so that tools like Cursor, Claude Code, Google Antigravity, and others can follow ICPay conventions when helping you build with the SDK, widget, payment links, and integrations. {{ className: 'lead' }}
+
+The ICPay skill is published on **skills.sh**. You can view it and install it from: **[https://skills.sh/icpay/icpay-sdk/icpay](https://skills.sh/icpay/icpay-sdk/icpay)**.
+
+## What are Skills?
+
+**Skills** are structured docs (markdown and references) that describe a project’s APIs, flows, and conventions. When you add a skill to your IDE or agent:
+
+- The **agent** can use it to answer questions and generate code that matches the project (correct endpoints, key handling, widget config, webhooks, etc.).
+- **You** get more accurate suggestions and fewer mistakes when asking for things like “add a pay button,” “create a payment link,” or “verify a payment with the secret key.”
+
+Skills are **not** part of the runtime app: they are only used by the AI to improve assistance. The ICPay skill covers the SDK (`@ic-pay/icpay-sdk`), widget (`@ic-pay/icpay-widget`), payment links, relay payments, X402, refunds, splits, webhooks, sandbox (betterstripe.com), and WordPress integrations.
+
+## Where to find the ICPay skill
+
+The ICPay skill is hosted on **skills.sh** and in the **icpay-sdk** repository:
+
+- **skills.sh (browse & install):** [https://skills.sh/icpay/icpay-sdk/icpay](https://skills.sh/icpay/icpay-sdk/icpay)
+- **GitHub:** [https://github.com/icpay/icpay-sdk/tree/master/skills](https://github.com/icpay/icpay-sdk/tree/master/skills)
+- **Skill folder:** `skills/icpay/` (contains `SKILL.md`, `reference.md`, `widget-reference.md`, `wordpress.md`)
+
+You can install it via the **npx** command below (when your environment supports it) or by copying/symlinking from a clone or from `node_modules` if you already use the SDK.
+
+## Install with npx
+
+From your project root (or any directory where you want the skill available to your agent), run:
+
+```bash
+npx skills add https://github.com/icpay/icpay-sdk --skill icpay
+```
+
+This fetches the **icpay** skill from the icpay-sdk repo and installs it into the location your agent expects (e.g. `.cursor/skills/icpay/` for Cursor). After that, when you ask the agent to work on ICPay-related code (payment links, widget, SDK, webhooks, etc.), it can use the skill content to follow the right patterns and endpoints.
+
+If you use a different IDE or agent (Claude Code, Antigravity, Continue, etc.), the same skill files can be copied or symlinked into that tool’s skills/rules directory; see [Manual install (clone or node_modules)](#manual-install) below.
+
+## Manual install (clone or node_modules)
+
+If you prefer not to use `npx skills add`, you can install the skill manually:
+
+1. **From a clone of icpay-sdk**
+   - `git clone https://github.com/icpay/icpay-sdk && cd icpay-sdk`
+   - Copy or symlink `skills/icpay` into your agent’s skills folder (e.g. `.cursor/skills/icpay` for Cursor). Symlinking keeps the skill updated when you `git pull`.
+
+2. **From node_modules**
+   - If your project already has `@ic-pay/icpay-sdk` in `node_modules` (e.g. you linked the repo), you can symlink or copy from `node_modules/@ic-pay/icpay-sdk/skills/icpay` to your agent’s skills directory. Note: the published npm package may not include the `skills` folder; it is present when you use the repo (clone or link).
+
+Full copy-paste commands for Cursor, Claude Code, Antigravity, Continue, Copilot, Kiro, and Trae are in the repo: [icpay-sdk/skills/README.md](https://github.com/icpay/icpay-sdk/blob/master/skills/README.md).
+
+## How Skills are used
+
+- **Discovery:** The agent uses the skill’s **description** (and your question) to decide when the ICPay skill is relevant (e.g. “payment links,” “icpay-widget,” “webhooks”).
+- **Application:** When relevant, the agent loads the skill’s **content** (main instructions and references) and uses it as context to generate or modify code and answers.
+- **Scope:** The agent does not “remember” the skill between sessions; it applies the skill each time the task matches. So the skill acts as an up-to-date instruction set in context.
+
+Keeping the skill updated (e.g. via symlink from a clone or after re-running `npx skills add`) helps the agent use the latest APIs and conventions.
+
+## Example
+
+After installing the ICPay skill, you can ask the agent to:
+
+- *“Add an ICPay pay button for xy USD using the widget.”*
+  The agent can use the skill to pick the right component (`icpay-pay-button`), config (`publishableKey`, `amountUsd`, `tokenShortcodes`), and event handling (`icpay-pay`, `icpay-error`).
+
+- *“Create a payment link via the API and then show the pay page URL.”*
+  The agent can follow the skill’s flow: register/login, create account, use Bearer token, call `POST /user-accounts` and payment-links endpoints, and use the correct DTOs and base URL (`https://api.icpay.org`).
+
+- *“Verify an incoming webhook from ICPay.”*
+  The skill describes verifying `X-ICPay-Signature` with HMAC-SHA256 and handling `payment.completed` / `payment.refunded`, so the agent can generate the correct verification code.
+
+Without the skill, the agent might guess endpoints or patterns; with it, it follows the documented API, key handling (publishable vs secret, `.env`), and widget options.

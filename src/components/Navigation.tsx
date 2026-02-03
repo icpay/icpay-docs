@@ -296,6 +296,12 @@ export const navigation: Array<NavGroup> = [
       { title: 'icpay.org Dashboard', href: '/icpay-org' },
     ],
   },
+  {
+    title: 'Skills',
+    links: [
+      { title: 'ICPay Skills', href: '/skills' },
+    ],
+  },
 ]
 
 export function Navigation(props: React.ComponentPropsWithoutRef<'nav'>) {
