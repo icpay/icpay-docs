@@ -1,7 +1,7 @@
 export const metadata = {
   title: 'Sandbox Server',
   description:
-    'Information about the ICPay sandbox server for testing and development. Access the sandbox at betterstripe.com to test new features with free faucet tokens on Base Sepolia and Solana Devnet.',
+    'Information about the ICPay sandbox server for testing and development. Access the sandbox at betterstripe.com to test new features with free faucet tokens on Base Sepolia, SKALE Base Testnet, ARC Network Testnet, and Solana Devnet.',
 }
 
 export const sections = [
@@ -25,7 +25,7 @@ The sandbox server is available at:
 
 - **Sandbox Environment**: This is a testing environment and may be unavailable at times due to feature rollouts, updates, or maintenance.
 - **New Features First**: New features and updates are typically deployed to the sandbox before production, making it ideal for early testing and integration.
-- **Test Networks**: The sandbox includes mainnets but also testnet and devnet networks (Base Sepolia and Solana Devnet) so you can test with free faucet tokens without spending real funds.
+- **Test Networks**: The sandbox includes mainnets but also testnet and devnet networks (Base Sepolia, SKALE Base Testnet, ARC Network Testnet, and Solana Devnet) so you can test with free faucet tokens without spending real funds.
 
 ## Test Networks
 
@@ -34,13 +34,17 @@ The sandbox server supports the following test networks for development and test
 | Chain Name | Chain ID | RPC URL | Faucet Link |
 |------------|----------|---------|-------------|
 | Base Sepolia | 84532 | `https://sepolia.base.org` | <a href="https://faucets.chain.link/base-sepolia" target="_blank" rel="noopener noreferrer">Chainlink Faucet</a> / <a href="https://ethglobal.com/faucet/base-sepolia-84532" target="_blank" rel="noopener noreferrer">ETHGlobal Faucet</a> |
+| SKALE on Base Testnet (SKALE on Base Sepolia) | 324705682 | `https://base-sepolia-testnet.skalenodes.com/v1/jubilant-horrible-ancha` | <a href="https://base-sepolia-faucet.skale.space" target="_blank" rel="noopener noreferrer">SKALE Base Sepolia Faucet</a> |
+| ARC Network Testnet | 5042002 | `https://rpc.testnet.arc.network` | <a href="https://arc-faucet.vercel.app" target="_blank" rel="noopener noreferrer">ARC Faucet</a> / <a href="https://faucet.circle.com" target="_blank" rel="noopener noreferrer">Circle Faucet</a> |
 | Solana Devnet | - | `https://api.devnet.solana.com` | <a href="https://faucet.solana.com" target="_blank" rel="noopener noreferrer">Solana Faucet</a> / <a href="https://faucet.quicknode.com/solana/devnet" target="_blank" rel="noopener noreferrer">QuickNode Faucet</a> |
 
 ### Getting Test Tokens
 
-Both networks provide free test tokens through their respective faucets:
+All test networks provide free test tokens through their respective faucets:
 
 - **Base Sepolia**: Request test ETH from the Chainlink or ETHGlobal faucets to pay for gas fees and test transactions.
+- **SKALE Base Testnet**: Request CREDIT (native token, 18 decimals) from the [SKALE Base Sepolia Faucet](https://base-sepolia-faucet.skale.space). The chain also has bridged USDC, USDT, SKL, and other tokens; see [SKALE on Base](https://docs.skale.space/get-started/quick-start/skale-on-base) for details. Explorer: [base-sepolia-testnet-explorer.skalenodes.com](https://base-sepolia-testnet-explorer.skalenodes.com).
+- **ARC Network Testnet**: The native currency is USDC. Request test tokens from the [ARC Faucet](https://arc-faucet.vercel.app) or [Circle Faucet](https://faucet.circle.com). Explorer: [testnet.arcscan.app](https://testnet.arcscan.app). See [Connect to Arc](https://docs.arc.network/arc/references/connect-to-arc) for full details.
 - **Solana Devnet**: Request test SOL from the Solana faucet to pay for transaction fees and test Solana-based payments.
 
 These test tokens have no real-world value and are intended solely for development and testing purposes.
@@ -122,4 +126,4 @@ onMounted(() => {
 
 </CodeGroup>
 
-> **Note**: Make sure you're using a publishable key from your sandbox account at [betterstripe.com](https://betterstripe.com). The sandbox uses test networks (Base Sepolia and Solana Devnet), so you'll need test tokens from the faucets listed above to complete transactions.
+> **Note**: Make sure you're using a publishable key from your sandbox account at [betterstripe.com](https://betterstripe.com). The sandbox uses test networks (Base Sepolia, SKALE Base Testnet, ARC Network Testnet, and Solana Devnet), so you'll need test tokens from the faucets listed above to complete transactions.
