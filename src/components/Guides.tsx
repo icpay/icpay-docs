@@ -3,6 +3,11 @@ import { Heading } from '@/components/Heading'
 
 const guides = [
   {
+    href: '/quick-start',
+    name: 'Quick start guide',
+    description: 'Create an account, get your API keys, and add a pay button to your site with Next.js.',
+  },
+  {
     href: '/sdk',
     name: 'Public SDK',
     description: 'Learn how to use the ICPay SDK on the frontend with your publishable key.',

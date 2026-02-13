@@ -1,12 +1,13 @@
 export const metadata = {
   title: 'Sandbox Server',
   description:
-    'Information about the ICPay sandbox server for testing and development. Access the sandbox at betterstripe.com to test new features with free faucet tokens on Base Sepolia, SKALE Base Testnet, ARC Network Testnet, and Solana Devnet.',
+    'Information about the ICPay sandbox server for testing and development. Access the sandbox at betterstripe.com, demo.betterstripe.com, and pos.betterstripe.com. Sandbox users and accounts are separate from live production icpay.org. Test with free faucet tokens on Base Sepolia, SKALE Base Testnet, ARC Network Testnet, and Solana Devnet.',
 }
 
 export const sections = [
   { title: 'Overview', id: 'overview' },
   { title: 'Test Networks', id: 'test-networks' },
+  { title: 'Wallet setup for Solana Devnet', id: 'wallet-setup-solana-devnet' },
   { title: 'Using with Widget', id: 'using-with-widget' },
 ]
 
@@ -20,12 +21,17 @@ The sandbox server is available at:
 
 - **Website**: [https://betterstripe.com](https://betterstripe.com)
 - **API**: [https://api.betterstripe.com](https://api.betterstripe.com)
+- **Demo**: [https://demo.betterstripe.com](https://demo.betterstripe.com)
+- **POS**: [https://pos.betterstripe.com](https://pos.betterstripe.com)
+
+[demo.betterstripe.com](https://demo.betterstripe.com) and [pos.betterstripe.com](https://pos.betterstripe.com) are linked to the sandbox environment and use the same test networks and sandbox API.
 
 ### Important Notes
 
 - **Sandbox Environment**: This is a testing environment and may be unavailable at times due to feature rollouts, updates, or maintenance.
 - **New Features First**: New features and updates are typically deployed to the sandbox before production, making it ideal for early testing and integration.
 - **Test Networks**: The sandbox includes mainnets but also testnet and devnet networks (Base Sepolia, SKALE Base Testnet, ARC Network Testnet, and Solana Devnet) so you can test with free faucet tokens without spending real funds.
+- **Separate from production**: Users and accounts created in the sandbox (betterstripe.com, demo.betterstripe.com, pos.betterstripe.com) are **not** the same as users and accounts on live production [icpay.org](https://icpay.org). You must create separate accounts for sandbox testing and for production use.
 
 ## Test Networks
 
@@ -48,6 +54,29 @@ All test networks provide free test tokens through their respective faucets:
 - **Solana Devnet**: Request test SOL from the Solana faucet to pay for transaction fees and test Solana-based payments.
 
 These test tokens have no real-world value and are intended solely for development and testing purposes.
+
+## Wallet setup for Solana Devnet
+
+To test Solana payments on the sandbox with devnet tokens, use a Solana wallet in developer/testnet mode. Below is how to configure **Phantom** and **Backpack**.
+
+### Phantom
+
+1. Open Phantom and go to **Settings** (gear icon).
+2. Open **Developer Settings** (or **Security & Privacy** → **Developer Settings** in some versions).
+3. Turn on **Developer Mode** (or **Testnet Mode**) so you can switch the wallet to Solana Devnet.
+4. In the network selector, choose **Devnet** so the wallet uses Solana Devnet and your devnet SOL/tokens.
+
+### Backpack
+
+1. Open Backpack and go to **Settings**.
+2. Enable **Developer Mode** so you can use test networks and custom RPCs.
+3. To test with devnet tokens, set the Solana RPC to the devnet endpoint:
+   - Go to **Settings** → **Networks** (or **Developer** / **RPC**).
+   - Set the Solana RPC URL to: `https://api.devnet.solana.com`
+
+   Without this RPC setting, Backpack may use mainnet by default and devnet transactions (e.g. from the [Solana Faucet](https://faucet.solana.com)) will not appear or work correctly.
+
+After configuring your wallet, request test SOL from the [Solana Faucet](https://faucet.solana.com) or [QuickNode Faucet](https://faucet.quicknode.com/solana/devnet) and use the sandbox (betterstripe.com) to complete devnet payments.
 
 ## Using with Widget
 
