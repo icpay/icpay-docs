@@ -9,6 +9,13 @@ export const sections = [
   { title: 'Create endpoints', id: 'create-endpoints' },
   { title: 'Event types', id: 'event-types' },
   { title: 'Payload format', id: 'payload-format' },
+  { title: 'payment_intent.created', id: 'event-payment-intent-created' },
+  { title: 'payment.created', id: 'event-payment-created' },
+  { title: 'payment.updated', id: 'event-payment-updated' },
+  { title: 'payment.completed', id: 'event-payment-completed' },
+  { title: 'payment.failed', id: 'event-payment-failed' },
+  { title: 'payment.cancelled', id: 'event-payment-cancelled' },
+  { title: 'payment.refunded', id: 'event-payment-refunded' },
   { title: 'Verify signatures', id: 'verify-signatures' },
   { title: 'Example handlers', id: 'example-handlers' },
   { title: 'Best practices', id: 'best-practices' },
@@ -16,45 +23,40 @@ export const sections = [
 
 # Webhooks
 
-Webhooks let your backend react to ICPay events such as payments being created or completed. Endpoints receive signed JSON payloads with Stripe-like structure and `X-ICPay-Signature`. {{ className: 'lead' }}
+Webhooks let your backend react to ICPay events such as payment intents being created or payments being completed. Endpoints receive signed JSON payloads with a Stripe-like structure and `X-ICPay-Signature`. {{ className: 'lead' }}
 
 ## Overview
 
-- Configure endpoints in `icpay.org` under Settings → Webhook Endpoints.
+- Configure endpoints in **icpay.org** under Settings → Webhook Endpoints.
 - Subscribe per-endpoint to one or more event types.
-- ICPay retries failed deliveries up to your endpoint’s configured retry count.
+- ICPay retries failed deliveries according to your endpoint’s retry count.
 
 ## Create endpoints
 
-In `icpay.org` → Settings → Webhook Endpoints, click “New Endpoint”, set:
+In **icpay.org** → Settings → Webhook Endpoints, click **New Endpoint** and set:
 
-- URL: your HTTPS receiver.
-- Subscribed events.
-- Retry count and timeout.
+- **URL**: Your HTTPS receiver.
+- **Subscribed events**: One or more of the event types listed below.
+- **Retry count** and **timeout**.
 - Optional custom headers.
 
 ## Event types
 
-Supported event types map to `WebhookEventType` in the API:
+Only the following event types are currently emitted. Subscribe to these in your endpoint:
 
-- payment.created
-- payment.updated
-- payment.completed
-- payment.failed
-- payment.cancelled
-- payment.refunded
-- payment_intent.created
-- account.updated
-- account.verified
-- wallet.created
-- wallet.updated
-- wallet.balance_changed
-- ledger.created
-- ledger.updated
+| Event type | When it is triggered |
+|------------|------------------------|
+| `payment_intent.created` | A new payment intent is created (e.g. when a customer starts checkout). |
+| `payment.created` | A payment record is created or first linked to a transaction. |
+| `payment.updated` | A payment’s attributes change (e.g. status) without transitioning to completed/failed/cancelled/refunded. |
+| `payment.completed` | A payment has been successfully completed. |
+| `payment.failed` | A payment has failed. |
+| `payment.cancelled` | A payment was cancelled. |
+| `payment.refunded` | A payment was refunded. |
 
 ## Payload format
 
-Deliveries use this canonical shape:
+Every delivery uses this envelope. The `data.object` and optional `data.previous_attributes` depend on the event type.
 
 ```json
 {
@@ -63,8 +65,8 @@ Deliveries use this canonical shape:
   "api_version": "2025-08-11",
   "created": 1733966400,
   "data": {
-    "object": { /* domain object, e.g. payment */ },
-    "previous_attributes": { /* optional diff */ }
+    "object": { },
+    "previous_attributes": { }
   },
   "livemode": true,
   "pending_webhooks": 1,
@@ -73,49 +75,147 @@ Deliveries use this canonical shape:
 }
 ```
 
-Example `payment.completed` (includes mismatch context when applicable). When a normal transaction has an amount mismatch, the payment status is `mismatched` and both amounts are present:
+- **id**: Unique event id (e.g. `evt_...`). Use for idempotency.
+- **type**: One of the event types above.
+- **data.object**: The resource (payment intent or payment); see each event section below.
+- **data.previous_attributes**: Present for `payment.updated` (and similar) when relevant; contains the previous values of changed fields.
+
+Sections below describe the **data.object** (and where applicable **data.previous_attributes**) for each event type.
+
+## payment_intent.created
+
+**Triggered when:** A new payment intent is created via the API (e.g. when a customer initiates checkout).
+
+**Emitted by:** ICPay API when `createPaymentIntent` succeeds.
+
+**data.object** (payment intent):
 
 ```json
 {
-  "type": "payment.completed",
-  "data": {
-    "object": {
-      "id": "pay_123",
-      "accountId": "acc_abc",
-      "paymentIntentId": "pi_123",
-      "transactionId": "tx_789",
-      "transactionSplitId": "spl_456",
-      "basePaymentAccountId": "acc_base",
-      "canisterTxId": 123456,
-      "amount": "150000000",
-      "ledgerCanisterId": "ryjl3-tyaaa-aaaaa-aaaba-cai",
-      "ledgerTxId": "ltx_001",
-      "accountCanisterId": 42,
-      "status": "mismatched",
-      "requestedAmount": "150000000",
-      "paidAmount": "140000000", // If the amounts match, `status` will be `completed`.
-      "invoiceId": "inv_001",
-      "metadata": {"orderId": "ORD-123"},
-      "createdAt": "2025-01-01T12:00:00Z",
-      "updatedAt": "2025-01-01T12:00:10Z"
-    }
-  }
+  "id": "pi_...",
+  "accountId": "acc_...",
+  "amount": "100000000",
+  "ledgerCanisterId": "ryjl3-tyaaa-aaaaa-aaaba-cai",
+  "description": "Order #123",
+  "expectedSenderPrincipal": null,
+  "status": "requires_payment",
+  "intentCode": 123456,
+  "metadata": { "orderId": "ORD-123" },
+  "createdAt": "2025-01-01T12:00:00.000Z"
 }
 ```
 
-### Payment object fields
+| Field | Type | Description |
+|-------|------|-------------|
+| id | string | Payment intent id. |
+| accountId | string | Account id. |
+| amount | string | Amount in smallest unit (e.g. 8 decimals). |
+| ledgerCanisterId | string | Ledger canister id (token). |
+| description | string \| null | Optional description. |
+| expectedSenderPrincipal | string \| null | Optional expected sender address. |
+| status | string | e.g. `requires_payment`, `processing`, `completed`, `failed`, `canceled`, `mismatched`. |
+| intentCode | number | Intent code. |
+| metadata | object | Key-value metadata from the intent. |
+| createdAt | string | ISO 8601 timestamp. |
 
-- **transactionSplitId**: Identifier of the `TransactionSplit` that this payment represents.
-- **basePaymentAccountId**: The base account for the intent/transaction (always present with ≥ 0.01% in split rules).
-- **ledgerTxId**: Linked `LedgerTransaction` id once sweep/linking completes.
+## payment.created
+
+**Triggered when:** A payment record is created, or an existing payment is first linked to a transaction (e.g. when the chain sync attaches a transaction to the payment).
+
+**Emitted:** When a payment is saved or when a previously pending payment gets a `transactionId` for the first time.
+
+**data.object** (payment):
+
+```json
+{
+  "id": "pay_...",
+  "accountId": "acc_...",
+  "paymentIntentId": "pi_...",
+  "transactionId": "tx_...",
+  "transactionSplitId": "spl_...",
+  "canisterTxId": "123456",
+  "status": "pending",
+  "amount": "150000000",
+  "ledgerCanisterId": "ryjl3-tyaaa-aaaaa-aaaba-cai",
+  "ledgerTxId": "ltx_...",
+  "accountCanisterId": 42,
+  "basePaymentAccountId": "acc_base",
+  "invoiceId": null,
+  "metadata": { "orderId": "ORD-123" },
+  "requestedAmount": "150000000",
+  "paidAmount": "140000000",
+  "createdAt": "2025-01-01T12:00:00.000Z"
+}
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| id | string | Payment id. |
+| accountId | string | Account id. |
+| paymentIntentId | string | Related payment intent id. |
+| transactionId | string \| null | Related transaction id once linked. |
+| transactionSplitId | string \| null | Transaction split id for this payment. |
+| canisterTxId | string \| null | Chain/canister transaction id. |
+| status | string | `pending`, `completed`, `failed`, `canceled`, `refunded`, `mismatched`. |
+| amount | string | Amount in smallest unit. |
+| ledgerCanisterId | string | Ledger (token) canister id. |
+| ledgerTxId | string \| null | Ledger transaction id. |
+| accountCanisterId | number \| null | Target account canister id. |
+| basePaymentAccountId | string \| null | Base account id for split. |
+| invoiceId | string \| null | Invoice id if created. |
+| metadata | object | From the payment intent. |
+| requestedAmount | string \| null | Intent amount (for mismatch comparison). |
+| paidAmount | string \| null | Actual paid amount from transaction. |
+| createdAt | string | ISO 8601. |
+
+If the payment is created with status `failed`, a `payment.failed` event is also emitted.
+
+## payment.updated
+
+**Triggered when:** A payment is updated and the new status is not one of completed, failed, cancelled, or refunded (e.g. status or other attributes change while still processing).
+
+**data.object**: Same shape as **payment.created** (see above). **data.previous_attributes** may contain the previous values of changed fields (e.g. `{ "status": "pending" }`).
+
+## payment.completed
+
+**Triggered when:** A payment’s status becomes `completed` (funds received and payment recorded).
+
+**data.object**: Same payment shape as **payment.created**. Typically includes `transactionId`, `ledgerTxId`, `amount`, and optional `requestedAmount` / `paidAmount` for mismatch handling. Use this event to fulfill orders or unlock content.
+
+## payment.failed
+
+**Triggered when:** A payment’s status becomes `failed`, or a payment is created with status `failed`.
+
+**data.object**: Same payment shape as **payment.created**. Use this event to notify the user or retry logic.
+
+## payment.cancelled
+
+**Triggered when:** A payment’s status becomes `canceled`.
+
+**data.object**: Same payment shape as **payment.created** with `status: "canceled"`.
+
+## payment.refunded
+
+**Triggered when:** A payment’s status becomes `refunded`.
+
+**data.object**: Same payment shape as **payment.created** with `status: "refunded"`. Use this event to update your records or inventory.
+
+---
+
+### Payment object fields (summary)
+
+- **transactionSplitId**: Id of the transaction split that this payment represents.
+- **basePaymentAccountId**: Base account for the intent/transaction (e.g. split rules).
+- **ledgerTxId**: Linked ledger transaction id after sweep/linking.
 - **accountCanisterId**: Canister id of the target account for this payment.
+- When **status** is `mismatched`, **requestedAmount** and **paidAmount** indicate the requested vs actual paid amount.
 
 ## Verify signatures
 
 Every request includes:
 
-- `X-ICPay-Signature`: `t=<unix>,v1=<hex>` HMAC-SHA256 over `"<t>." + payload` using your account secret key
-- `X-ICPay-Timestamp`: Unix seconds
+- **X-ICPay-Signature**: `t=<unix>,v1=<hex>` — HMAC-SHA256 over `"<t>." + payload` using your account **secret key**.
+- **X-ICPay-Timestamp**: Unix seconds (use for replay tolerance).
 
 ```ts {{ title: 'Node/Express verification' }}
 import crypto from 'crypto'
@@ -143,8 +243,10 @@ app.post('/webhooks/icpay', express.raw({ type: 'application/json' }), (req, res
   if (!ok) return res.status(401).send('Invalid signature')
   const event = JSON.parse(req.body.toString('utf8'))
   switch (event.type) {
+    case 'payment_intent.created': /* e.g. log or prepare order */ break
     case 'payment.completed': /* fulfill order */ break
     case 'payment.failed': /* notify user */ break
+    case 'payment.refunded': /* update records */ break
     default: /* log */
   }
   res.sendStatus(200)
@@ -167,11 +269,11 @@ export async function POST(req: Request) {
 
 ## Best practices
 
-- Verify signatures and enforce timestamp tolerance.
-- Respond within 5s; perform heavy work async.
-- Implement idempotency using event id `evt_*`.
-- Log deliveries and store last processed `evt_*`.
-- Use retries prudently; keep endpoints highly available.
+- **Verify signatures** and enforce a timestamp tolerance (e.g. 300 seconds) to prevent replay.
+- **Respond within ~5s**; do heavy work asynchronously.
+- **Implement idempotency** using the event `id` (`evt_*`); store last processed ids to avoid duplicate handling.
+- **Log deliveries** and failures for debugging.
+- Use retries wisely; keep your endpoint highly available.
 
 <div className="not-prose">
   <Button href="/sdk" variant="text" arrow="right">

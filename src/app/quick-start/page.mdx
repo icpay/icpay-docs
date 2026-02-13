@@ -1,0 +1,122 @@
+export const metadata = {
+  title: 'Quick start guide',
+  description:
+    'Create an ICPay account, get your API keys, and add a pay button to your site with the ICPay Widget and Next.js.',
+}
+
+export const sections = [
+  { title: 'Create an account', id: 'create-account' },
+  { title: 'Get your API keys', id: 'api-keys' },
+  { title: 'Add a pay button with Next.js', id: 'pay-button-nextjs' },
+  { title: 'Try it in the demo', id: 'try-demo' },
+]
+
+# Quick start guide
+
+This guide walks you through creating an ICPay account, getting your publishable key, and adding a pay button to your site using Next.js. No prior crypto or blockchain experience required. {{ className: 'lead' }}
+
+## Create an account
+
+1. Go to **[icpay.org](https://icpay.org)** and click **Sign up** (or **Log in** if you already have an account).
+2. Register with your email and set a password. You can also use social login if available.
+3. After signing in, you’ll land in the **dashboard**. Here you can manage payments, view balances, and find your API keys.
+
+For testing without real funds, you can use the **sandbox** at [betterstripe.com](https://betterstripe.com). Accounts and keys there are separate from production—see the [Sandbox Server](/sandbox) docs.
+
+## Get your API keys
+
+To show a pay button on your site, you only need the **publishable key**. It’s safe to use in the browser.
+
+1. In the [icpay.org](https://icpay.org) dashboard, open **Settings** (or **API keys** / **Developers**, depending on the menu).
+2. Find your **Publishable key**. It usually starts with `pk_` (for example, `pk_live_...` in production or `pk_test_...` in sandbox).
+3. Copy the key. You’ll use it in your Next.js app in the next step.
+
+Keep your **Secret key** (if you see it) private and only use it on the server. For a simple pay button, the publishable key is enough.
+
+## Add a pay button with Next.js
+
+These steps add a single “Pay with crypto” button that opens the ICPay payment flow. The code matches what you can generate on [demo.icpay.org](https://demo.icpay.org) when you choose the Pay Button and the Next.js tab.
+
+### 1. Install the widget
+
+In your Next.js project folder, run:
+
+```bash
+npm install @ic-pay/icpay-widget @ic-pay/icpay-sdk
+```
+
+(or `pnpm add` / `yarn add` if you use those).
+
+### 2. Add your publishable key to environment variables
+
+Create or edit `.env` in the project root and add:
+
+```
+NEXT_PUBLIC_ICPAY_PK=pk_your_publishable_key_here
+```
+
+Replace `pk_your_publishable_key_here` with the key you copied from the dashboard. The `NEXT_PUBLIC_` prefix makes it available in the browser, which is what the widget needs.
+
+### 3. Create a page with the pay button
+
+Create a new page (for example `app/checkout/page.tsx`) or add the snippet below to an existing page. This uses the **Pay Button** widget: one button that opens the payment modal for a fixed amount.
+
+```tsx
+'use client'
+import { useEffect, useRef } from 'react'
+import '@ic-pay/icpay-widget'
+
+export default function Checkout() {
+  const elRef = useRef<any>(null)
+
+  useEffect(() => {
+    const el = elRef.current
+    if (!el) return
+
+    el.config = {
+      publishableKey: process.env.NEXT_PUBLIC_ICPAY_PK,
+      amountUsd: 9.99,
+      buttonLabel: 'Pay $9.99 with crypto',
+    }
+
+    const onSuccess = (e: any) => console.log('Payment completed', e.detail)
+    const onError = (e: any) => console.error('Payment error', e.detail)
+
+    el.addEventListener('icpay-pay', onSuccess)
+    el.addEventListener('icpay-error', onError)
+
+    return () => {
+      el.removeEventListener('icpay-pay', onSuccess)
+      el.removeEventListener('icpay-error', onError)
+    }
+  }, [])
+
+  return <icpay-pay-button ref={elRef} />
+}
+```
+
+- **`publishableKey`**: Your key from the dashboard (from `.env`).
+- **`amountUsd`**: The amount in USD (e.g. `9.99`).
+- **`buttonLabel`**: Optional text on the button.
+
+When a visitor clicks the button, they’ll see the ICPay payment UI to choose a wallet and complete the payment. You can change `amountUsd` and `buttonLabel` to match your product or donation amount.
+
+### 4. Run your app
+
+Run your dev server (e.g. `npm run dev`) and open the page that renders `<icpay-pay-button />`. Click the button and complete a test payment. In production, use your live publishable key from [icpay.org](https://icpay.org); for testing, use the sandbox at [betterstripe.com](https://betterstripe.com) and a `pk_test_...` key.
+
+## Try it in the demo
+
+You can try the Pay Button (and other widgets) and get ready-made code without writing anything first:
+
+1. Go to **[demo.icpay.org](https://demo.icpay.org)**.
+2. Select **Pay Button** (or another component like Tip Jar or Coffee Shop).
+3. Enter your publishable key (or use the demo key to preview).
+4. Adjust the amount, label, and other options.
+5. Open the **Next.js** tab and copy the generated code into your project.
+
+The generated snippet is the same pattern as above: install the widget, set `el.config` with your `publishableKey` and options, and listen for `icpay-pay` and `icpay-error`. You can paste it into a new `app/checkout/page.tsx` (or similar) and add your key to `.env`.
+
+---
+
+For more widget types (tip jar, premium content, donation thermometer) and options, see [Widget components](/widget) and [Pay Button](/widget/components/pay-button). For server-side operations and webhooks, see the [Private SDK](/sdk-secret) and [Webhooks](/webhooks).

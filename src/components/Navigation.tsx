@@ -237,6 +237,7 @@ export const navigation: Array<NavGroup> = [
     title: 'Getting started',
     links: [
       { title: 'Introduction', href: '/' },
+      { title: 'Quick start guide', href: '/quick-start' },
       { title: 'Sandbox Server', href: '/sandbox' },
     ],
   },
