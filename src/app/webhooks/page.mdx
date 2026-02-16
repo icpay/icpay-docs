@@ -114,7 +114,7 @@ Sections below describe the **data.object** (and where applicable **data.previou
 | description | string \| null | Optional description. |
 | expectedSenderPrincipal | string \| null | Optional expected sender address. |
 | status | string | e.g. `requires_payment`, `processing`, `completed`, `failed`, `canceled`, `mismatched`. |
-| intentCode | number | Intent code. |
+| intentCode | number | Intent code (always a number in webhook payloads). |
 | metadata | object | Key-value metadata from the intent. |
 | createdAt | string | ISO 8601 timestamp. |
 
@@ -144,7 +144,9 @@ Sections below describe the **data.object** (and where applicable **data.previou
   "metadata": { "orderId": "ORD-123" },
   "requestedAmount": "150000000",
   "paidAmount": "140000000",
-  "createdAt": "2025-01-01T12:00:00.000Z"
+  "createdAt": "2025-01-01T12:00:00.000Z",
+  "network": "ic",
+  "token": "ICP"
 }
 ```
 
@@ -166,7 +168,10 @@ Sections below describe the **data.object** (and where applicable **data.previou
 | metadata | object | From the payment intent. |
 | requestedAmount | string \| null | Intent amount (for mismatch comparison). |
 | paidAmount | string \| null | Actual paid amount from transaction. |
-| createdAt | string | ISO 8601. |
+| createdAt | string | ISO 8601 (mandatory). |
+| network | string \| null | Chain type from the chains table (e.g. `ic`, `evm`, `sol`). |
+| token | string \| null | Token symbol from the ledger (e.g. `ICP`, `USDC`). |
+| intent | object \| undefined | When present, includes `intentCode` (number), `amount`, `metadata`, etc. |
 
 If the payment is created with status `failed`, a `payment.failed` event is also emitted.
 
@@ -180,7 +185,7 @@ If the payment is created with status `failed`, a `payment.failed` event is also
 
 **Triggered when:** A payment’s status becomes `completed` (funds received and payment recorded).
 
-**data.object**: Same payment shape as **payment.created**. Typically includes `transactionId`, `ledgerTxId`, `amount`, and optional `requestedAmount` / `paidAmount` for mismatch handling. Use this event to fulfill orders or unlock content.
+**data.object**: Same payment shape as **payment.created**, with **createdAt** (mandatory), **completedAt** (when the payment was completed), **network** (chain type: `ic` \| `evm` \| `sol`) and **token** (symbol). When the payment has an associated intent, **intent** is included with **intentCode** as a number. Typically includes `transactionId`, `ledgerTxId`, `amount`, and optional `requestedAmount` / `paidAmount` for mismatch handling. Use this event to fulfill orders or unlock content.
 
 ## payment.failed
 
@@ -204,6 +209,10 @@ If the payment is created with status `failed`, a `payment.failed` event is also
 
 ### Payment object fields (summary)
 
+- **createdAt**: ISO 8601 timestamp; mandatory on all payment events (including `payment.completed`).
+- **network**: Chain type from the chains table (e.g. `ic`, `evm`, `sol`). Always present so you don't need to derive it from `ledgerCanisterId`.
+- **token**: Token symbol from the ledger (e.g. `ICP`, `USDC`). Always present.
+- **intent**: When present, includes **intentCode** (number), `amount`, `metadata`, and other intent fields.
 - **transactionSplitId**: Id of the transaction split that this payment represents.
 - **basePaymentAccountId**: Base account for the intent/transaction (e.g. split rules).
 - **ledgerTxId**: Linked ledger transaction id after sweep/linking.
