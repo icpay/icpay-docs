@@ -185,6 +185,11 @@ export default function Page() {
   const config = {
     publishableKey: process.env.NEXT_PUBLIC_ICPAY_PK,
     amountUsd: 12,
+    // For X402 up-to agentic flows:
+    // x402Upto: true,
+    // onX402UptoIntent: ({ paymentIntentId, amountUsd, accepts }) => {
+    //   // Start your long-running job and pass paymentIntentId to your backend
+    // },
   }
   return (
     <IcpayPayButton

@@ -17,6 +17,7 @@ export const sections = [
   { title: 'USDC example (Base)', id: 'usdc-example' },
   { title: 'Events and statuses', id: 'events' },
   { title: 'Troubleshooting', id: 'troubleshooting' },
+  { title: 'Up-to (scalable amount) flows', id: 'upto-flows' },
 ]
 
 # X402 v2 payments
@@ -222,6 +223,157 @@ ICPay operates its own X402 facilitator for EVM and Solana:
 - Solana: Verifies the X402 v2 message or relays the signed transaction to the network using a platform relayer when necessary.
 
 These endpoints are used automatically by the SDK; no additional configuration is required beyond having an EVM/Solana wallet provider available.
+
+## Up-to (scalable amount) flows
+
+X402 v2 supports **“up-to” payments** where the wallet signs a **maximum** amount, but the final price is only known after the service completes its work. ICPay exposes this as the `upto` scheme with **x402 up-to intents**.
+
+- **Intent flag:** ICPay marks these as `x402_upto = true` on the payment intent.
+- **Authorization:** The wallet still signs an authorization for `maxAmountRequired` (cap).
+- **Settlement:** The business backend later calls a **secret-key endpoint** with the final `settledAmount` (must satisfy `0 < settledAmount <= maxAmountRequired`).
+
+### New endpoints and flags
+
+- **Intent creation (public SDK, publishable key)**
+  - SDK method: `createPaymentX402Usd({ usdAmount, tokenShortcode, x402Upto: true, ... })`
+  - Widget prop (pay button): `x402Upto: true`
+  - API: `/sdk/public/payments/intents/x402` (unchanged URL, intent stored with `x402_upto = true`).
+  - X402 acceptance:
+    - `scheme: 'upto'`
+    - `maxAmountRequired`: cap in smallest unit.
+
+- **Public settle (publishable key)**
+  - URL: `POST /sdk/public/payments/x402/settle`
+  - Behavior for up-to:
+    - If the intent is `x402_upto = true`, this endpoint now returns:
+      - `{ status: 'failed', error: 'x402_upto_settlement_requires_secret_key' }`
+    - This prevents client-side wallets from unilaterally settling up-to flows.
+
+- **Secret-key settle for up-to (backend only)**
+  - URL (icpay-api, secret key): `POST /sdk/payments/x402/upto/settle`
+    - Guarded by `SecretKeyAuthGuard`, requires `secretKey` and `x-account-id`.
+    - Body:
+      ```json
+      {
+        "paymentIntentId": "pi_123",
+        "settledAmount": "900000" // in token smallest unit
+      }
+      ```
+    - Constraints:
+      - Intent must belong to the authenticated account.
+      - Intent must have `x402_upto = true`.
+      - `0 < settledAmount <= maxAmountRequired`.
+    - Calls internal services to perform on-chain settlement and records `settledAmount` on the intent.
+
+- **icpay-services internal settlement (called by icpay-api)**
+  - URL: `POST /evm/settlement/x402-upto`
+  - Auth: internal API key between icpay-api and icpay-services (Bearer).
+  - Role: enforce `settledAmount <= maxAmountRequired` and perform EVM settlement via the existing X402 authorization path.
+
+### Use case: metered AI API or long-running job
+
+Scenario: You run an AI-enhanced service where:
+
+- The user triggers a job (e.g., “summarize 500 documents”).
+- You only know the **upper bound** price up front (e.g., `$25 max`), based on token or compute limits.
+- Actual cost might be anywhere from `$5` to `$25` depending on usage.
+
+With X402 up-to in ICPay:
+
+1. **Frontend / widget (user starts the job)**
+   - Your frontend uses the ICPay widget pay button with `x402Upto: true`:
+
+   ```tsx
+   <icpay-pay-button
+     publishableKey={process.env.NEXT_PUBLIC_ICPAY_PK}
+     amountUsd={25}
+     fiat_currency="USD"
+     x402Upto={true}
+     metadata={{
+       orderId: 'job-123',
+       icpay: {
+         icpay_context: 'ai-job:x402',
+       },
+     }}
+   />
+   ```
+
+   - The widget:
+     - Calls `createPaymentX402Usd` with `x402Upto: true`.
+     - Gets an X402 v2 `accepts[]` response with `scheme: 'upto'`, `maxAmountRequired` corresponding to `$25`.
+     - Guides the wallet to sign the X402 authorization.
+
+2. **SDK (client-side X402 flow)**
+
+   If you use the SDK directly instead of the widget:
+
+   ```ts
+   import { Icpay } from '@ic-pay/icpay-sdk';
+
+   const icpay = new Icpay({
+     publishableKey: process.env.NEXT_PUBLIC_ICPAY_PK!,
+     enableEvents: true,
+     debug: true,
+   });
+
+   // User approves up-to $25 for this job
+   const x402Init = await icpay.createPaymentX402Usd({
+     usdAmount: 25,
+     tokenShortcode: 'base_usdc',
+     metadata: { orderId: 'job-123' },
+     x402Upto: true,
+   });
+   ```
+
+   - ICPay creates a payment intent flagged as `x402_upto = true` and returns an HTTP 402 with `accepts[]` (`scheme: 'upto'`).
+   - The SDK:
+     - Builds the EIP‑712 payload (`value = maxAmountRequired`).
+     - Requests the wallet signature.
+     - Verifies/settles X402 authorization server-side.
+   - The job is now **authorized up to the cap**, but not yet finally billed.
+
+3. **Backend service work**
+
+   - Your backend sees the X402 authorization is valid (e.g., via webhook or polling) and starts the long-running job.
+   - When the job finishes, your backend calculates the actual cost (for example, `$9.75` → `900000` units in smallest token unit).
+
+4. **Backend settlement with secret key**
+
+   On your **server**, using secret key + account id, you call the new SDK protected method:
+
+   ```ts
+   import { Icpay } from '@ic-pay/icpay-sdk';
+
+   const icpayBackend = new Icpay({
+     secretKey: process.env.ICPAY_SECRET_KEY!,
+     apiUrl: process.env.ICPAY_API_URL,      // e.g. https://api.icpay.org
+     enableEvents: false,
+   });
+
+   // Example: usage cost = 900000 token units (<= maxAmountRequired)
+   await icpayBackend.protected.settleX402Upto({
+     paymentIntentId: 'pi_123',
+     settledAmount: '900000',
+   });
+   ```
+
+   - This hits `POST /sdk/payments/x402/upto/settle`:
+     - Confirms the intent is `x402_upto` and belongs to your account.
+     - Enforces business rule `settledAmount <= maxAmountRequired`.
+   - icpay-api then calls icpay-services `/evm/settlement/x402-upto` to perform on-chain settlement.
+
+5. **Notifications**
+
+   - Once settlement is done, ICPay updates the payment/intent status.
+   - You can:
+     - Use webhooks (existing ICPay webhooks) to be notified when the payment is completed.
+     - Or use `icpayBackend.protected.getPaymentById` / `getPaymentHistory` to reconcile.
+
+This pattern gives you:
+
+- **Guardrails for the user:** wallet signs an authorization capped at `maxAmountRequired`.
+- **Flexibility for the service:** backend chooses the final `settledAmount` based on real usage.
+- **Security:** final settlement for up-to flows is restricted to **secret-key server calls**, not client-side publishable-key flows.
 
 ## SDK usage example
 

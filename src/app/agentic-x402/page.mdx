@@ -1,0 +1,258 @@
+export const metadata = {
+  title: 'Agentic X402 up-to payments',
+  description:
+    'Usage-based and agentic payments with X402 up-to scheme in ICPay: create capped authorizations, run work, and settle later using icpay-sdk or icpay-widget.',
+}
+
+export const sections = [
+  { title: 'Overview', id: 'overview' },
+  { title: 'Flow overview', id: 'flow' },
+  { title: 'Using icpay-sdk only', id: 'sdk-only' },
+  { title: 'Using icpay-widget', id: 'widget' },
+  { title: 'Config reference (SDK & widget)', id: 'config-reference' },
+]
+
+# Agentic X402 up-to payments
+
+X402 v2 supports **up-to** schemes: the wallet signs an authorization for a **maximum** amount, and your service decides the **final cost** after the work is done. ICPay exposes this via **`x402Upto`** and the `upto` scheme so you can build agentic, usage-based, or long-running flows. {{ className: 'lead' }}
+
+## Overview
+
+Typical use cases:
+
+- AI / LLM calls where token usage is unknown up front (only a maximum budget is known).
+- Long-running jobs where you want to cap the user’s exposure but bill only what they actually used.
+- Agentic workflows where an agent is authorized to spend “up to X” for a task.
+
+You get:
+
+- **Cap for the user**: wallet signs a maximum amount.
+- **Flexibility for the service**: backend chooses the final settled amount.
+- **Separation of concerns**: frontend handles X402 authorization; backend handles settlement with secret key.
+
+## Flow overview
+
+End-to-end flow:
+
+1. **User requests a service**. Your app decides a **maximum price** (cap).
+2. **Create X402 up-to intent** via SDK or widget:
+   - Intent is stored with `x402_upto = true`.
+   - ICPay returns an X402 acceptance with `scheme: 'upto'` and `maxAmountRequired` (cap).
+3. **User signs X402 v2 authorization**:
+   - EVM: EIP-712 typed data (EIP‑3009) for `maxAmountRequired`.
+   - ICPay’s backend verifies the authorization.
+4. **Your service starts work** once the authorization is valid.
+5. **Service finishes and computes `settledAmount`** (in smallest unit), satisfying:
+   - `0 < settledAmount <= maxAmountRequired`.
+6. **Backend settles**:
+   - Uses `secretKey` + `protected.settleX402Upto` to finalize the payment with `settledAmount`.
+7. **ICPay settles on-chain** using the signed authorization, enforces the cap, and records `settledAmount` on the intent.
+8. **You notify the user and/or client** via webhooks, polling, or your own messaging.
+
+## Using icpay-sdk only
+
+### 1. Frontend: create X402 up-to intent and authorization
+
+On the **frontend** (publishable key), call `createPaymentX402Usd` with `x402Upto: true`:
+
+```ts {{ title: 'Create X402 up-to intent (frontend)' }}
+import { Icpay } from '@ic-pay/icpay-sdk'
+
+const icpay = new Icpay({
+  publishableKey: process.env.NEXT_PUBLIC_ICPAY_PK!,
+  enableEvents: true,
+  debug: true,
+})
+
+// User approves up to $25 for this job
+const maxUsd = 25
+const x402Init = await icpay.createPaymentX402Usd({
+  usdAmount: maxUsd,
+  tokenShortcode: 'base_usdc',
+  metadata: { orderId: 'job-123', context: 'agentic-x402' },
+  x402Upto: true,
+})
+
+// x402Init.payment contains:
+// {
+//   x402Version,
+//   paymentIntentId,
+//   accepts: [ { scheme: 'upto', maxAmountRequired, ... } ]
+// }
+```
+
+What happens:
+
+- ICPay creates a payment intent with `x402_upto = true`.
+- API responds with HTTP 402 + `accepts[]` (`scheme: 'upto'`).
+- SDK builds and signs the X402 v2 authorization **for `maxAmountRequired`**.
+- SDK verifies the authorization and returns when it is valid; **no final settlement is performed** for up-to.
+
+You can pass the `paymentIntentId` to your backend (e.g., via metadata, params, or a direct API call).
+
+### 2. Backend: run the job and settle later
+
+On the **backend** (Node, server-side only), configure `secretKey`:
+
+```ts {{ title: 'Backend: settle X402 up-to intent' }}
+import { Icpay } from '@ic-pay/icpay-sdk'
+
+const icpayBackend = new Icpay({
+  secretKey: process.env.ICPAY_SECRET_KEY!,
+  apiUrl: process.env.ICPAY_API_URL,
+})
+
+export async function runJobAndSettle(paymentIntentId: string, usageUsd: number) {
+  // 1) Convert usageUsd to token smallest unit (you can use ICPay helpers or your own pricing)
+  const usageAmountAtomic = await computeAtomicAmountFromUsd(usageUsd, /* token info */)
+
+  // 2) Commit settlement (must satisfy 0 < settledAmount <= maxAmountRequired)
+  const result = await icpayBackend.protected.settleX402Upto({
+    paymentIntentId,
+    settledAmount: usageAmountAtomic.toString(),
+  })
+
+  if (!result.ok) {
+    throw new Error(`X402 upto settlement failed: ${result.error || 'unknown error'}`)
+  }
+
+  // 3) Optionally look up the payment and notify your app
+  const paymentAgg = await icpayBackend.protected.getPaymentById(paymentIntentId)
+  // paymentAgg.payment / paymentAgg.intent contain final values
+}
+```
+
+The `protected.settleX402Upto` method:
+
+- Is available only on the **secret key** SDK (`icpayBackend.protected`).
+- Calls `POST /sdk/payments/x402/upto/settle` on icpay-api.
+- Enforces:
+  - Intent belongs to your account.
+  - Intent has `x402_upto = true`.
+  - `0 < settledAmount <= maxAmountRequired`.
+
+## Using icpay-widget
+
+When you want a drop-in UI but still need agentic/usage-based billing, use `icpay-pay-button` with `x402Upto` and `onX402UptoIntent`.
+
+### 1. Configure the pay button
+
+```tsx {{ title: 'React: icpay-pay-button with X402 up-to' }}
+'use client'
+import { IcpayPayButton, IcpaySuccess } from '@ic-pay/icpay-widget/react'
+
+export default function Page() {
+  const config = {
+    publishableKey: process.env.NEXT_PUBLIC_ICPAY_PK,
+    amountUsd: 25,             // max budget (cap)
+    x402Upto: true,
+    metadata: {
+      orderId: 'job-123',
+      icpay: { icpay_context: 'agentic-x402' },
+    },
+    onX402UptoIntent: async ({ paymentIntentId, amountUsd, accepts }) => {
+      console.log('X402 up-to intent created', { paymentIntentId, amountUsd, accepts })
+      // Call your backend to start work and pass paymentIntentId
+      await fetch('/api/start-job', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ paymentIntentId, maxUsd: amountUsd }),
+      })
+    },
+  }
+
+  return (
+    <IcpayPayButton
+      config={config}
+      onSuccess={(detail: IcpaySuccess) => console.log('Job paid', detail)}
+    />
+  )
+}
+```
+
+Under the hood:
+
+- Widget calls `createPaymentX402Usd({ x402Upto: true, ... })`.
+- SDK performs X402 authorization but **does not** call the public settle endpoint for up-to.
+- Widget calls `onX402UptoIntent` with:
+  - `paymentIntentId`
+  - `amountUsd` (cap)
+  - `metadata`
+  - `accepts[]` (X402 requirements)
+- Widget then polls the intent via `GET /sdk/public/payments/intents/:id` until it is terminal:
+  - When your backend calls `protected.settleX402Upto` and ICPay marks the intent `completed`, the widget:
+    - Updates its UI.
+    - Calls `onSuccess` for the host.
+
+### 2. Backend: same `settleX402Upto` call
+
+Your backend implementation is identical to the SDK-only case: it receives `paymentIntentId` from `onX402UptoIntent` and later calls `protected.settleX402Upto` with the computed `settledAmount`.
+
+## Config reference (SDK & widget)
+
+### SDK: createPaymentX402Usd (frontend)
+
+New field on `CreatePaymentUsdRequest`:
+
+```ts
+export interface CreatePaymentUsdRequest {
+  usdAmount: string | number;
+  ...
+  /** When true, create an x402 intent that uses the 'upto' scheme instead of 'exact'. */
+  x402Upto?: boolean;
+}
+```
+
+Usage:
+
+- `x402Upto: true` → ICPay:
+  - Marks the payment intent with `x402_upto = true`.
+  - Emits X402 v2 acceptance with `scheme: 'upto'`.
+  - SDK **does not** auto-settle via `/sdk/public/payments/x402/settle`; settlement must be driven by your backend via `protected.settleX402Upto`.
+
+### SDK: protected API (backend)
+
+New protected method:
+
+```ts
+icpayBackend.protected.settleX402Upto({
+  paymentIntentId: string;
+  settledAmount: string | number; // smallest unit, <= maxAmountRequired
+})
+```
+
+Requires:
+
+- `secretKey` configured in `IcpayConfig`.
+- Intent must belong to the authenticated account and have `x402_upto = true`.
+
+### Widget: pay button config
+
+New fields on `PayButtonConfig`:
+
+```ts
+export type PayButtonConfig = CommonConfig & {
+  amountUsd?: number;
+  buttonLabel?: string;
+  onSuccess?: (tx: { id: number; status: string }) => void;
+
+  // X402 up-to support
+  x402Upto?: boolean;
+  onX402UptoIntent?: (info: {
+    paymentIntentId: string;
+    amountUsd: number;
+    metadata?: Record<string, any>;
+    accepts: any[];
+  }) => void | Promise<void>;
+};
+```
+
+Behavior:
+
+- When `x402Upto` is `true` and the selected token supports X402:
+  - Widget initiates X402 up-to intent and authorization via SDK.
+  - Calls `onX402UptoIntent` when the intent + acceptances are ready.
+  - Polls the intent until status becomes terminal, then fires `onSuccess` (and emits global SDK events).
+
+This combination—`x402Upto` + `onX402UptoIntent` + `protected.settleX402Upto`—is the recommended pattern for **agentic, usage-based X402 payments** in ICPay.
+
