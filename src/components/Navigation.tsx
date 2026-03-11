@@ -271,6 +271,7 @@ export const navigation: Array<NavGroup> = [
     title: 'X402',
     links: [
       { title: 'X402 payments', href: '/x402' },
+      { title: 'Agentic X402 up-to', href: '/agentic-x402' },
     ],
   },
   {
