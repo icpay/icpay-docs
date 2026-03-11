@@ -106,6 +106,23 @@ const out = await icpay.createPaymentX402Usd({
 // and settlement, then wait for terminal status, emitting events along the way.
 ```
 
+```ts {{ title: 'X402 up-to payments (agentic / usage-based)' }}
+// Authorize up to $25; backend decides final cost (<= $25) and settles later
+const x402Init = await icpay.createPaymentX402Usd({
+  usdAmount: 25,
+  tokenShortcode: 'base_usdc',
+  metadata: { orderId: 'job-123', context: 'agentic-x402' },
+  x402Upto: true, // mark this as an up-to scheme
+})
+
+// On up-to flows, the SDK creates an X402 v2 authorization and stops;
+// settlement is performed later via secret-key SDK:
+//
+// icpayBackend.protected.settleX402Upto({ paymentIntentId, settledAmount })
+//
+// See /agentic-x402 for a complete example.
+```
+
 Events are emitted throughout the flow when `enableEvents` is true. See Events section below.
 
 ### Solana support
