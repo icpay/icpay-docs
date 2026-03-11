@@ -103,13 +103,10 @@ const icpayBackend = new Icpay({
 })
 
 export async function runJobAndSettle(paymentIntentId: string, usageUsd: number) {
-  // 1) Convert usageUsd to token smallest unit (you can use ICPay helpers or your own pricing)
-  const usageAmountAtomic = await computeAtomicAmountFromUsd(usageUsd, /* token info */)
-
-  // 2) Commit settlement (must satisfy 0 < settledAmount <= maxAmountRequired)
+  // 1) Commit settlement (ICPay converts USD to token units and enforces cap)
   const result = await icpayBackend.protected.settleX402Upto({
     paymentIntentId,
-    settledAmount: usageAmountAtomic.toString(),
+    settledAmountUsd: usageUsd,
   })
 
   if (!result.ok) {
@@ -217,7 +214,7 @@ New protected method:
 ```ts
 icpayBackend.protected.settleX402Upto({
   paymentIntentId: string;
-  settledAmount: string | number; // smallest unit, <= maxAmountRequired
+  settledAmountUsd: string | number; // USD, ICPay converts to token units and enforces <= maxAmountRequired
 })
 ```
 
