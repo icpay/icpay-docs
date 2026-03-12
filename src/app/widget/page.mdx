@@ -185,10 +185,15 @@ export default function Page() {
   const config = {
     publishableKey: process.env.NEXT_PUBLIC_ICPAY_PK,
     amountUsd: 12,
-    // For X402 up-to agentic flows:
+    // For X402 up-to agentic flows (EVM):
     // x402Upto: true,
-    // onX402UptoIntent: ({ paymentIntentId, amountUsd, accepts }) => {
-    //   // Start your long-running job and pass paymentIntentId to your backend
+    // onX402UptoIntent: ({ paymentIntentId, amountUsd, accepts, paymentHeader, paymentRequirements }) => {
+    //   // Start your long-running job and pass paymentIntentId + signed header to your backend
+    //   fetch('/api/start-job', {
+    //     method: 'POST',
+    //     headers: { 'Content-Type': 'application/json' },
+    //     body: JSON.stringify({ paymentIntentId, maxUsd: amountUsd, paymentHeader, paymentRequirements }),
+    //   })
     // },
   }
   return (
