@@ -73,22 +73,48 @@ const x402Init = await icpay.createPaymentX402Usd({
   x402Upto: true,
 })
 
-// x402Init.payment contains:
-// {
-//   x402Version,
-//   paymentIntentId,
-//   accepts: [ { scheme: 'upto', maxAmountRequired, ... } ]
-// }
+// For up-to EVM flows, the SDK:
+// - creates a payment intent with x402_upto = true
+// - receives X402 accepts[] with scheme: 'upto' and maxAmountRequired
+// - builds and signs an X402 v2 header (EIP‑712/EIP‑3009) for maxAmountRequired
+// - returns a deferred object instead of auto-settling:
+//   {
+//     paymentIntentId,
+//     payment: {
+//       x402Version,
+//       paymentIntentId,
+//       accepts: [...],
+//       paymentHeader,         // base64-encoded signed X402 header
+//       paymentRequirements,   // the exact requirement used for signing
+//     },
+//     status: 'pending',
+//     ...
+//   }
 ```
 
 What happens:
 
 - ICPay creates a payment intent with `x402_upto = true`.
 - API responds with HTTP 402 + `accepts[]` (`scheme: 'upto'`).
-- SDK builds and signs the X402 v2 authorization **for `maxAmountRequired`**.
-- SDK verifies the authorization and returns when it is valid; **no final settlement is performed** for up-to.
+- SDK builds and signs the X402 v2 authorization **for `maxAmountRequired`** and encodes it as `paymentHeader` (base64).
+- SDK returns a deferred object that includes `paymentIntentId`, `payment.accepts`, `payment.paymentHeader`, and `payment.paymentRequirements` without calling the public settle endpoint.
 
-You can pass the `paymentIntentId` to your backend (e.g., via metadata, params, or a direct API call).
+You should pass **both** the `paymentIntentId` and the `paymentHeader` (and optionally `paymentRequirements`) to your backend. The backend will later send the header to ICPay when calling the secret-key settle endpoint.
+
+#### X402 up-to header structure (EVM)
+
+For EVM, `paymentHeader` is a base64-encoded JSON header that includes an EIP‑712 typed-data payload (EIP‑3009 style). Inside the decoded JSON:
+
+- `payload.authorization.maxAmount` — the **cap** in token smallest units.
+- `payload.authorization.validBefore` — Unix timestamp (seconds) when the authorization expires.
+- `payload.authorization.nonce` — unique nonce for replay protection.
+- Other fields describe the token, spender, and chain.
+
+ICPay stores this header on the payment intent when you call the secret-key settle endpoint and uses it to:
+
+- Validate signature and constraints.
+- Enforce `settledAmount <= maxAmountRequired`.
+- Ensure the authorization is still valid (`validBefore` not passed) at settlement time.
 
 ### 2. Backend: run the job and settle later
 
@@ -103,10 +129,15 @@ const icpayBackend = new Icpay({
 })
 
 export async function runJobAndSettle(paymentIntentId: string, usageUsd: number) {
-  // 1) Commit settlement (ICPay converts USD to token units and enforces cap)
+  // 1) Look up the signed X402 header your frontend sent you when the up-to intent was created
+  const paymentHeader = await loadPaymentHeaderForIntent(paymentIntentId) // app-specific storage
+
+  // 2) Commit settlement (ICPay converts USD to token units and enforces cap, using the stored header)
   const result = await icpayBackend.protected.settleX402Upto({
     paymentIntentId,
     settledAmountUsd: usageUsd,
+    // If you proxy the header through your backend, include it here so icpay-api can persist it
+    // paymentHeader,
   })
 
   if (!result.ok) {
@@ -147,13 +178,18 @@ export default function Page() {
       orderId: 'job-123',
       icpay: { icpay_context: 'agentic-x402' },
     },
-    onX402UptoIntent: async ({ paymentIntentId, amountUsd, accepts }) => {
-      console.log('X402 up-to intent created', { paymentIntentId, amountUsd, accepts })
-      // Call your backend to start work and pass paymentIntentId
+    onX402UptoIntent: async ({ paymentIntentId, amountUsd, accepts, paymentHeader, paymentRequirements }) => {
+      console.log('X402 up-to intent created', { paymentIntentId, amountUsd, accepts, paymentHeader })
+      // Call your backend to start work and pass paymentIntentId and the signed header
       await fetch('/api/start-job', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ paymentIntentId, maxUsd: amountUsd }),
+        body: JSON.stringify({
+          paymentIntentId,
+          maxUsd: amountUsd,
+          paymentHeader,          // base64 X402 header (optional but recommended)
+          paymentRequirements,    // exact requirement used for signing (optional)
+        }),
       })
     },
   }
@@ -205,7 +241,8 @@ Usage:
 - `x402Upto: true` → ICPay:
   - Marks the payment intent with `x402_upto = true`.
   - Emits X402 v2 acceptance with `scheme: 'upto'`.
-  - SDK **does not** auto-settle via `/sdk/public/payments/x402/settle`; settlement must be driven by your backend via `protected.settleX402Upto`.
+  - SDK builds and signs an X402 v2 header and exposes it as `payment.paymentHeader` and `payment.paymentRequirements` on the `createPaymentX402Usd` return value for up-to flows.
+  - SDK **does not** auto-settle via `/sdk/public/payments/x402/settle`; settlement must be driven by your backend via `protected.settleX402Upto`, optionally passing the header.
 
 ### SDK: protected API (backend)
 

@@ -115,12 +115,22 @@ const x402Init = await icpay.createPaymentX402Usd({
   x402Upto: true, // mark this as an up-to scheme
 })
 
-// On up-to flows, the SDK creates an X402 v2 authorization and stops;
-// settlement is performed later via secret-key SDK:
+// On up-to flows, the SDK:
+// - creates an X402 v2 authorization for maxAmountRequired
+// - returns a deferred object instead of auto-settling
+// - exposes header + requirement so you can pass them to your backend:
 //
-// icpayBackend.protected.settleX402Upto({ paymentIntentId, settledAmount })
+// x402Init.payment.paymentHeader        // base64 X402 header (signed)
+// x402Init.payment.paymentRequirements  // requirement used for signing
 //
-// See /agentic-x402 for a complete example.
+// Your backend later calls:
+//   icpayBackend.protected.settleX402Upto({
+//     paymentIntentId: x402Init.paymentIntentId,
+//     settledAmountUsd: usageUsd,
+//     // optionally: paymentHeader: x402Init.payment.paymentHeader,
+//   })
+//
+// See /agentic-x402 for a complete end-to-end example.
 ```
 
 Events are emitted throughout the flow when `enableEvents` is true. See Events section below.
