@@ -286,6 +286,8 @@ const principal = icpay.getAccountAddress()
   - `createPayment(request)` → Token-denominated payment.
   - `createPaymentUsd(request)` → USD-denominated payment (auto conversion).
   - `createPaymentX402Usd(request)` → X402 flow with automatic fallback to regular path.
+  - `subscribePaymentIntentStatus({ paymentIntentId, onUpdate, onError?, intervalMs? })` → Subscribe to one payment intent via SSE.
+  - `waitForPaymentIntentCompletion(paymentIntentId)` → Convenience helper that waits for terminal status using SSE first, then polling fallback.
   - `notifyPaymentIntentOnRamp({ paymentIntentId, ... })` → Poll an onramp intent until terminal status.
   - `triggerTransactionSync(canisterTransactionId)` → Ask ICPay to sync a canister tx to API DB now.
 
